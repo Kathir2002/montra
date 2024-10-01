@@ -1,0 +1,11 @@
+{
+    "orWith": "Or with",
+    "forgotPassword": "Forgot Password? ",
+    "dontHaveAccount": "Don't have an account?",
+    "signup": "Sign Up",
+    "login": "Login",
+    "loginGoogle": "Login with Google",
+    "password": "Password",
+    "email": "Email",
+    "requiredMsg": "This field is required"
+}

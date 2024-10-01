@@ -1,0 +1,17 @@
+{
+    "orWith": "または",
+    "bySigningUp": "サインアップすると、次の内容に同意したものとみなされます",
+    "termsAndConditions": "利用規約とプライバシーポリシー",
+    "alreadyHaveAccount": "すでにアカウントをお持ちですか?",
+    "acceptTC": "利用規約に同意してください",
+    "signup": "サインアップ",
+    "login": "ログイン",
+    "signupGoogle": "Google に登録する",
+    "password": "パスワード",
+    "name": "名前",
+    "email": "電子メール",
+    "requiredMsg": "この項目は必須です",
+    "validPassord": "文字、数字、記号を組み合わせた 8 文字以上を使用してください",
+    "validName": "有効な名前を入力してください",
+    "validEmail": "有効なメールアドレスを入力してください"
+}

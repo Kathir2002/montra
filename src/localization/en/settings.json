@@ -1,0 +1,11 @@
+{
+  "currency": "Currency",
+  "language": "Language",
+  "notification": "Notification",
+  "security": "Security",
+  "about": "About",
+  "help": "Help",
+  "fingerPrint": "FingerPrint",
+  "pin": "PIN",
+  "settings": "Settings"
+}

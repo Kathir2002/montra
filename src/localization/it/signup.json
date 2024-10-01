@@ -1,0 +1,17 @@
+{
+    "orWith": "O con",
+    "bySigningUp": "Iscrivendoti accetti i",
+    "termsAndConditions": "Termini di servizio e Informativa sulla privacy",
+    "alreadyHaveAccount": "Hai già un account?",
+    "acceptTC": "Si prega di accettare i Termini e le Condizioni",
+    "signup": "Iscrizione",
+    "login": "Login",
+    "signupGoogle": "Iscriviti con Google",
+    "password": "Password",
+    "name": "Nome",
+    "email": "E-mail",
+    "requiredMsg": "Questo campo è obbligatorio",
+    "validPassord": "Utilizza 8 o più caratteri con un mix di lettere, numeri e simboli",
+    "validName": "Inserisci un nome valido",
+    "validEmail": "Inserisci un'e-mail valida"
+}

@@ -1,0 +1,88 @@
+import {
+  GestureResponderEvent,
+  StyleProp,
+  StyleSheet,
+  Text,
+  TextStyle,
+  useWindowDimensions,
+  View,
+  ViewStyle,
+} from 'react-native';
+import React, {FC, useEffect, useState} from 'react';
+import {Button} from '@rneui/base';
+import {appColors} from '@shared/appColors';
+
+interface CommonButtonInterface {
+  title: string;
+  onPress: ((event: GestureResponderEvent) => void) | undefined;
+  buttonStyle?: StyleProp<ViewStyle>;
+  disabled?: boolean;
+  titleStyle?: StyleProp<TextStyle>;
+  buttonType?: 'solid' | 'clear' | 'outline';
+  loading?: boolean;
+}
+
+const CommonButton: FC<CommonButtonInterface> = ({
+  title,
+  onPress,
+  buttonStyle,
+  disabled,
+  titleStyle,
+  buttonType,
+  loading,
+}) => {
+  const {height, width} = useWindowDimensions();
+  const [resolutionRatio, setResolutionRatio] = useState(1);
+  let orgHeight = 841.0909090909091;
+  let orgWidth = 392.72727272727275;
+  useEffect(() => {
+    const ratio = (height * width) / (orgWidth * orgHeight);
+    setResolutionRatio(ratio);
+  }, [height, width]);
+
+  return (
+    <Button
+      title={title}
+      onPress={onPress}
+      buttonStyle={[
+        buttonType == 'clear'
+          ? commonButtonStyle.clearButtonStyle
+          : commonButtonStyle.buttonStyle,
+        buttonStyle,
+      ]}
+      disabled={disabled}
+      titleStyle={[
+        {fontSize: 16 * resolutionRatio},
+        buttonType == 'clear'
+          ? commonButtonStyle.clearTitleStyle
+          : commonButtonStyle.titleStyle,
+        titleStyle,
+      ]}
+      type={buttonType}
+      loading={loading}
+    />
+  );
+};
+
+export default CommonButton;
+
+const commonButtonStyle = StyleSheet.create({
+  buttonStyle: {
+    backgroundColor: appColors.primary,
+    borderRadius: 13,
+  },
+  titleStyle: {
+    color: appColors.light,
+    textAlign: 'center',
+    paddingVertical: 5,
+  },
+  clearButtonStyle: {
+    backgroundColor: appColors.buttonClear,
+    borderRadius: 13,
+  },
+  clearTitleStyle: {
+    color: appColors.primary,
+    textAlign: 'center',
+    paddingVertical: 5,
+  },
+});

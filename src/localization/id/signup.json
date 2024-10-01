@@ -1,0 +1,17 @@
+{
+    "orWith": "Atau dengan",
+    "bySigningUp": "Dengan mendaftar, Anda menyetujui",
+    "termsAndConditions": "Ketentuan Layanan dan Kebijakan Privasi",
+    "alreadyHaveAccount": "Sudah punya akun?",
+    "acceptTC": "Harap Terima Syarat & Ketentuan",
+    "signup": "Mendaftar",
+    "login": "Login",
+    "signupGoogle": "Daftar dengan Google",
+    "password": "Kata sandi",
+    "name": "Nama",
+    "email": "E-mail",
+    "requiredMsg": "Bidang ini wajib diisi",
+    "validPassord": "Gunakan 8 karakter atau lebih dengan campuran huruf, angka & simbol",
+    "validName": "Silakan masukkan nama yang valid",
+    "validEmail": "Silakan masukkan email yang valid"
+}

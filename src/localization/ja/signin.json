@@ -1,0 +1,11 @@
+{
+    "orWith": "または",
+    "forgotPassword": "パスワードをお忘れですか？ ",
+    "dontHaveAccount": "アカウントをお持ちでない場合は、",
+    "signup": "サインアップ",
+    "login": "ログイン",
+    "loginGoogle": "Googleでログイン",
+    "password": "パスワード",
+    "email": "電子メール",
+    "requiredMsg": "この項目は必須です"
+}

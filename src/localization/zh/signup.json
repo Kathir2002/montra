@@ -1,0 +1,17 @@
+{
+    "orWith": "或者与",
+    "bySigningUp": "注册即表示您同意",
+    "termsAndConditions": "服务条款和隐私政策",
+    "alreadyHaveAccount": "已经有帐户？",
+    "acceptTC": "请接受条款和条件",
+    "signup": "报名",
+    "login": "登录",
+    "signupGoogle": "与谷歌注册",
+    "password": "密码",
+    "name": "姓名",
+    "email": "电子邮件",
+    "requiredMsg": "此字段是必需的",
+    "validPassord": "使用 8 个或更多字符以及字母、数字和符号的混合",
+    "validName": "请输入有效的姓名",
+    "validEmail": "请输入有效的电子邮件"
+}

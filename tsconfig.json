@@ -1,0 +1,29 @@
+{
+  "extends": "@tsconfig/react-native/tsconfig.json",
+  "compilerOptions": {
+    "target": "esnext",
+    "lib": ["es2019"],
+    "jsx": "react-native",
+    "baseUrl": ".",
+    "paths": {
+      "@assets/*": ["./src/assets/*"],
+      "@store/*": ["./src/store/*"],
+      "@components/*": ["./src/components/*"],
+      "@navigations/*": ["./src/navigations/*"],
+      "@screens/*": ["./src/screens/*"],
+      "@services/*": ["./src/services/*"],
+      "@shared/*": ["./src/shared/*"],
+      "@themes/*": ["./src/themes/*"],
+      "@localization/*": ["./src/localization/*"],
+      "@src/*": ["./src/*"],
+      "@env": ["./src/types/env.d.ts"]
+    }
+  },
+  "jsxFactory": "React.createElement",
+  "typeRoots": ["src/types"],
+  "exclude": ["node_modules", "dist"],
+  "include": ["**/*.ts", "**/*.tsx"],
+  "allowImportingTsExtensions": false
+
+  // "lib":["es2020" ]
+}

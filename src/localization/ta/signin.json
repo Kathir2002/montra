@@ -1,0 +1,11 @@
+{
+    "orWith": "அல்லது",
+    "forgotPassword": "கடவுச்சொல் மறந்துவிட்டதா?",
+    "dontHaveAccount": "கணக்கு இல்லையா? ",
+    "signup": "பதிவு செய்யவும்",
+    "login": "உள்நுழைக",
+    "loginGoogle": "Google மூலம் உள்நுழைக",
+    "password": "கடவுச்சொல்",
+    "email": "மின்னஞ்சல்",
+    "requiredMsg": "இந்த புலம் தேவை"
+}

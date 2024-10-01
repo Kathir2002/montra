@@ -1,0 +1,17 @@
+{
+    "orWith": "Of met",
+    "bySigningUp": "Door u aan te melden, gaat u akkoord met de",
+    "termsAndConditions": "Servicevoorwaarden en privacybeleid",
+    "alreadyHaveAccount": "Heeft u al een account?",
+    "acceptTC": "Accepteer de Algemene voorwaarden",
+    "signup": "Aanmelden",
+    "login": "Login",
+    "signupGoogle": "Meld u aan bij Google",
+    "password": "Wachtwoord",
+    "name": "Naam",
+    "email": "E-mail",
+    "requiredMsg": "Dit veld is verplicht",
+    "validPassord": "Gebruik 8 of meer tekens met een combinatie van letters, cijfers en symbolen",
+    "validName": "Voer een geldige naam in",
+    "validEmail": "Voer een geldig e-mailadres in"
+}
