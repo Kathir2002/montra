@@ -98,8 +98,6 @@ const Notification = () => {
     };
     await AccountService.changeAccountPreferences(data)
       .then((res: any) => {
-        console.log(res);
-
         if (res?.success) {
           setLoading(false);
           setNotificationData(prev => {

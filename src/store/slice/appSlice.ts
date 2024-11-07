@@ -11,6 +11,7 @@ interface IntialStateInterface {
     isSetupDone?: boolean;
     currencySymbol?: string;
     currentLanguage?: string;
+    securityMethod?: 'PIN' | 'FINGERPRINT';
   };
 }
 

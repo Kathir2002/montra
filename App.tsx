@@ -1,4 +1,4 @@
-import {Alert, Platform, StatusBar, View} from 'react-native';
+import {Alert, BackHandler, Platform, StatusBar, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import AuthStack from '@navigations/AuthStack';
 import {RootState} from './src/store/store';
@@ -23,6 +23,7 @@ import {Toast} from '@shared/ToastConfig';
 import SetUpStack from '@navigations/setupStack';
 import AppContext from '@shared/appContext';
 import {useTranslation} from 'react-i18next';
+import {navigationRef} from './index';
 
 const App = () => {
   const isloggedin = useSelector((state: RootState) => state.auth.isLoggedIn);
@@ -37,7 +38,9 @@ const App = () => {
   const {i18n} = useTranslation();
 
   const handleBiometricAuth = async () => {
-    const rnBiometrics = new ReactNativeBiometrics();
+    const rnBiometrics = new ReactNativeBiometrics({
+      allowDeviceCredentials: true,
+    });
     rnBiometrics
       .isSensorAvailable()
       .then(async resultObject => {
@@ -54,7 +57,10 @@ const App = () => {
               Alert.alert(
                 'Authentication failed',
                 'Biometric authentication failed',
-                [{text: 'Retry', onPress: () => handleBiometricAuth()}],
+                [
+                  {text: 'Cancel', onPress: () => BackHandler.exitApp()},
+                  {text: 'Unlock', onPress: () => handleBiometricAuth()},
+                ],
               );
             }
           } catch (error) {
@@ -77,11 +83,10 @@ const App = () => {
   };
 
   const getUserDetails = async () => {
-    AuthService.userDetails()
+    await AuthService.userDetails()
       .then((res: any) => {
         if (res?.success) {
           dispatch(updateIsLoggedin(true));
-
           dispatch(
             updateCurrentUser({
               email: res?.user?.email,
@@ -90,6 +95,7 @@ const App = () => {
               picture: res?.user?.picture,
               isSetupDone: res?.user?.isSetupDone,
               currencySymbol: res?.user?.currency,
+              securityMethod: res?.user?.securityMethod,
               currentLanguage: i18n.language,
             }),
           );
@@ -122,10 +128,19 @@ const App = () => {
 
   const loginStatusCheck = async () => {
     const userToken = await CommonDataService.getToken();
-
     if (userToken) {
-      // handleBiometricAuth();
-      getUserDetails();
+      await AsyncStorage.getItem('securityMethod').then(async value => {
+        await AsyncStorage.getItem('pinValue').then(val => {
+          const securityValue = value ? JSON.parse(value) : null;
+          if (securityValue === 'PIN' && val) {
+            if (navigationRef?.current?.isReady)
+              navigationRef?.current?.navigate('PinGerneration1');
+          } else if (securityValue === 'FINGERPRINT') {
+            handleBiometricAuth();
+          }
+        });
+      });
+      // getUserDetails();
     } else {
       setIsLoading(false);
       EncryptedStorage.removeItem('login');

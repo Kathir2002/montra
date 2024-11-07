@@ -62,6 +62,10 @@ const Button = ({
             'getStartedVisible',
             JSON.stringify(false),
           );
+          await AsyncStorage.setItem(
+            'securityMethod',
+            JSON.stringify('FINGERPRINT'),
+          );
           setIsGetStartedVisible(false);
           if (navigationRef?.current)
             navigationRef?.current?.navigate('SignIn');

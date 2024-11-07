@@ -50,6 +50,7 @@ import {
   PROD_IOS_CLIENTID,
   PROD_WEB_CLIENTID,
 } from '@env';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Profile = () => {
   const isToggleOpen = useSelector(
@@ -82,7 +83,17 @@ const Profile = () => {
     try {
       await GoogleSignin.signOut();
       // Perform additional cleanup and logout operations.
-      EncryptedStorage.clear();
+      const ASYNC_KEYS = await AsyncStorage.getAllKeys();
+      await EncryptedStorage.clear();
+      ASYNC_KEYS?.map(async (res: string) => {
+        if (
+          res !== 'getStartedVisible' &&
+          res !== 'pinValue' &&
+          res !== 'securityMethod'
+        ) {
+          await AsyncStorage.removeItem(res);
+        }
+      });
       dispatch(updateIsLoggedin(false));
       dispatch(updateCurrentUser({}));
       navigation.navigate('SignIn');

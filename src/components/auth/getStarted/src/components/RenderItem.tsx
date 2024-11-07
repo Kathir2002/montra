@@ -1,4 +1,4 @@
-import {StatusBar, StyleSheet, View, useWindowDimensions} from 'react-native';
+import {StyleSheet, View, useWindowDimensions} from 'react-native';
 import React from 'react';
 import Animated, {
   Extrapolation,

@@ -1,6 +1,12 @@
 import React, {Dispatch, SetStateAction} from 'react';
 import moment from 'moment';
-import {TouchableOpacity, View} from 'react-native';
+import {
+  Platform,
+  TouchableNativeFeedback,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
 import {
   NavigationProp,
   ParamListBase,
@@ -18,6 +24,10 @@ import RentIcon from '@assets/svg/income/salary.svg';
 import TransferIcon from '@assets/svg/transfer.svg';
 import {paymentData, PaymentDataInterface} from '@assets/svg';
 import {getCurrencySymbol} from '@src/lib/functions';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+} from 'react-native-reanimated';
 
 const TransactionRenderItem = ({
   item,
@@ -76,16 +86,33 @@ const TransactionRenderItem = ({
         ) || null;
   };
 
+  const scaleValue = useSharedValue(1);
+
+  const animatedScaleStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{scale: scaleValue.value}],
+    };
+  });
+
+  const AnimatedTouchableOpacity = Animated.createAnimatedComponent(
+    Platform.OS == 'ios' ? TouchableWithoutFeedback : TouchableNativeFeedback,
+  );
+
   return (
-    <TouchableOpacity
-      activeOpacity={0.5}
+    <AnimatedTouchableOpacity
+      onPressIn={() => {
+        scaleValue.value = 0.95;
+      }}
+      onPressOut={() => {
+        scaleValue.value = 1;
+      }}
       onPress={() => {
         if (setChartDropdownOpen) {
           setChartDropdownOpen(false);
         }
         navigation.navigate(`${item.transactionType}Details`, item);
       }}
-      style={{flexGrow: 1, marginTop: 15}}>
+      style={[{marginTop: 15, flexGrow: 1}, animatedScaleStyle]}>
       <View
         style={{
           flexDirection: 'row',
@@ -149,7 +176,7 @@ const TransactionRenderItem = ({
           </View>
         </View>
       </View>
-    </TouchableOpacity>
+    </AnimatedTouchableOpacity>
   );
 };
 

@@ -10,9 +10,9 @@ const SetUpStack = () => {
 
   return (
     <SetUpStack.Navigator
-      initialRouteName="Setup"
+      initialRouteName="PinGerneration"
       screenOptions={{headerShown: false, animationEnabled: false}}>
-      {/* <SetUpStack.Screen name="PinGerneration" component={PinGerneration} /> */}
+      <SetUpStack.Screen name="PinGerneration" component={PinGerneration} />
       <SetUpStack.Screen name="Setup" component={Setup} />
       <SetUpStack.Screen name="AddNewAccount" component={AddNewAccount} />
     </SetUpStack.Navigator>

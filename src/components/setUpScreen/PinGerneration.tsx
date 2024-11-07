@@ -1,26 +1,136 @@
+import React, {useEffect, useState} from 'react';
 import {
   FlatList,
   ScrollView,
   StatusBar,
   StyleSheet,
-  Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {appColors} from '@shared/appColors';
 import CommonText from '@shared/components/commonText/CommonText';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
+import ArrowIcon from '@assets/svg/submit-arrow.svg';
+import DeleteTextIcon from '@assets/svg/delete-text.svg';
+import {Toast} from '@shared/ToastConfig';
+import {
+  NavigationProp,
+  ParamListBase,
+  useIsFocused,
+  useNavigation,
+} from '@react-navigation/native';
 
+interface ItemType {
+  id: number | string;
+  value: React.JSX.Element;
+}
 const PinGerneration = () => {
-  const [pinValue, setPinValue] = useState(new Array(6).fill(null));
-  const numArray = Array.from({length: 10}, (_, i) => {
-    const number = (i + 1) % 10;
-    return number;
-  });
+  const [pinValue, setPinValue] = useState('');
+  const [isRetype, setIsRetype] = useState(false);
+  const [retypePinValue, setRetypePinValue] = useState('');
+  const maxPinLength = 6; // Maximum length of the PIN
+  const navigation = useNavigation<NavigationProp<ParamListBase>>();
+  const isFocused = useIsFocused();
+  useEffect(() => {
+    if (isFocused) {
+      AsyncStorage.getItem('pinValue').then(value => {
+        console.log(value);
 
-  const renderItem = ({item, index}: {item: number; index: number}) => {
+        if (value) {
+          setPinValue(value);
+        }
+      });
+    }
+  }, [isFocused]);
+
+  const data = [
+    {
+      id: 1,
+      value: <CommonText size={30} content={'1'} color={appColors.light} />,
+    },
+    {
+      id: 2,
+      value: <CommonText size={30} content={'2'} color={appColors.light} />,
+    },
+    {
+      id: 3,
+      value: <CommonText size={30} content={'3'} color={appColors.light} />,
+    },
+    {
+      id: 4,
+      value: <CommonText size={30} content={'4'} color={appColors.light} />,
+    },
+    {
+      id: 5,
+      value: <CommonText size={30} content={'5'} color={appColors.light} />,
+    },
+    {
+      id: 6,
+      value: <CommonText size={30} content={'6'} color={appColors.light} />,
+    },
+    {
+      id: 7,
+      value: <CommonText size={30} content={'7'} color={appColors.light} />,
+    },
+    {
+      id: 8,
+      value: <CommonText size={30} content={'8'} color={appColors.light} />,
+    },
+    {
+      id: 9,
+      value: <CommonText size={30} content={'9'} color={appColors.light} />,
+    },
+    {
+      id: 'delete',
+      value: <DeleteTextIcon width={40} height={40} stroke={appColors.light} />,
+    },
+    {
+      id: 0,
+      value: <CommonText size={30} content={'0'} color={appColors.light} />,
+    },
+    {
+      id: 'submit',
+      value: <ArrowIcon width={40} height={40} stroke={appColors.light} />,
+    },
+  ];
+
+  const handlePress = async (item: ItemType) => {
+    if (item?.id == 'delete') {
+      isRetype
+        ? setRetypePinValue(prev => prev.slice(0, -1))
+        : setPinValue(prev => prev.slice(0, -1));
+    } else if (item?.id == 'submit') {
+      if (!isRetype) {
+        if (pinValue?.length === maxPinLength) {
+          setIsRetype(true);
+        } else {
+          Toast({message: 'Please enter the pin', type: 'error'});
+        }
+      } else if (retypePinValue?.length === maxPinLength) {
+        if (retypePinValue === pinValue) {
+          await AsyncStorage.setItem('pinValue', JSON.stringify(pinValue));
+          navigation.navigate('Setup');
+          Toast({message: 'Pin Generated successfully', type: 'success'});
+        } else {
+          Toast({message: "Pin doesn't same", type: 'error'});
+        }
+      } else {
+        Toast({message: 'Please enter the pin', type: 'error'});
+      }
+    } else {
+      isRetype
+        ? setRetypePinValue(prev => (prev + item?.id).slice(0, maxPinLength))
+        : setPinValue(prev => (prev + item?.id).slice(0, maxPinLength));
+    }
+  };
+
+  const renderItem = ({item, index}: {item: ItemType; index: number}) => {
     return (
-      <View
+      <TouchableOpacity
+        hitSlop={{bottom: 25, left: 25, right: 25, top: 25}}
+        onPress={() => handlePress(item)}
+        activeOpacity={0.5}
         style={{
           marginHorizontal: 30,
           marginBottom: 20,
@@ -28,8 +138,8 @@ const PinGerneration = () => {
           justifyContent: 'center',
           alignItems: 'center',
         }}>
-        <CommonText size={30} content={item} color={appColors.light} />
-      </View>
+        {item.value}
+      </TouchableOpacity>
     );
   };
 
@@ -51,7 +161,9 @@ const PinGerneration = () => {
         }}>
         <CommonText
           color={appColors.light}
-          content="Let’s  setup your PIN"
+          content={
+            isRetype ? 'Ok. Re type your PIN again.' : 'Let’s  setup your PIN'
+          }
           size={'large'}
         />
         <View
@@ -62,14 +174,17 @@ const PinGerneration = () => {
             gap: 10,
             marginTop: 30,
           }}>
-          {pinValue.map((pin, index) => {
+          {Array.from({length: maxPinLength}).map((pin, index) => {
             return (
               <View
                 key={index}
                 style={{
                   marginVertical: 10,
                   backgroundColor:
-                    pin == null ? 'transparent' : appColors.light,
+                    index <
+                    (isRetype ? retypePinValue?.length : pinValue?.length)
+                      ? appColors.light
+                      : 'transparent',
                   width: 20,
                   height: 20,
                   borderRadius: 10,
@@ -87,7 +202,7 @@ const PinGerneration = () => {
           justifyContent: 'flex-end',
           paddingBottom: 30,
         }}
-        data={numArray}
+        data={data}
         scrollEnabled={false}
         numColumns={3}
         renderItem={renderItem}

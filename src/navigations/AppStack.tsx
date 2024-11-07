@@ -14,6 +14,7 @@ import About from '@components/profile/About';
 import Help from '@components/profile/Help';
 import Currency from '@components/profile/Currency';
 import ExportData from '@components/profile/ExportData';
+import PinGerneration from '@components/setUpScreen/PinGerneration';
 
 const AppStack = () => {
   const AppStack = createStackNavigator();
@@ -44,6 +45,7 @@ const AppStack = () => {
     <AppStack.Navigator
       initialRouteName="BottomTab"
       screenOptions={{headerShown: false, animationEnabled: false}}>
+      <AppStack.Screen name="PinGerneration1" component={PinGerneration} />
       <AppStack.Screen name="BottomTab" component={BottomTabNavigator} />
       <AppStack.Screen name="AddExpense" component={AddExpense} />
       <AppStack.Screen name="AddIncome" component={AddIncome} />

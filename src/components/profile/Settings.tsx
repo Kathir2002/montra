@@ -2,6 +2,8 @@ import {
   FlatList,
   I18nManager,
   KeyboardAvoidingView,
+  Modal,
+  StatusBar,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -18,21 +20,70 @@ import {
 } from '@react-navigation/native';
 import Arrow from '@assets/svg/Arrow.svg';
 import CommonText from '@shared/components/commonText/CommonText';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from '@store/store';
 import CommonDropDown from '@shared/components/commonDropdown/CommonDropDown';
 import {useTranslation} from 'react-i18next';
+import AccountService from '@services/setup/accountService';
+import {Toast} from '@shared/ToastConfig';
+import CommonLoader from '@shared/components/commonLoader/CommonLoader';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {updateCurrentUser} from '@store/slice/appSlice';
+
+type SecurityType = 'FINGERPRINT' | 'PIN';
 
 const Settings = () => {
-  const {t} = useTranslation(['settings']);
+  const {t, i18n} = useTranslation(['settings']);
+
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const userDetails = useSelector((state: RootState) => state.auth.userDetails);
+  console.log(userDetails.securityMethod);
+
+  const [isLoading, setIsLoading] = useState(false);
   const securityData = [
     {label: t('pin'), value: 'PIN'},
-    {label: t('fingerPrint'), value: 'FingerPrint'},
+    {label: t('fingerPrint'), value: 'FINGERPRINT'},
   ];
-  const [securityValue, setSecurityValue] = useState('PIN');
+  const dispatch = useDispatch();
+  const [securityValue, setSecurityValue] = useState<'PIN' | 'FINGERPRINT'>(
+    userDetails.securityMethod as SecurityType,
+  );
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  console.log(userDetails);
+
+  const updateUserSecurityMethod = async (val: SecurityType) => {
+    setIsLoading(true);
+    const data = {
+      securityMethod: val,
+    };
+    await AccountService.changeAccountPreferences(data)
+      .then(async (res: any) => {
+        if (res?.success) {
+          setIsLoading(false);
+          await AsyncStorage.setItem('securityMethod', JSON.stringify(val));
+          dispatch(
+            updateCurrentUser({
+              email: userDetails?.email,
+              id: userDetails?.id,
+              name: userDetails?.name,
+              picture: userDetails?.picture,
+              isSetupDone: userDetails?.isSetupDone,
+              currencySymbol: userDetails?.currencySymbol,
+              securityMethod: val,
+              currentLanguage: i18n.language,
+            }),
+          );
+          Toast({
+            message: res?.message,
+            type: 'success',
+          });
+        }
+      })
+      .catch(err => {
+        setIsLoading(false);
+        Toast({message: err?.response?.data?.message, type: 'error'});
+      });
+  };
 
   const DropDownComponent = () => {
     return (
@@ -56,7 +107,9 @@ const Settings = () => {
           setOpen={setDropdownOpen}
           value={securityValue}
           setValue={setSecurityValue}
-          onSelectItem={val => {}}
+          onSelectItem={val => {
+            updateUserSecurityMethod(val.value as SecurityType);
+          }}
         />
       </View>
     );
@@ -173,12 +226,21 @@ const Settings = () => {
         leftIcon
         leftIconPressBack={() => navigation.goBack()}
       />
+      <StatusBar
+        backgroundColor={
+          isLoading ? appColors?.transparentBackground : appColors.light
+        }
+        barStyle={isLoading ? 'light-content' : 'dark-content'}
+      />
       <FlatList
         data={settingsDataArray}
         renderItem={renderItem}
         contentContainerStyle={{paddingHorizontal: 15, zIndex: -1}}
         keyExtractor={(item, index) => index.toString()}
       />
+      <Modal visible={isLoading} transparent={true} animationType="fade">
+        <CommonLoader />
+      </Modal>
     </KeyboardAvoidingView>
   );
 };

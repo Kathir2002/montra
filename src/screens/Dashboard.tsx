@@ -78,107 +78,12 @@ export interface TransactionListInterface {
 }
 
 const Dashboard = () => {
-  const isFocused = useIsFocused();
-  const dispatch = useDispatch();
-  const userDetails = useSelector((state: RootState) => state.auth.userDetails);
-  const [accountBalanceData, setAccountBalanceData] = useState<any>({});
-  const [chartDropdownOpen, setChartDropdownOpen] = useState(false);
-  const [chartDropdownData, setChartDropdownData] = useState<
-    {label: string; value: string}[]
-  >([]);
   // Set Monday as the first day of the week
   moment.updateLocale('en', {
     week: {
       dow: 1, // Monday is the first day of the week
     },
   });
-  const [chartDropdownValue, setChartDropdownvalue] = useState(
-    `start:${moment().startOf('week')},end:${moment().endOf('week')}`,
-  );
-  const navigation: NavigationProp<ParamListBase> = useNavigation();
-
-  const isToggleOpen = useSelector(
-    (state: RootState) => state.auth.isFabToggleOpen,
-  );
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [monthlyReportData, setMonthlyReportData] = useState({});
-
-  const [show, setShow] = useState(false);
-  const [isFinanceStoryVisible, setIsFinanceStoryVisible] = useState(false);
-  const [filterData, setFilterData] = useState<{
-    filterMonth: Date;
-  }>({filterMonth: new Date()});
-  const [transactionDetails, setTransactionDetails] = useState<
-    TransactionListInterface[]
-  >([]);
-  const [chartData, setChartData] = useState<number[]>([]);
-  const [refreshing, setRefreshing] = useState<boolean>(false);
-  const {isTransactionAdded, setIsTransactionAdded} = useContext(AppContext);
-
-  const days = {Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0, Sun: 0};
-
-  // useEffect which is used to initialize the service call functionality
-  useEffect(() => {
-    if (isFocused) {
-      console.log('USE EFFECT 1');
-
-      accountBalance();
-    }
-  }, [filterData.filterMonth]);
-
-  useEffect(() => {
-    if (isFocused) {
-      console.log('USE EFFECT 2');
-      accountBalance(true);
-    }
-  }, [chartDropdownValue]);
-
-  // useEffect which is used to initialize the service call when the transaction entry is modified
-  useEffect(() => {
-    if (isFocused && isTransactionAdded) {
-      console.log('USE EFFECT 3');
-      accountBalance();
-    }
-  }, [isFocused]);
-
-  const accountBalance = (isChartDropdownValueUpdated = false) => {
-    setIsLoading(true);
-    getAccountBalance();
-    const monthFirstdate = moment(filterData.filterMonth).startOf('month');
-    const monthLastdate = moment(filterData.filterMonth).endOf('month');
-    const monthRange = splitMonthIntoWeeks(monthFirstdate, monthLastdate);
-
-    setChartDropdownData(monthRange);
-    if (!isChartDropdownValueUpdated) {
-      if (!moment(filterData.filterMonth).isSame(moment(), 'month')) {
-        setChartDropdownvalue(monthRange[0]?.value);
-      } else {
-        console.log('Hello');
-
-        // setChartDropdownvalue(
-        //   `start:${moment().startOf('week')},end:${moment().endOf('week')}`,
-        // );
-      }
-    }
-  };
-
-  const getMaxTransaction = (
-    transactions: TransactionListInterface[],
-    type: 'Income' | 'Expense',
-  ) => {
-    const currentMonth = moment().month(); // 0-indexed (e.g., 7 for August)
-    const currentYear = moment().year();
-    return transactions
-      .filter(
-        t =>
-          moment(t.transactionDate).year() === currentYear &&
-          moment(t.transactionDate).month() === currentMonth &&
-          t.transactionType === type,
-      )
-      .reduce((max, t) => (t.amount > max.amount ? t : max), {amount: 0});
-  };
-
   const splitMonthIntoWeeks = (startDate: Moment, endDate: Moment) => {
     const weeks = [];
     // Set Monday as the first day of the week
@@ -209,6 +114,100 @@ const Dashboard = () => {
 
     return weeks;
   };
+  const isFocused = useIsFocused();
+  const dispatch = useDispatch();
+  const userDetails = useSelector((state: RootState) => state.auth.userDetails);
+  const [accountBalanceData, setAccountBalanceData] = useState<any>({});
+  const [chartDropdownOpen, setChartDropdownOpen] = useState(false);
+  const [filterData, setFilterData] = useState<{
+    filterMonth: Date;
+  }>({filterMonth: new Date()});
+
+  const monthFirstdate = moment(filterData.filterMonth).startOf('month');
+  const monthLastdate = moment(filterData.filterMonth).endOf('month');
+  const monthRange = splitMonthIntoWeeks(monthFirstdate, monthLastdate);
+
+  const [chartDropdownData, setChartDropdownData] =
+    useState<{label: string; value: string}[]>(monthRange);
+
+  const data = monthRange.find(month => {
+    return month.value.includes(`start:${moment().startOf('week')},`);
+  });
+
+  const [chartDropdownValue, setChartDropdownvalue] = useState(
+    `start:${moment().startOf('week')},end:${moment().endOf('week')}`,
+  );
+  const navigation: NavigationProp<ParamListBase> = useNavigation();
+
+  const isToggleOpen = useSelector(
+    (state: RootState) => state.auth.isFabToggleOpen,
+  );
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [monthlyReportData, setMonthlyReportData] = useState({});
+
+  const [show, setShow] = useState(false);
+  const [isFinanceStoryVisible, setIsFinanceStoryVisible] = useState(false);
+
+  const [transactionDetails, setTransactionDetails] = useState<
+    TransactionListInterface[]
+  >([]);
+  const [chartData, setChartData] = useState<number[]>([]);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const {isTransactionAdded, setIsTransactionAdded} = useContext(AppContext);
+
+  const days = {Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0, Sun: 0};
+
+  // useEffect which is used to initialize the service call functionality
+  useEffect(() => {
+    if (isFocused) {
+      accountBalance();
+    }
+  }, [filterData.filterMonth]);
+
+  useEffect(() => {
+    if (isFocused) {
+      accountBalance(true);
+    }
+  }, [chartDropdownValue]);
+
+  // useEffect which is used to initialize the service call when the transaction entry is modified
+  useEffect(() => {
+    if (isFocused && isTransactionAdded) {
+      accountBalance();
+    }
+  }, [isFocused]);
+
+  const accountBalance = (isChartDropdownValueUpdated = false) => {
+    setIsLoading(true);
+    getAccountBalance();
+
+    if (!isChartDropdownValueUpdated) {
+      if (!moment(filterData.filterMonth).isSame(moment(), 'month')) {
+        // setChartDropdownvalue(monthRange[0]?.value);
+      } else {
+        // setChartDropdownvalue(
+        //   `start:${moment().startOf('week')},end:${moment().endOf('week')}`,
+        // );
+      }
+    }
+  };
+
+  const getMaxTransaction = (
+    transactions: TransactionListInterface[],
+    type: 'Income' | 'Expense',
+  ) => {
+    const currentMonth = moment().month(); // 0-indexed (e.g., 7 for August)
+    const currentYear = moment().year();
+    return transactions
+      .filter(
+        t =>
+          moment(t.transactionDate).year() === currentYear &&
+          moment(t.transactionDate).month() === currentMonth &&
+          t.transactionType === type,
+      )
+      .reduce((max, t) => (t.amount > max.amount ? t : max), {amount: 0});
+  };
 
   const onValueChange = (event: EventTypes, newDate: Date) => {
     setShow(false);
@@ -236,7 +235,6 @@ const Dashboard = () => {
             weekStartDate: chartDropdownValue.split(',')[0].split('start:')[1],
             weekEndDate: chartDropdownValue.split(',')[1].split('end:')[1],
           };
-          console.log(data);
 
           await AccountService.getWeeklyTransactions(data).then(
             async (item: any) => {
