@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {Dispatch, SetStateAction} from 'react';
 import {StyleSheet, TouchableOpacity} from 'react-native';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import {useDispatch} from 'react-redux';
@@ -11,8 +11,13 @@ import GoogleLogo from '@assets/svg/googleLogo.svg';
 import {useTranslation} from 'react-i18next';
 import {Toast} from '@shared/ToastConfig';
 
-const LoginWithGoogle = (props: {buttonText: string}) => {
-  const {buttonText} = props;
+interface LoginWithGoogleProps {
+  buttonText: string;
+  setIsLoading: Dispatch<SetStateAction<boolean>>;
+}
+
+const LoginWithGoogle = (props: LoginWithGoogleProps) => {
+  const {buttonText, setIsLoading} = props;
   const {i18n} = useTranslation();
   const dispatch = useDispatch();
 
@@ -27,6 +32,7 @@ const LoginWithGoogle = (props: {buttonText: string}) => {
       const getToken = await GoogleSignin.signIn();
 
       if (getToken?.idToken) {
+        setIsLoading(true);
         AuthService.signinWithGoogle({data: {}, token: getToken.idToken})
           .then((res: any) => {
             if (res?.success) {
@@ -42,11 +48,13 @@ const LoginWithGoogle = (props: {buttonText: string}) => {
                   currencySymbol: res?.user?.currency,
                   currentLanguage: i18n.language,
                 }),
+                setIsLoading(false),
               );
             }
           })
           .catch(err => {
-            console.log('Error in signin with google', err);
+            console.log('Error in signin with google', err?.response?.data);
+            setIsLoading(false);
           });
       }
     } catch (error: any) {

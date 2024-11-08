@@ -1,6 +1,7 @@
 import {
   Dimensions,
   KeyboardAvoidingView,
+  Modal,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -37,11 +38,14 @@ import {Toast} from '@shared/ToastConfig';
 import LoginWithGoogle from '@shared/components/auth/LoginWithGoogle';
 import Rive, {Alignment, Fit, RiveRef} from 'rive-react-native';
 import {useTranslation} from 'react-i18next';
+import CommonLoader from '@shared/components/commonLoader/CommonLoader';
+import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 
 const Signin = () => {
   const dispatch = useDispatch();
 
   const riveRef = useRef<RiveRef>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const {t, i18n} = useTranslation(['signin']);
   const [btnLoader, setBtnLoader] = useState(false);
   const navigation: NavigationProp<ParamListBase> = useNavigation();
@@ -130,7 +134,11 @@ const Signin = () => {
         flex: 1,
         backgroundColor: appColors.light,
       }}>
-      <StatusBar backgroundColor={appColors.light} barStyle={'dark-content'} />
+      <CommonHeader title="" leftIconPressBack={() => {}} leftIcon={false} />
+      <StatusBar
+        backgroundColor={isLoading ? appColors.transferBg : appColors.light}
+        barStyle={isLoading ? 'light-content' : 'dark-content'}
+      />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
@@ -268,7 +276,10 @@ const Signin = () => {
               color={appColors.placeholderColor}
             />
             {/* Login with google button */}
-            <LoginWithGoogle buttonText={t('loginGoogle')} />
+            <LoginWithGoogle
+              setIsLoading={setIsLoading}
+              buttonText={t('loginGoogle')}
+            />
             <CommonText
               onPress={() => navigation.navigate('ForgotPassword')}
               content={t('forgotPassword')}
@@ -294,6 +305,9 @@ const Signin = () => {
           </View>
         </View>
       </ScrollView>
+      <Modal visible={isLoading} animationType="fade" transparent={true}>
+        <CommonLoader />
+      </Modal>
     </KeyboardAvoidingView>
   );
 };
