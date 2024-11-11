@@ -3,6 +3,7 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Modal,
+  ScrollView,
   StatusBar,
   StyleSheet,
   TouchableOpacity,
@@ -33,6 +34,8 @@ import {SecurityType, updateCurrentUser} from '@store/slice/appSlice';
 import {RootState} from '@store/store';
 import {useTranslation} from 'react-i18next';
 import ReactNativeBiometrics from 'react-native-biometrics';
+import CommonInput from '@shared/components/commonInput/CommonInput';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Security = () => {
   const dispatch = useDispatch();
@@ -49,7 +52,7 @@ const Security = () => {
     {label: t('FingerPrint'), value: 'FINGERPRINT'},
   ];
   const [rbSheetOpen, setRbSheetOpen] = useState(false);
-
+  const [pin, setPin] = useState('');
   const navigation: NavigationProp<ParamListBase> = useNavigation();
 
   const renderItem = ({
@@ -157,6 +160,14 @@ const Security = () => {
       });
   };
 
+  const updateSecurityPin = async () => {
+    if (pin.length === 6) {
+      await AsyncStorage.setItem('securityPin', pin);
+    } else {
+      Toast({message: 'Please enter a 6-digit PIN.', type: 'error'});
+    }
+  };
+
   return (
     <KeyboardAvoidingView style={{flex: 1, backgroundColor: appColors.light}}>
       <CommonHeader
@@ -176,15 +187,28 @@ const Security = () => {
             : 'dark-content'
         }
       />
-      <FlatList
-        initialNumToRender={25}
-        contentContainerStyle={{paddingHorizontal: 15}}
-        data={securityData}
-        renderItem={renderItem}
-        showsVerticalScrollIndicator={false}
-        onEndReachedThreshold={0.01}
-        keyExtractor={(_, index) => index.toString()}
-      />
+      <ScrollView contentContainerStyle={{flexGrow: 1}}>
+        <FlatList
+          style={{}}
+          scrollEnabled={false}
+          initialNumToRender={25}
+          contentContainerStyle={{paddingHorizontal: 15}}
+          data={securityData}
+          renderItem={renderItem}
+          showsVerticalScrollIndicator={false}
+          onEndReachedThreshold={0.01}
+          keyExtractor={(_, index) => index.toString()}
+        />
+        <View style={{paddingHorizontal: 15}}>
+          <CommonText content="Change Pin" size={'large'} bold />
+          <CommonInput
+            value={pin}
+            onChangeText={val => setPin(val)}
+            placeholder="Security PIN"
+          />
+          <CommonButton title="Update" onPress={updateSecurityPin} />
+        </View>
+      </ScrollView>
       <CommonRBSheet
         onClose={() => {
           setRbSheetOpen(false);

@@ -8,11 +8,7 @@ import GetStarted from '@components/auth/getStarted/GetStarted';
 import EmailVerification from '@components/auth/EmailVerification';
 import ResetPassword from '@components/auth/ResetPassword';
 import PinGerneration from '@components/setUpScreen/PinGerneration';
-import {appColors} from '@shared/appColors';
 import SplashScreen from '@components/auth/SplashScreen';
-import ReactNativeBiometrics from 'react-native-biometrics';
-import {useDispatch} from 'react-redux';
-import {updateIsLoggedin} from '@store/slice/appSlice';
 
 const AuthStack = ({
   isGetStartedVisible,
@@ -24,51 +20,6 @@ const AuthStack = ({
   isNavigateToLogin: boolean | null;
 }) => {
   const AuthStack = createStackNavigator();
-  const dispatch = useDispatch();
-  const handleBiometricAuth = async () => {
-    const rnBiometrics = new ReactNativeBiometrics({
-      allowDeviceCredentials: true,
-    });
-    rnBiometrics
-      .isSensorAvailable()
-      .then(async resultObject => {
-        const {available} = resultObject;
-        if (available) {
-          try {
-            const {success, error} = await rnBiometrics.simplePrompt({
-              promptMessage: 'Authenticate to continue',
-            });
-
-            if (success) {
-              dispatch(updateIsLoggedin(true));
-            } else {
-              Alert.alert(
-                'Authentication failed',
-                'Biometric authentication failed',
-                [
-                  {text: 'Cancel', onPress: () => BackHandler.exitApp()},
-                  {text: 'Unlock', onPress: () => handleBiometricAuth()},
-                ],
-              );
-            }
-          } catch (error) {
-            console.error('[handleBiometricAuth] Error:', error);
-          }
-        } else {
-          Alert.alert(
-            'Biometrics not supported',
-            'This device does not support biometric authentication.',
-          );
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        Alert.alert(
-          'Error',
-          'An error occurred while checking biometrics availability.',
-        );
-      });
-  };
 
   if (isGetStartedVisible) {
     return <GetStarted setIsGetStartedVisible={setIsGetStartedVisible} />;

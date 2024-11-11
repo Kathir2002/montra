@@ -23,8 +23,9 @@ import {
 } from '@react-navigation/native';
 import AccountService from '@services/setup/accountService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {updateIsLoggedin} from '@store/slice/appSlice';
+import {RootState} from '@store/store';
 
 interface ItemType {
   id: number | string;
@@ -41,7 +42,7 @@ const PinGerneration = () => {
   const [retypePinValue, setRetypePinValue] = useState('');
   const maxPinLength = 6; // Maximum length of the PIN
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
-
+  const userDetails = useSelector((state: RootState) => state.auth.userDetails);
   const [isPinSetupDone, setIsPinSetupDone] = useState(false);
   const isFocused = useIsFocused();
   useEffect(() => {
@@ -62,8 +63,7 @@ const PinGerneration = () => {
         .then(() => {
           setLoading(false);
           dispatch(updateIsLoggedin(true));
-
-          navigation.navigate('Setup');
+          userDetails.isSetupDone ? undefined : navigation.navigate('Setup');
           Toast({
             message: 'Security pin generated sucessfully',
             type: 'success',

@@ -1,5 +1,6 @@
 import {
   KeyboardAvoidingView,
+  Modal,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -26,9 +27,12 @@ import {Toast} from '@shared/ToastConfig';
 import AuthService from '@services/authService';
 import LoginWithGoogle from '@shared/components/auth/LoginWithGoogle';
 import {useTranslation} from 'react-i18next';
+import CommonLoader from '@shared/components/commonLoader/CommonLoader';
 const SignUp = () => {
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const {t} = useTranslation(['signup']);
+  const [isLoading, setIsLoading] = useState(false);
+
   const validationSchema = yup.object().shape({
     email: yup
       .string()
@@ -214,7 +218,10 @@ const SignUp = () => {
               color={appColors.placeholderColor}
             />
             {/* Signup with Google */}
-            <LoginWithGoogle buttonText={t('signupGoogle')} />
+            <LoginWithGoogle
+              setIsLoading={setIsLoading}
+              buttonText={t('signupGoogle')}
+            />
             <CommonText
               content={undefined}
               style={{color: appColors.placeholderColor, textAlign: 'center'}}
@@ -233,6 +240,9 @@ const SignUp = () => {
           </View>
         </View>
       </ScrollView>
+      <Modal visible={isLoading} animationType="fade" transparent={true}>
+        <CommonLoader />
+      </Modal>
     </KeyboardAvoidingView>
   );
 };
