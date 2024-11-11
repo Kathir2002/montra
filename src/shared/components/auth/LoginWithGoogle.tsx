@@ -10,6 +10,12 @@ import CommonText from '../commonText/CommonText';
 import GoogleLogo from '@assets/svg/googleLogo.svg';
 import {useTranslation} from 'react-i18next';
 import {Toast} from '@shared/ToastConfig';
+import {
+  NavigationProp,
+  ParamListBase,
+  useNavigation,
+} from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface LoginWithGoogleProps {
   buttonText: string;
@@ -20,7 +26,7 @@ const LoginWithGoogle = (props: LoginWithGoogleProps) => {
   const {buttonText, setIsLoading} = props;
   const {i18n} = useTranslation();
   const dispatch = useDispatch();
-
+  const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const loginWithGoogleHandler = async () => {
     try {
       // Check if your device supports Google Play
@@ -33,11 +39,11 @@ const LoginWithGoogle = (props: LoginWithGoogleProps) => {
 
       if (getToken?.idToken) {
         setIsLoading(true);
-        AuthService.signinWithGoogle({data: {}, token: getToken.idToken})
-          .then((res: any) => {
+
+        await AuthService.signinWithGoogle({data: {}, token: getToken.idToken})
+          .then(async (res: any) => {
             if (res?.success) {
               CommonDataService.setToken(res?.token);
-              dispatch(updateIsLoggedin(true));
               dispatch(
                 updateCurrentUser({
                   email: res?.user?.email,
@@ -47,9 +53,17 @@ const LoginWithGoogle = (props: LoginWithGoogleProps) => {
                   isSetupDone: res?.user?.isSetupDone,
                   currencySymbol: res?.user?.currency,
                   currentLanguage: i18n.language,
+                  securityMethod: res?.user?.securityMethod,
                 }),
-                setIsLoading(false),
               );
+              setIsLoading(false);
+              await AsyncStorage.getItem('securityPin').then(value => {
+                if (value === null) {
+                  navigation.navigate('PinGerneration');
+                } else {
+                  dispatch(updateIsLoggedin(true));
+                }
+              });
             }
           })
           .catch(err => {

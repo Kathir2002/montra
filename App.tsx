@@ -1,5 +1,5 @@
 import {Alert, BackHandler, Platform, StatusBar, View} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {SetStateAction, useEffect, useState} from 'react';
 import AuthStack from '@navigations/AuthStack';
 import {RootState} from './src/store/store';
 import {useDispatch, useSelector} from 'react-redux';
@@ -24,6 +24,7 @@ import SetUpStack from '@navigations/setupStack';
 import AppContext from '@shared/appContext';
 import {useTranslation} from 'react-i18next';
 import {navigationRef} from './index';
+import {Dispatch} from '@reduxjs/toolkit';
 
 const App = () => {
   const isloggedin = useSelector((state: RootState) => state.auth.isLoggedIn);
@@ -33,6 +34,9 @@ const App = () => {
   const [isTransactionAdded, setIsTransactionAdded] = useState(false);
   const userDetails = useSelector((state: RootState) => state.auth.userDetails);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isNavigateToLogin, setIsNavigateToLogin] = useState<null | boolean>(
+    null,
+  );
   const netInfo = useNetInfo();
   const dispatch = useDispatch();
   const {i18n} = useTranslation();
@@ -52,7 +56,8 @@ const App = () => {
             });
 
             if (success) {
-              getUserDetails();
+              if (navigationRef?.current?.isReady)
+                dispatch(updateIsLoggedin(true));
             } else {
               Alert.alert(
                 'Authentication failed',
@@ -84,9 +89,8 @@ const App = () => {
 
   const getUserDetails = async () => {
     await AuthService.userDetails()
-      .then((res: any) => {
+      .then(async (res: any) => {
         if (res?.success) {
-          dispatch(updateIsLoggedin(true));
           dispatch(
             updateCurrentUser({
               email: res?.user?.email,
@@ -99,6 +103,17 @@ const App = () => {
               currentLanguage: i18n.language,
             }),
           );
+          const securityValue = res?.user?.securityMethod;
+
+          if (securityValue === 'PIN' && res?.user?.securityPin) {
+            if (navigationRef?.current?.isReady)
+              setTimeout(() => {
+                navigationRef?.current?.navigate('PinGerneration');
+              }, 1000);
+          } else if (securityValue === 'FINGERPRINT') {
+            setIsNavigateToLogin(false);
+            handleBiometricAuth();
+          }
         }
       })
       .catch(err => {
@@ -129,19 +144,9 @@ const App = () => {
   const loginStatusCheck = async () => {
     const userToken = await CommonDataService.getToken();
     if (userToken) {
-      await AsyncStorage.getItem('securityMethod').then(async value => {
-        await AsyncStorage.getItem('pinValue').then(val => {
-          const securityValue = value ? JSON.parse(value) : null;
-          if (securityValue === 'PIN' && val) {
-            if (navigationRef?.current?.isReady)
-              navigationRef?.current?.navigate('PinGerneration1');
-          } else if (securityValue === 'FINGERPRINT') {
-            handleBiometricAuth();
-          }
-        });
-      });
-      // getUserDetails();
+      getUserDetails();
     } else {
+      setIsNavigateToLogin(true);
       setIsLoading(false);
       EncryptedStorage.removeItem('login');
       dispatch(updateIsLoggedin(false));
@@ -167,6 +172,7 @@ const App = () => {
           ) : !isLoading && !isloggedin ? (
             <>
               <AuthStack
+                isNavigateToLogin={isNavigateToLogin}
                 isGetStartedVisible={isGetStartedVisible}
                 setIsGetStartedVisible={setIsGetStartedVisible}
               />

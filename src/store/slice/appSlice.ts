@@ -1,4 +1,5 @@
 import {PayloadAction, createSlice} from '@reduxjs/toolkit';
+export type SecurityType = 'FINGERPRINT' | 'PIN';
 
 interface IntialStateInterface {
   isLoggedIn: boolean;
@@ -11,7 +12,7 @@ interface IntialStateInterface {
     isSetupDone?: boolean;
     currencySymbol?: string;
     currentLanguage?: string;
-    securityMethod?: 'PIN' | 'FINGERPRINT';
+    securityMethod?: SecurityType;
   };
 }
 

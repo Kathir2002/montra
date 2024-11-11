@@ -188,7 +188,7 @@ const AddNewAccount = () => {
         }
       })
       .catch(err => {
-        console.log('Error in geting wallet list data', err);
+        console.log('Error in geting wallet list data', err?.response?.data);
         Toast({message: err?.response?.data?.message, type: 'error'});
       })
       .finally(() => {

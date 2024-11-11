@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import BottomTabNavigator from './BottomTabNavigator';
 import CommonAddScreen from '@components/transactions/CommonAddScreen';
@@ -14,7 +14,8 @@ import About from '@components/profile/About';
 import Help from '@components/profile/Help';
 import Currency from '@components/profile/Currency';
 import ExportData from '@components/profile/ExportData';
-import PinGerneration from '@components/setUpScreen/PinGerneration';
+import Security from '@components/profile/Security';
+import {PanResponder, PanResponderInstance, View} from 'react-native';
 
 const AppStack = () => {
   const AppStack = createStackNavigator();
@@ -40,32 +41,55 @@ const AppStack = () => {
   const TransferDetails = () => {
     return <CommonDetailsScreen screenName="Transfer" />;
   };
+  const timerId = useRef<NodeJS.Timeout | null>(null);
+
+  const resetInactivityTimeout = useCallback(() => {
+    clearTimeout(timerId?.current!);
+    timerId.current = setTimeout(() => {
+      console.log('==========TIMEOUT==========');
+    }, 10000);
+  }, []);
+
+  useEffect(() => {
+    resetInactivityTimeout();
+  }, [resetInactivityTimeout]);
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponderCapture: () => {
+        resetInactivityTimeout();
+        return false;
+      },
+    }),
+  ).current;
 
   return (
-    <AppStack.Navigator
-      initialRouteName="BottomTab"
-      screenOptions={{headerShown: false, animationEnabled: false}}>
-      <AppStack.Screen name="PinGerneration1" component={PinGerneration} />
-      <AppStack.Screen name="BottomTab" component={BottomTabNavigator} />
-      <AppStack.Screen name="AddExpense" component={AddExpense} />
-      <AppStack.Screen name="AddIncome" component={AddIncome} />
-      <AppStack.Screen name="AddTransfer" component={AddTransfer} />
-      <AppStack.Screen name="AddBudget" component={AddBudget} />
-      <AppStack.Screen name="AddNewBankAccount" component={AddNewAccount} />
-      <AppStack.Screen name="FinanceReport" component={FinanceReport} />
-      <AppStack.Screen name="IncomeDetails" component={IncomeDetails} />
-      <AppStack.Screen name="ExpenseDetails" component={ExpenseDetails} />
-      <AppStack.Screen name="TransferDetails" component={TransferDetails} />
-      <AppStack.Screen name="BudgetDetails" component={BudgetDetails} />
-      <AppStack.Screen name="Account" component={Account} />
-      <AppStack.Screen name="Settings" component={Settings} />
-      <AppStack.Screen name="Language" component={Language} />
-      <AppStack.Screen name="Notification" component={Notification} />
-      <AppStack.Screen name="About" component={About} />
-      <AppStack.Screen name="Help" component={Help} />
-      <AppStack.Screen name="Currency" component={Currency} />
-      <AppStack.Screen name="ExportData" component={ExportData} />
-    </AppStack.Navigator>
+    <View {...panResponder.panHandlers} style={{flex: 1}}>
+      <AppStack.Navigator
+        initialRouteName="BottomTab"
+        screenOptions={{headerShown: false, animationEnabled: false}}>
+        <AppStack.Screen name="BottomTab" component={BottomTabNavigator} />
+        <AppStack.Screen name="AddExpense" component={AddExpense} />
+        <AppStack.Screen name="AddIncome" component={AddIncome} />
+        <AppStack.Screen name="AddTransfer" component={AddTransfer} />
+        <AppStack.Screen name="AddBudget" component={AddBudget} />
+        <AppStack.Screen name="AddNewBankAccount" component={AddNewAccount} />
+        <AppStack.Screen name="FinanceReport" component={FinanceReport} />
+        <AppStack.Screen name="IncomeDetails" component={IncomeDetails} />
+        <AppStack.Screen name="ExpenseDetails" component={ExpenseDetails} />
+        <AppStack.Screen name="TransferDetails" component={TransferDetails} />
+        <AppStack.Screen name="BudgetDetails" component={BudgetDetails} />
+        <AppStack.Screen name="Account" component={Account} />
+        <AppStack.Screen name="Settings" component={Settings} />
+        <AppStack.Screen name="Language" component={Language} />
+        <AppStack.Screen name="Notification" component={Notification} />
+        <AppStack.Screen name="About" component={About} />
+        <AppStack.Screen name="Help" component={Help} />
+        <AppStack.Screen name="Currency" component={Currency} />
+        <AppStack.Screen name="ExportData" component={ExportData} />
+        <AppStack.Screen name="Security" component={Security} />
+      </AppStack.Navigator>
+    </View>
   );
 };
 

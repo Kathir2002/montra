@@ -202,7 +202,9 @@ const Budget = () => {
         <FocusAwareStatusBar
           barStyle={'light-content'}
           backgroundColor={
-            isLoading ? appColors.transparentBackground : appColors.primary
+            isLoading || isToggleOpen
+              ? appColors.transparentBackground
+              : appColors.primary
           }
         />
         <CommonHeader

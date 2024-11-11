@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {appColors} from '@shared/appColors';
 import CommonText from '@shared/components/commonText/CommonText';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
@@ -17,32 +16,81 @@ import {Toast} from '@shared/ToastConfig';
 import {
   NavigationProp,
   ParamListBase,
+  RouteProp,
   useIsFocused,
   useNavigation,
+  useRoute,
 } from '@react-navigation/native';
+import AccountService from '@services/setup/accountService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useDispatch} from 'react-redux';
+import {updateIsLoggedin} from '@store/slice/appSlice';
 
 interface ItemType {
   id: number | string;
   value: React.JSX.Element;
 }
+
+interface Props {}
+
 const PinGerneration = () => {
   const [pinValue, setPinValue] = useState('');
   const [isRetype, setIsRetype] = useState(false);
+  const [Loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
   const [retypePinValue, setRetypePinValue] = useState('');
   const maxPinLength = 6; // Maximum length of the PIN
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
+
+  const [isPinSetupDone, setIsPinSetupDone] = useState(false);
   const isFocused = useIsFocused();
   useEffect(() => {
-    if (isFocused) {
-      AsyncStorage.getItem('pinValue').then(value => {
-        console.log(value);
-
-        if (value) {
-          setPinValue(value);
-        }
-      });
-    }
+    AsyncStorage.getItem('securityPin').then(value => {
+      if (value) {
+        setIsPinSetupDone(true);
+      } else {
+        setIsPinSetupDone(false);
+      }
+    });
   }, [isFocused]);
+
+  const userAddPinHandler = async () => {
+    setLoading(true);
+
+    if (!isPinSetupDone) {
+      await AsyncStorage.setItem('securityPin', JSON.stringify(pinValue))
+        .then(() => {
+          setLoading(false);
+          dispatch(updateIsLoggedin(true));
+
+          navigation.navigate('Setup');
+          Toast({
+            message: 'Security pin generated sucessfully',
+            type: 'success',
+          });
+        })
+        .catch(() => {
+          setLoading(false);
+          Toast({message: 'Something went wrong', type: 'error'});
+        });
+    } else {
+      await AsyncStorage.getItem('securityPin')
+        .then(value => {
+          if (value ? JSON.parse(value) : null === pinValue) {
+            setLoading(false);
+            dispatch(updateIsLoggedin(true));
+            // Toast({
+            //   message: ' sucessfully',
+            //   type: 'success',
+            // });
+          }
+        })
+        .catch(() => {
+          setLoading(false);
+          Toast({message: 'Something went wrong', type: 'error'});
+        });
+    }
+  };
 
   const data = [
     {
@@ -101,7 +149,9 @@ const PinGerneration = () => {
         ? setRetypePinValue(prev => prev.slice(0, -1))
         : setPinValue(prev => prev.slice(0, -1));
     } else if (item?.id == 'submit') {
-      if (!isRetype) {
+      if (isPinSetupDone) {
+        userAddPinHandler();
+      } else if (!isRetype) {
         if (pinValue?.length === maxPinLength) {
           setIsRetype(true);
         } else {
@@ -109,9 +159,7 @@ const PinGerneration = () => {
         }
       } else if (retypePinValue?.length === maxPinLength) {
         if (retypePinValue === pinValue) {
-          await AsyncStorage.setItem('pinValue', JSON.stringify(pinValue));
-          navigation.navigate('Setup');
-          Toast({message: 'Pin Generated successfully', type: 'success'});
+          userAddPinHandler();
         } else {
           Toast({message: "Pin doesn't same", type: 'error'});
         }
@@ -124,6 +172,7 @@ const PinGerneration = () => {
         : setPinValue(prev => (prev + item?.id).slice(0, maxPinLength));
     }
   };
+  console.log(isPinSetupDone);
 
   const renderItem = ({item, index}: {item: ItemType; index: number}) => {
     return (
@@ -162,7 +211,11 @@ const PinGerneration = () => {
         <CommonText
           color={appColors.light}
           content={
-            isRetype ? 'Ok. Re type your PIN again.' : 'Let’s  setup your PIN'
+            !isPinSetupDone
+              ? isRetype
+                ? 'Ok. Re type your PIN again.'
+                : 'Let’s  setup your PIN'
+              : 'Enter Pin'
           }
           size={'large'}
         />

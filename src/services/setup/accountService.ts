@@ -25,6 +25,9 @@ class accountService {
       data,
     );
   }
+  checkUserPin(data: any) {
+    return HttpRoutingService.postMethod('api/account/check-user-pin', data);
+  }
   getWalletList() {
     return HttpRoutingService.getMethod('api/account/get-wallet-list');
   }

@@ -5,6 +5,7 @@ import {
   Linking,
   Modal,
   ScrollView,
+  StatusBarProps,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -24,6 +25,7 @@ import {
 import {
   NavigationProp,
   ParamListBase,
+  useIsFocused,
   useNavigation,
 } from '@react-navigation/native';
 import Animated, {FadeIn, FadeOut} from 'react-native-reanimated';
@@ -56,6 +58,7 @@ const Profile = () => {
   const isToggleOpen = useSelector(
     (state: RootState) => state.auth.isFabToggleOpen,
   );
+  const isFocused = useIsFocused();
   const devData = {
     webClientId: DEV_WEB_CLIENTID,
     androidClientId: DEV_ANDROID_CLIENTID,
@@ -86,11 +89,7 @@ const Profile = () => {
       const ASYNC_KEYS = await AsyncStorage.getAllKeys();
       await EncryptedStorage.clear();
       ASYNC_KEYS?.map(async (res: string) => {
-        if (
-          res !== 'getStartedVisible' &&
-          res !== 'pinValue' &&
-          res !== 'securityMethod'
-        ) {
+        if (res !== 'getStartedVisible') {
           await AsyncStorage.removeItem(res);
         }
       });
@@ -166,6 +165,10 @@ const Profile = () => {
     );
   };
 
+  function FocusAwareStatusBar(props: StatusBarProps) {
+    return isFocused ? <StatusBar {...props} /> : null;
+  }
+
   return (
     <ScrollView
       contentContainerStyle={{
@@ -180,9 +183,11 @@ const Profile = () => {
         title=""
         headerBgc="#F6F6F6"
       />
-      <StatusBar
+      <FocusAwareStatusBar
         backgroundColor={
-          rbSheetOpen ? appColors.transparentBackground : '#F6F6F6'
+          rbSheetOpen || isToggleOpen
+            ? appColors.transparentBackground
+            : '#F6F6F6'
         }
         barStyle={rbSheetOpen ? 'light-content' : 'dark-content'}
       />

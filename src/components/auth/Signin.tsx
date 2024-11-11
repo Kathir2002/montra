@@ -40,6 +40,7 @@ import Rive, {Alignment, Fit, RiveRef} from 'rive-react-native';
 import {useTranslation} from 'react-i18next';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Signin = () => {
   const dispatch = useDispatch();
@@ -75,25 +76,31 @@ const Signin = () => {
       password: formik.values.password,
     };
     AuthService.signin({data})
-      .then((res: any) => {
+      .then(async (res: any) => {
         if (res?.success) {
           setBtnLoader(false);
           CommonDataService.setToken(res?.token);
           riveRef.current?.setInputState('Login Machine', 'trigSuccess', true);
-          setTimeout(() => {
-            dispatch(updateIsLoggedin(true));
-            dispatch(
-              updateCurrentUser({
-                email: res?.user?.email,
-                id: res?.user?.id,
-                name: res?.user?.name,
-                picture: res?.user?.picture,
-                isSetupDone: res?.user?.isSetupDone,
-                currencySymbol: res?.user?.currency,
-                currentLanguage: i18n.language,
-              }),
-            );
-          }, 1000);
+          dispatch(
+            updateCurrentUser({
+              email: res?.user?.email,
+              id: res?.user?.id,
+              name: res?.user?.name,
+              picture: res?.user?.picture,
+              isSetupDone: res?.user?.isSetupDone,
+              currencySymbol: res?.user?.currency,
+              currentLanguage: i18n.language,
+            }),
+          );
+          await AsyncStorage.getItem('securityPin').then(value => {
+            if (value === null) {
+              navigation.navigate('PinGerneration');
+            } else {
+              setTimeout(() => {
+                dispatch(updateIsLoggedin(true));
+              }, 1000);
+            }
+          });
         }
       })
       .catch(err => {
