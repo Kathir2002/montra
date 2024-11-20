@@ -5,6 +5,7 @@ import {
   StatusBar,
   StyleSheet,
   TouchableOpacity,
+  Vibration,
   View,
 } from 'react-native';
 import {appColors} from '@shared/appColors';
@@ -21,7 +22,6 @@ import {
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
-import AccountService from '@services/setup/accountService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useDispatch} from 'react-redux';
 import {updateIsLoggedin} from '@store/slice/appSlice';
@@ -62,7 +62,6 @@ const PinGerneration = () => {
         .then(() => {
           setLoading(false);
           dispatch(updateIsLoggedin(true));
-
           navigation.navigate('Setup');
           Toast({
             message: 'Security pin generated sucessfully',
@@ -76,13 +75,13 @@ const PinGerneration = () => {
     } else {
       await AsyncStorage.getItem('securityPin')
         .then(value => {
-          if (value ? JSON.parse(value) : null === pinValue) {
+          const savedPin = value ? JSON.parse(value) : null;
+
+          if (savedPin === pinValue) {
             setLoading(false);
             dispatch(updateIsLoggedin(true));
-            // Toast({
-            //   message: ' sucessfully',
-            //   type: 'success',
-            // });
+          } else {
+            Toast({message: 'Invalid user pin', type: 'error'});
           }
         })
         .catch(() => {
@@ -144,6 +143,8 @@ const PinGerneration = () => {
   ];
 
   const handlePress = async (item: ItemType) => {
+    Vibration.vibrate(50);
+
     if (item?.id == 'delete') {
       isRetype
         ? setRetypePinValue(prev => prev.slice(0, -1))
@@ -172,7 +173,6 @@ const PinGerneration = () => {
         : setPinValue(prev => (prev + item?.id).slice(0, maxPinLength));
     }
   };
-  console.log(isPinSetupDone);
 
   const renderItem = ({item, index}: {item: ItemType; index: number}) => {
     return (

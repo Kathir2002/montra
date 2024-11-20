@@ -37,7 +37,7 @@ import {TransactionListInterface} from './Dashboard';
 import {Icon} from '@rneui/base';
 import MonthPicker, {EventTypes} from 'react-native-month-year-picker';
 import LottieView from 'lottie-react-native';
-import {RefreshControl} from 'react-native-gesture-handler';
+import {RefreshControl} from 'react-native';
 import AccountService from '@services/setup/accountService';
 import FinanceStory from '@components/financeReport/FinanceStory';
 import {updateIsFabToggleOpen} from '@store/slice/appSlice';
@@ -316,6 +316,7 @@ const Transaction = () => {
         contentContainerStyle={{
           flex: transactionDetails.length === 0 ? 1 : 0,
           paddingBottom: 100,
+          // paddingTop: 20,
         }}
       />
       {isToggleOpen ? (

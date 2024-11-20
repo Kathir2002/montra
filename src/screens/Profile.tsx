@@ -89,7 +89,7 @@ const Profile = () => {
       const ASYNC_KEYS = await AsyncStorage.getAllKeys();
       await EncryptedStorage.clear();
       ASYNC_KEYS?.map(async (res: string) => {
-        if (res !== 'getStartedVisible') {
+        if (res !== 'getStartedVisible' && res !== 'securityPin') {
           await AsyncStorage.removeItem(res);
         }
       });

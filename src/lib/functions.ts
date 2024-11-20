@@ -1,3 +1,7 @@
+import {
+  StackCardInterpolatedStyle,
+  StackCardInterpolationProps,
+} from '@react-navigation/stack';
 import {store} from '@store/store';
 import * as CryptoJS from 'react-native-crypto-js';
 /**
@@ -58,4 +62,19 @@ export const getCurrencySymbol = (amount: number, formatting = true) => {
       useGrouping: false, // No commas
     });
   }
+};
+
+export const forSlideFromLeftAnimation = ({
+  current,
+  layouts,
+}: StackCardInterpolationProps): StackCardInterpolatedStyle => {
+  const translateX = current.progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-layouts.screen.width, 0],
+  });
+  return {
+    cardStyle: {
+      transform: [{translateX}],
+    },
+  };
 };

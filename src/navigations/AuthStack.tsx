@@ -13,6 +13,7 @@ import SplashScreen from '@components/auth/SplashScreen';
 import ReactNativeBiometrics from 'react-native-biometrics';
 import {useDispatch} from 'react-redux';
 import {updateIsLoggedin} from '@store/slice/appSlice';
+import {forSlideFromLeftAnimation} from '@src/lib/functions';
 
 const AuthStack = ({
   isGetStartedVisible,
@@ -83,7 +84,10 @@ const AuthStack = ({
           ? 'PinGerneration'
           : 'EmptyScreen'
       }
-      screenOptions={{headerShown: false, animationEnabled: false}}>
+      screenOptions={{
+        headerShown: false,
+        cardStyleInterpolator: forSlideFromLeftAnimation,
+      }}>
       <AuthStack.Screen name="SignIn" component={Signin} />
       <AuthStack.Screen name="SignUp" component={Signup} />
       <AuthStack.Screen name="ForgotPassword" component={ForgotPassword} />

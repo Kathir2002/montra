@@ -1,5 +1,9 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {createStackNavigator} from '@react-navigation/stack';
+import {
+  createStackNavigator,
+  StackCardInterpolatedStyle,
+  StackCardInterpolationProps,
+} from '@react-navigation/stack';
 import BottomTabNavigator from './BottomTabNavigator';
 import CommonAddScreen from '@components/transactions/CommonAddScreen';
 import AddNewAccount from '@components/setUpScreen/AddNewAccount';
@@ -16,6 +20,7 @@ import Currency from '@components/profile/Currency';
 import ExportData from '@components/profile/ExportData';
 import Security from '@components/profile/Security';
 import {PanResponder, PanResponderInstance, View} from 'react-native';
+import {forSlideFromLeftAnimation} from '@src/lib/functions';
 
 const AppStack = () => {
   const AppStack = createStackNavigator();
@@ -67,7 +72,10 @@ const AppStack = () => {
     <View {...panResponder.panHandlers} style={{flex: 1}}>
       <AppStack.Navigator
         initialRouteName="BottomTab"
-        screenOptions={{headerShown: false, animationEnabled: false}}>
+        screenOptions={{
+          headerShown: false,
+          cardStyleInterpolator: forSlideFromLeftAnimation,
+        }}>
         <AppStack.Screen name="BottomTab" component={BottomTabNavigator} />
         <AppStack.Screen name="AddExpense" component={AddExpense} />
         <AppStack.Screen name="AddIncome" component={AddIncome} />

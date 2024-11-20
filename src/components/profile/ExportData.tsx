@@ -1,11 +1,18 @@
 import {
   KeyboardAvoidingView,
   Modal,
+  PermissionsAndroid,
+  Platform,
+  StatusBar,
   StyleSheet,
+  ToastAndroid,
   TouchableOpacity,
   View,
 } from 'react-native';
 import React, {useState} from 'react';
+import ReactNativeBlobUtil, {
+  ReactNativeBlobUtilConfig,
+} from 'react-native-blob-util';
 import {appColors} from '@shared/appColors';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 import {
@@ -18,6 +25,15 @@ import CommonDropDown from '@shared/components/commonDropdown/CommonDropDown';
 import CommonButton from '@shared/components/commonButton/CommonButton';
 import UploadIcon from '@assets/svg/upload.svg';
 import ExportImage from '@assets/svg/illustration.svg';
+import {Toast} from '@shared/ToastConfig';
+import {config} from '../../../environment';
+import CommonDataService from '@shared/commonDataServices';
+
+interface PayloadData {
+  transactionType: string;
+  fileFormat: string;
+  dateRange: string;
+}
 
 const ExportData = () => {
   const navigation: NavigationProp<ParamListBase> = useNavigation();
@@ -28,6 +44,8 @@ const ExportData = () => {
   const [dateRangeValue, setDateRangeValue] = useState('30days');
   const [formatValue, setFormatValue] = useState('CSV');
   const [modalVisible, setModalVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const dropdownData = {
     dataDropdown: [
       {label: 'All', value: 'All'},
@@ -47,6 +65,96 @@ const ExportData = () => {
     ],
   };
 
+  const generateMimeType = (fileName: string) => {
+    switch (fileName.split('.')[1].toLocaleLowerCase()) {
+      case 'xlsx':
+        return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+      case 'csv':
+        return 'text/csv';
+    }
+  };
+
+  const exportTransactionData = async () => {
+    setLoading(true);
+
+    const data = {
+      transactionType: dataToExportValue,
+      fileFormat: formatValue,
+      dateRange: dateRangeValue,
+    };
+
+    // Directories for different platforms
+    const {fs} = ReactNativeBlobUtil;
+    const downloadDir = Platform.select({
+      ios: fs.dirs.DocumentDir,
+      android: '/storage/emulated/0/Download/',
+      // android: fs.dirs.DownloadDir,
+    });
+    const filename = `transactions_${new Date().getTime()}.${
+      formatValue === 'CSV' ? 'csv' : 'xlsx'
+    }`;
+
+    // Full path for the file
+    const filePath = `${downloadDir}/${filename}`;
+
+    // Download configuration
+    const configOptions: ReactNativeBlobUtilConfig = {
+      fileCache: true,
+      path: filePath,
+      addAndroidDownloads: {
+        notification: true,
+        useDownloadManager: true,
+        mediaScannable: true,
+        path: filePath,
+        description: 'Downloading file...',
+        mime: generateMimeType(filename),
+      },
+    };
+    const token = await CommonDataService.getToken();
+    const queryString = Object.keys(data)
+      .map(
+        (key: string) =>
+          `${encodeURIComponent(key)}=${encodeURIComponent(
+            data[key as keyof PayloadData],
+          )}`,
+      )
+      .join('&');
+    await ReactNativeBlobUtil.config(configOptions)
+      .fetch(
+        'GET',
+        `${config.apiUrldb}api/transaction/export-transction?${queryString}`,
+        {
+          'Content-Type': 'application/json',
+          Accept:
+            formatValue === 'CSV'
+              ? 'text/csv'
+              : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          Authorization: `Bearer ${token}`,
+          'Access-Control-Allow-Origin': '*',
+        },
+      )
+      .then(res => {
+        // Platform.OS === 'android'
+        //   ? ReactNativeBlobUtil.android.actionViewIntent(
+        //       filePath,
+        //       generateMimeType(filename)!,
+        //     )
+        //   : ReactNativeBlobUtil.ios.openDocument(filePath);
+        setModalVisible(true);
+        Toast({
+          message: 'File downloaded successfully',
+          type: 'success',
+        });
+      })
+      .catch(err => {
+        Toast({
+          message: 'Something went wrong, Please try again later!',
+          type: 'error',
+        });
+        console.log('Error in downloading file:', err);
+      });
+  };
+
   return (
     <KeyboardAvoidingView style={{flex: 1, backgroundColor: appColors.light}}>
       <CommonHeader
@@ -54,6 +162,7 @@ const ExportData = () => {
         leftIcon
         leftIconPressBack={() => navigation.goBack()}
       />
+      <StatusBar backgroundColor={appColors.light} barStyle={'dark-content'} />
       <View style={{flex: 1, paddingHorizontal: 15}}>
         <View>
           <CommonText
@@ -103,7 +212,7 @@ const ExportData = () => {
           }}>
           <TouchableOpacity
             onPress={() => {
-              setModalVisible(true);
+              exportTransactionData();
             }}
             activeOpacity={0.5}
             style={{
@@ -141,9 +250,9 @@ const ExportData = () => {
             titleStyle={{
               width: '100%',
             }}
-            onPress={() =>
-              navigation.navigate('BottomTab', {screen: 'Dashboard'})
-            }
+            onPress={() => {
+              navigation.navigate('BottomTab', {screen: 'Dashboard'});
+            }}
             title="Back to Home"
           />
         </View>

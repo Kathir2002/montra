@@ -729,6 +729,8 @@ const CommonAddScreen: FC<{
   ];
 
   const isFieldValid = (fieldName: keyof FormValues) => {
+    console.log(formik.errors[fieldName], formik.touched[fieldName], fieldName);
+
     return !formik.errors[fieldName] && formik.touched[fieldName];
   };
 
@@ -751,8 +753,8 @@ const CommonAddScreen: FC<{
       if (
         (formik.values.frequency == 'daily' && isFieldValid('endAfter')) ||
         (formik.values.frequency == 'weekly' &&
-          isFieldValid('endAfter') &&
-          isFieldValid('day')) ||
+          isFieldValid('day') &&
+          isFieldValid('endAfter')) ||
         (formik.values.frequency == 'monthly' &&
           isFieldValid('endAfter') &&
           isFieldValid('date')) ||
@@ -856,7 +858,10 @@ const CommonAddScreen: FC<{
         />
         <StatusBar
           backgroundColor={
-            rbSheetOpen || isSuccessPopoverVisible || isLoading
+            rbSheetOpen ||
+            isSuccessPopoverVisible ||
+            isLoading ||
+            isAddPopoverOpen
               ? appColors.transparentBackground
               : screenName == 'Income'
               ? appColors.incomeBg
@@ -1337,11 +1342,16 @@ const CommonAddScreen: FC<{
                           {formik.values.frequency === 'yearly' ? (
                             <CommonText
                               color={appColors.placeholderColor}
-                              content={`${formik.values.month} ${formik.values.date}`}
+                              content={moment()
+                                .month(Number(formik.values.month) - 1)
+                                .date(Number(formik.values.date))
+                                .format('MMM, Do')}
                             />
                           ) : formik.values.frequency == 'monthly' ? (
                             <CommonText
-                              content={formik.values.date}
+                              content={moment()
+                                .date(Number(formik.values.date))
+                                .format('Do')}
                               color={appColors.placeholderColor}
                             />
                           ) : formik.values.frequency == 'weekly' ? (
@@ -1368,6 +1378,35 @@ const CommonAddScreen: FC<{
                       <TouchableOpacity
                         activeOpacity={0.7}
                         onPress={() => {
+                          formik.setFieldTouched('endAfter', true);
+                          if (formik.values.frequency === 'weekly') {
+                            formik.setFieldTouched('day', true);
+                            formik.setFieldValue(
+                              'month',
+                              formik.initialValues.month,
+                            );
+                            formik.setFieldValue(
+                              'date',
+                              formik.initialValues.date,
+                            );
+                          } else if (formik.values.frequency === 'monthly') {
+                            formik.setFieldTouched('date', true);
+                            formik.setFieldValue(
+                              'day',
+                              formik.initialValues.day,
+                            );
+                            formik.setFieldValue(
+                              'month',
+                              formik.initialValues.month,
+                            );
+                          } else if (formik.values?.frequency === 'yearly') {
+                            formik.setFieldTouched('month', true);
+                            formik.setFieldTouched('date', true);
+                            formik.setFieldValue(
+                              'day',
+                              formik.initialValues.day,
+                            );
+                          }
                           repeatRBSheetRef.current?.open();
                           setRbSheetOpen(true);
                         }}
@@ -1519,7 +1558,8 @@ const CommonAddScreen: FC<{
         <ScrollView
           contentContainerStyle={{
             paddingHorizontal: 15,
-            paddingVertical: 10,
+            paddingTop: 10,
+            paddingBottom: 20,
             flexGrow: 1,
             backgroundColor: appColors.light,
           }}>
@@ -1589,10 +1629,13 @@ const CommonAddScreen: FC<{
             {formik.values.frequency == 'yearly' && (
               <CommonInput
                 onPress={dropdownCloseHandler}
-                placeholder="Date / Month"
+                placeholder="Month, Date"
                 value={
                   formik.values.month !== ''
-                    ? formik.values.date + ' / ' + formik.values.month
+                    ? moment()
+                        .month(Number(formik.values.month) - 1)
+                        .date(Number(formik.values?.date))
+                        .format('MMM, Do')
                     : ''
                 }
                 editable={false}
@@ -1729,7 +1772,11 @@ const CommonAddScreen: FC<{
           />
           {isRepeactDateVisible ? (
             <DateTimePicker
-              value={initialDate}
+              value={
+                formik?.values?.endAfter
+                  ? new Date(formik.values.endAfter)
+                  : initialDate
+              }
               mode={'date'}
               is24Hour={true}
               positiveButton={{label: 'OK', textColor: appColors.primary}}
@@ -1795,6 +1842,9 @@ const CommonAddScreen: FC<{
       <CommonRBSheet
         onClose={() => {
           setRbSheetOpen(false);
+        }}
+        onOpen={() => {
+          setRbSheetOpen(true);
         }}
         ref={dirtyRBSheetRef}
         height={200}
