@@ -59,7 +59,7 @@ const ForgotPassword = () => {
           }
         })
         .catch(err => {
-          Toast({message: err?.data?.message, type: 'error'});
+          Toast({message: err?.response?.data?.message, type: 'error'});
         });
     },
   });
@@ -96,6 +96,7 @@ const ForgotPassword = () => {
             />
           </View>
           <CommonInput
+            autoCapitalize="none"
             placeholder={t('email')}
             value={formik.values.email}
             onChangeText={(text: string) => {

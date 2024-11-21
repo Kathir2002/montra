@@ -17,13 +17,11 @@ import {Toast} from '@shared/ToastConfig';
 import {
   NavigationProp,
   ParamListBase,
-  RouteProp,
   useIsFocused,
   useNavigation,
-  useRoute,
 } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {updateIsLoggedin} from '@store/slice/appSlice';
 
 interface ItemType {
@@ -41,7 +39,6 @@ const PinGerneration = () => {
   const [retypePinValue, setRetypePinValue] = useState('');
   const maxPinLength = 6; // Maximum length of the PIN
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
-
   const [isPinSetupDone, setIsPinSetupDone] = useState(false);
   const isFocused = useIsFocused();
   useEffect(() => {
