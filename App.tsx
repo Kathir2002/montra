@@ -6,10 +6,8 @@ import {useDispatch, useSelector} from 'react-redux';
 import AppStack from '@navigations/AppStack';
 import {useNetInfo} from '@react-native-community/netinfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import ReactNativeBiometrics, {
-  BiometryTypes,
-  FaceID,
-} from 'react-native-biometrics';
+import ReactNativeBiometrics from 'react-native-biometrics';
+import messaging from '@react-native-firebase/messaging';
 
 import CommonDataService from '@shared/commonDataServices';
 import EncryptedStorage from 'react-native-encrypted-storage';
@@ -24,7 +22,10 @@ import SetUpStack from '@navigations/setupStack';
 import AppContext from '@shared/appContext';
 import {useTranslation} from 'react-i18next';
 import {navigationRef} from './index';
-import {Dispatch} from '@reduxjs/toolkit';
+import {
+  MessageType,
+  useNotificationChannels,
+} from '@src/hooks/useNotificationChannels';
 
 const App = () => {
   const isloggedin = useSelector((state: RootState) => state.auth.isLoggedIn);
@@ -152,6 +153,61 @@ const App = () => {
       dispatch(updateIsLoggedin(false));
     }
   };
+
+  const {createNotificationChannels, displayNotification} =
+    useNotificationChannels();
+
+  useEffect(() => {
+    const setupNotificationHandling = async () => {
+      try {
+        // Request permissions
+        await messaging().requestPermission();
+
+        // Create initial channels
+        await createNotificationChannels();
+
+        // Handle foreground messages
+        const unsubscribeForeground = messaging().onMessage(
+          async remoteMessage => {
+            // Convert Firebase message to our MessageType
+            const message: MessageType = {
+              type: remoteMessage.data?.type || 'default',
+              title: remoteMessage.notification?.title || 'Notification',
+              body: remoteMessage.notification?.body || '',
+              data: remoteMessage.data as Record<string, string>,
+            };
+
+            // Display notification
+            await displayNotification(message);
+          },
+        );
+
+        // Handle background/quit state notifications
+        messaging().setBackgroundMessageHandler(async remoteMessage => {
+          const message: MessageType = {
+            type: remoteMessage.data?.type || 'default',
+            title: remoteMessage.notification?.title || 'Notification',
+            body: remoteMessage.notification?.body || '',
+            data: remoteMessage.data as Record<string, string>,
+          };
+
+          // You might want to store or process these differently
+          console.log('Background message', message);
+        });
+
+        return unsubscribeForeground;
+      } catch (error) {
+        console.error('Notification setup failed', error);
+      }
+    };
+
+    setupNotificationHandling();
+
+    // Cleanup
+    return () => {
+      messaging().onMessage(() => {});
+    };
+  }, [createNotificationChannels, displayNotification]);
 
   return (
     <>

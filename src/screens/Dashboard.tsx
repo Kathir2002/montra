@@ -3,6 +3,7 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
   RefreshControl,
   StatusBar,
@@ -41,6 +42,8 @@ import FinanceStory from '@components/financeReport/FinanceStory';
 import AppContext from '@shared/appContext';
 import {updateIsFabToggleOpen} from '@store/slice/appSlice';
 import {getCurrencySymbol} from '@src/lib/functions';
+import callPermission from '@services/permission';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface TransactionListInterface {
   _id: string;
@@ -193,6 +196,28 @@ const Dashboard = () => {
     }
   };
 
+  // Function which is used to handle notification
+  const handlePushNotification = async () => {
+    const isPushNotificationEnabled: string | null = await AsyncStorage.getItem(
+      'isPushNotification',
+    );
+    const data = JSON.parse(isPushNotificationEnabled!);
+    if (Platform.OS == 'android') {
+      const version: number = Number(await Platform.constants?.Release);
+      if (version > 12 && !data) {
+        callPermission('PUSH_NOTIFICATION')
+          .then(res => {})
+          .catch(async err => {
+            await AsyncStorage.setItem(
+              'isPushNotification',
+              JSON.stringify(true),
+            );
+            console.log(err, 'Promise Handler');
+          });
+      }
+    }
+  };
+
   const getMaxTransaction = (
     transactions: TransactionListInterface[],
     type: 'Income' | 'Expense',
@@ -238,6 +263,7 @@ const Dashboard = () => {
 
           await AccountService.getWeeklyTransactions(data).then(
             async (item: any) => {
+              handlePushNotification();
               if (item?.success) {
                 if (item?.transactionData?.length > 0) {
                   item?.transactionData.forEach(

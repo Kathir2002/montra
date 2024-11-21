@@ -141,7 +141,7 @@ const Budget = () => {
         </View>
 
         <CommonText
-          content={`Remainging ${
+          content={`Remaining ${
             Math.sign(item?.remaining) == -1
               ? getCurrencySymbol(0)
               : getCurrencySymbol(item?.remaining)
@@ -160,10 +160,7 @@ const Budget = () => {
               backgroundColor: item?.color,
               height: 10,
               borderRadius: 5,
-              width:
-                item?.spent > item?.budget
-                  ? '100%'
-                  : `${(item?.spent / item?.budget) * 100}%`,
+              width: `${item?.spentPercent}%`,
             }}
           />
         </View>

@@ -9,11 +9,16 @@ import { Provider } from 'react-redux';
 import { store } from './src/store/store';
 import React from 'react';
 import "@src/localization/i18n"
+import messaging from '@react-native-firebase/messaging';
 
 import {
   NavigationContainer,
 } from '@react-navigation/native';
+
 export const navigationRef = React.createRef();
+messaging().setBackgroundMessageHandler(async remoteMessage => {
+  console.log('Background message handled:', remoteMessage);
+});
 const AppWrapper = () => {
   return (
     <Provider store={store}>

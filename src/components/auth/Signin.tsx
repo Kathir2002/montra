@@ -41,6 +41,8 @@ import {useTranslation} from 'react-i18next';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import DeviceInfo from 'react-native-device-info';
+import messaging from '@react-native-firebase/messaging';
 
 const Signin = () => {
   const dispatch = useDispatch();
@@ -51,6 +53,25 @@ const Signin = () => {
   const [btnLoader, setBtnLoader] = useState(false);
   const navigation: NavigationProp<ParamListBase> = useNavigation();
 
+  const getDeviceDetails = async () => {
+    const platform = DeviceInfo.getSystemName(); // e.g., "iOS" or "Android"
+    const deviceModel = DeviceInfo.getModel(); // e.g., "iPhone 13"
+    const osVersion = DeviceInfo.getSystemVersion(); // e.g., "16.0"
+    const appVersion = DeviceInfo.getVersion(); // e.g., "1.0.0"
+    const appId = DeviceInfo.getBundleId(); // e.g., "com.example.app"
+    const manufacturer = await DeviceInfo.getManufacturer(); // e.g., "Apple" or "Samsung"
+    const fcmToken = await messaging().getToken();
+
+    return {
+      platform,
+      deviceModel,
+      osVersion,
+      appVersion,
+      appId,
+      manufacturer,
+      fcmToken,
+    };
+  };
   const devData = {
     webClientId: DEV_WEB_CLIENTID,
     androidClientId: DEV_ANDROID_CLIENTID,
@@ -71,10 +92,14 @@ const Signin = () => {
 
   const handleSignin = async () => {
     setBtnLoader(true);
+
     const data = {
       email: formik.values.email,
       password: formik.values.password,
+      ...getDeviceDetails(),
     };
+    console.log(data, '=========');
+
     AuthService.signin({data})
       .then(async (res: any) => {
         if (res?.success) {

@@ -16,6 +16,8 @@ import {
   useNavigation,
 } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import DeviceInfo from 'react-native-device-info';
+import messaging from '@react-native-firebase/messaging';
 
 interface LoginWithGoogleProps {
   buttonText: string;
@@ -27,6 +29,28 @@ const LoginWithGoogle = (props: LoginWithGoogleProps) => {
   const {i18n} = useTranslation();
   const dispatch = useDispatch();
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
+
+  const getDeviceDetails = async () => {
+    const platform = DeviceInfo.getSystemName(); // e.g., "iOS" or "Android"
+    const deviceModel = DeviceInfo.getModel(); // e.g., "iPhone 13"
+    const osVersion = DeviceInfo.getSystemVersion(); // e.g., "16.0"
+    const appVersion = DeviceInfo.getVersion(); // e.g., "1.0.0"
+    const appId = DeviceInfo.getBundleId(); // e.g., "com.example.app"
+    const manufacturer = await DeviceInfo.getManufacturer(); // e.g., "Apple" or "Samsung"
+    const fcmToken = await messaging().getToken();
+    console.log(DeviceInfo.getSystemName());
+
+    return {
+      platform,
+      deviceModel,
+      osVersion,
+      appVersion,
+      appId,
+      manufacturer,
+      fcmToken,
+    };
+  };
+
   const loginWithGoogleHandler = async () => {
     try {
       // Check if your device supports Google Play
@@ -39,8 +63,13 @@ const LoginWithGoogle = (props: LoginWithGoogleProps) => {
 
       if (getToken?.idToken) {
         setIsLoading(true);
+        const data = await getDeviceDetails();
+        console.log(data);
 
-        await AuthService.signinWithGoogle({data: {}, token: getToken.idToken})
+        await AuthService.signinWithGoogle({
+          data,
+          token: getToken.idToken,
+        })
           .then(async (res: any) => {
             if (res?.success) {
               CommonDataService.setToken(res?.token);

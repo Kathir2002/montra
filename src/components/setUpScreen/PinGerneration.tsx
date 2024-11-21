@@ -21,7 +21,7 @@ import {
   useNavigation,
 } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useDispatch, useSelector} from 'react-redux';
+import {useDispatch} from 'react-redux';
 import {updateIsLoggedin} from '@store/slice/appSlice';
 
 interface ItemType {

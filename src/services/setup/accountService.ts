@@ -48,6 +48,9 @@ class accountService {
       data,
     );
   }
+  logoutUser(data: any) {
+    return HttpRoutingService.postMethod('api/account/logout-user', data);
+  }
 }
 const AccountService = new accountService();
 export default AccountService;

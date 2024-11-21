@@ -62,6 +62,10 @@ const Button = ({
             'getStartedVisible',
             JSON.stringify(false),
           );
+          await AsyncStorage.setItem(
+            'isPushNotification',
+            JSON.stringify(false),
+          );
           setIsGetStartedVisible(false);
           if (navigationRef?.current)
             navigationRef?.current?.navigate('SignIn');
