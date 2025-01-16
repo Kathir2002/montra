@@ -7,6 +7,7 @@ import {
   View,
   StatusBar,
   SafeAreaView,
+  Modal,
 } from 'react-native';
 import styles from './financeStory.styles';
 import {appColors} from '@shared/appColors';
@@ -21,27 +22,207 @@ import {
   NavigationProp,
   ParamListBase,
   useNavigation,
-  useRoute,
 } from '@react-navigation/native';
 import {TransactionListInterface} from '@screens/Dashboard';
 import LottieView from 'lottie-react-native';
 import CommonButton from '@shared/components/commonButton/CommonButton';
 import {getCurrencySymbol} from '@src/lib/functions';
+import TransactionService from '@services/transactionService';
+import {Toast} from '@shared/ToastConfig';
+import moment from 'moment';
+import AccountService from '@services/setup/accountService';
+import CommonLoader from '@shared/components/commonLoader/CommonLoader';
+import BudgetService from '@services/setup/budgetSerice';
 
-const FinanceStory = ({monthlyReportData, closeHandler}: any) => {
+interface BudgetInterface {
+  _id: string;
+  budget: number;
+  category: string;
+  isReceiveAlert: boolean;
+  month: Date;
+  remaining: number;
+  spent: number;
+  spentPercent: number;
+  userId: string;
+}
+
+type StoriesItem =
+  | TransactionListInterface
+  | {budget: BudgetInterface[]; totalQuantity: number}
+  | {quote: string; author: string}
+  | undefined;
+
+interface MonthlyReportInterface {
+  maxExpenseData: TransactionListInterface;
+  maxIncomeData: TransactionListInterface;
+  totalExpenses: number;
+  totalIncome: number;
+  budgetData: {
+    budget: BudgetInterface[];
+    totalQuantity: number;
+  };
+  quote: {
+    quote: string;
+    author: string;
+  };
+}
+const getIcon = (story: {transactionFor: string; transactionType: string}) => {
+  if (story?.transactionType === 'Expense') {
+    switch (story?.transactionFor) {
+      case 'Shopping':
+        return <ShoppingIcon width={20} height={20} />;
+      case 'Rent':
+        return <RentIcon width={20} height={20} />;
+      case 'Food':
+        return <FoodIcon width={20} height={20} />;
+      case 'Transportation':
+        return <TransportationIcon width={20} height={20} />;
+      default:
+        return <TransportationIcon width={20} height={20} />;
+    }
+  } else if (story?.transactionType === 'Income') {
+    switch (story?.transactionFor) {
+      case 'Salary':
+        return <SalaryIcon width={20} height={20} />;
+      default:
+        return <TransportationIcon width={20} height={20} />;
+    }
+  } else {
+    return <TransferIcon width={20} height={20} />;
+  }
+};
+
+const FinanceStory = ({closeHandler}: any) => {
   const {width} = useWindowDimensions();
   const pausedProgress = useRef(0);
   const progressAnim = useRef(new Animated.Value(0)).current;
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [monthlyReportData, setMonthlyReportData] =
+    useState<MonthlyReportInterface>();
   const navigation: NavigationProp<ParamListBase> = useNavigation();
 
   const expenseData = monthlyReportData?.maxExpenseData;
   const incomeData = monthlyReportData?.maxIncomeData;
-  const stories = [expenseData, incomeData, {}];
+  const stories = [
+    expenseData,
+    incomeData,
+    monthlyReportData?.budgetData,
+    monthlyReportData?.quote,
+  ];
+  const availableStories = stories.filter(
+    (
+      item,
+    ): item is
+      | {budget: BudgetInterface[]; totalQuantity: number}
+      | {quote: string; author: string} => {
+      if (!item) return false; // Exclude null or undefined
+
+      if ('budget' in item && item.budget.length === 0) return false; // Exclude empty budget
+      if ('quote' in item && !item.author) return false; // Exclude incomplete quotes
+
+      return true; // Include valid items
+    },
+  );
 
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
+
   const [isPaused, setIsPaused] = useState(false);
-  const currentStory = stories[currentStoryIndex];
+  const currentStory = availableStories[currentStoryIndex];
   const [wentBack, setWentBack] = useState(0);
+
+  useEffect(() => {
+    getFinanceStoryData();
+  }, []);
+
+  const getMaxTransaction = (
+    transactions: TransactionListInterface[],
+    type: 'Income' | 'Expense',
+  ): TransactionListInterface | null => {
+    const currentMonth = moment().month(); // 0-indexed (e.g., 7 for August)
+    const currentYear = moment().year();
+
+    const filteredTransactions = transactions.filter(
+      t =>
+        moment(t.transactionDate).year() === currentYear &&
+        moment(t.transactionDate).month() === currentMonth &&
+        t.transactionType === type,
+    );
+
+    if (filteredTransactions.length === 0) {
+      return null;
+    }
+
+    return filteredTransactions.reduce((max, t) =>
+      t.amount > max.amount ? t : max,
+    );
+  };
+
+  const getFinanceStoryData = async () => {
+    const data = {
+      month: new Date(),
+    };
+
+    await AccountService.getAccountBalance(data)
+      .then(async (res: any) => {
+        if (res?.success) {
+          await TransactionService.getTransactionList({
+            filterByMonth: new Date(),
+          }).then(async (response: any) => {
+            if (response?.success) {
+              await TransactionService.getQuote().then(
+                async (quoteResponse: any) => {
+                  if (quoteResponse?.success) {
+                  }
+                  const data = {filterDate: new Date()};
+                  await BudgetService.getBudgetList(data)
+                    .then((budgetResponse: any) => {
+                      setIsLoading(false);
+                      const data: BudgetInterface[] =
+                        budgetResponse?.rows?.filter(
+                          (budget: any) => Math.sign(budget?.remaining) === -1,
+                        );
+                      const maxExpense = getMaxTransaction(
+                        response?.rows,
+                        'Expense',
+                      );
+                      const maxIncome = getMaxTransaction(
+                        response?.rows,
+                        'Income',
+                      );
+
+                      setMonthlyReportData({
+                        maxIncomeData: maxIncome!,
+                        maxExpenseData: maxExpense!,
+                        totalIncome: res?.balanceData?.totalIncome,
+                        totalExpenses: res?.balanceData?.totalExpenses,
+                        budgetData: {
+                          budget: data,
+                          totalQuantity: budgetResponse?.rows?.length,
+                        },
+                        quote: {
+                          quote: quoteResponse?.quote?.quote,
+                          author: quoteResponse?.quote?.author,
+                        },
+                      });
+                    })
+                    .catch(err => {
+                      setIsLoading(false);
+                      Toast({
+                        message: err?.response?.data?.message,
+                        type: 'error',
+                      });
+                    });
+                },
+              );
+            }
+          });
+        }
+      })
+      .catch(err => {
+        console.log(err.response?.data);
+      });
+  };
 
   /**
    * method to get the currency symbol
@@ -49,7 +230,7 @@ const FinanceStory = ({monthlyReportData, closeHandler}: any) => {
    */
 
   const goToNextStory = () => {
-    if (currentStoryIndex < stories.length - 1) {
+    if (currentStoryIndex < availableStories.length - 1) {
       Animated.timing(progressAnim, {
         toValue: 1,
         duration: 3,
@@ -137,32 +318,6 @@ const FinanceStory = ({monthlyReportData, closeHandler}: any) => {
   }, [currentStoryIndex, isPaused]);
 
   const renderStoryContent = (story: TransactionListInterface) => {
-    const getIcon = () => {
-      if (story?.transactionType === 'Expense') {
-        switch (story?.transactionFor) {
-          case 'Shopping':
-            return <ShoppingIcon width={20} height={20} />;
-          case 'Rent':
-            return <RentIcon width={20} height={20} />;
-          case 'Food':
-            return <FoodIcon width={20} height={20} />;
-          case 'Transportation':
-            return <TransportationIcon width={20} height={20} />;
-          default:
-            return <TransportationIcon width={20} height={20} />;
-        }
-      } else if (story?.transactionType === 'Income') {
-        switch (story?.transactionFor) {
-          case 'Salary':
-            return <SalaryIcon width={20} height={20} />;
-          default:
-            return <TransportationIcon width={20} height={20} />;
-        }
-      } else {
-        return <TransferIcon width={20} height={20} />;
-      }
-    };
-
     return (
       <View
         style={{
@@ -191,14 +346,8 @@ const FinanceStory = ({monthlyReportData, closeHandler}: any) => {
             style={{paddingVertical: 15, textAlign: 'center'}}
             content={
               currentStoryIndex == 0
-                ? getCurrencySymbol(
-                    monthlyReportData?.totalExpenses,
-                    // route?.params?.monthlyReportData?.totalExpenses,
-                  )
-                : getCurrencySymbol(
-                    monthlyReportData?.totalIncome,
-                    // route?.params?.monthlyReportData?.totalIncome,
-                  )
+                ? getCurrencySymbol(monthlyReportData?.totalExpenses!)
+                : getCurrencySymbol(monthlyReportData?.totalIncome!)
             }
             color={appColors.light}
             bold
@@ -226,7 +375,9 @@ const FinanceStory = ({monthlyReportData, closeHandler}: any) => {
               />
               <CommonText
                 style={{textAlign: 'center'}}
-                content="spending is from"
+                content={`${
+                  currentStoryIndex == 0 ? 'spending' : 'income'
+                } is from`}
                 bold
                 size={'label'}
               />
@@ -250,7 +401,7 @@ const FinanceStory = ({monthlyReportData, closeHandler}: any) => {
                   padding: 5,
                   borderRadius: 10,
                 }}>
-                {getIcon()}
+                {getIcon(story)}
               </View>
               <CommonText content={story?.transactionFor} />
             </View>
@@ -292,14 +443,132 @@ const FinanceStory = ({monthlyReportData, closeHandler}: any) => {
     );
   };
 
+  const renderBudetStory = (story: {
+    budget: BudgetInterface[];
+    totalQuantity: number;
+  }) => {
+    return (
+      <View
+        style={{
+          paddingVertical: 25,
+          flex: 1,
+          paddingHorizontal: 15,
+          justifyContent: 'flex-start',
+        }}>
+        <CommonText
+          content="This Month"
+          color={appColors.light}
+          size={'large'}
+          style={{textAlign: 'center', marginTop: 10}}
+        />
+        <View
+          style={{
+            gap: 15,
+            justifyContent: 'center',
+            flex: 1,
+          }}>
+          <View
+            style={{
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+            <CommonText
+              content={`${story?.budget?.length} of ${story?.totalQuantity} Budget is`}
+              color={appColors.light}
+              size={'appHeader'}
+            />
+            <CommonText
+              content={`exceeds the limit`}
+              color={appColors.light}
+              size={'appHeader'}
+            />
+          </View>
+
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-evenly',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 15,
+            }}>
+            {story?.budget?.map((singleStory, index) => {
+              const data = {
+                ...singleStory,
+                transactionFor: singleStory?.category,
+                transactionType: 'Expense',
+              };
+              return (
+                <View
+                  key={index}
+                  style={{
+                    alignSelf: 'center',
+                    borderColor: appColors.formBorderColor,
+                    borderWidth: 1,
+                    borderRadius: 15,
+                    gap: 10,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    paddingHorizontal: 15,
+                    paddingVertical: 8,
+                    backgroundColor: appColors?.light,
+                  }}>
+                  <View
+                    style={{
+                      backgroundColor: '#FCEED4',
+                      padding: 5,
+                      borderRadius: 10,
+                    }}>
+                    {getIcon(data)}
+                  </View>
+                  <CommonText content={data?.transactionFor} />
+                </View>
+              );
+            })}
+          </View>
+        </View>
+      </View>
+    );
+  };
+
+  const isTransactionListInterface = (
+    story: any,
+  ): story is TransactionListInterface => {
+    return (
+      story &&
+      typeof story.amount === 'number' && // Adjust based on the type of `amount`
+      '_id' in story &&
+      'transactionDate' in story // Add other necessary properties to validate
+    );
+  };
+
+  const getCurrentStoryName = (): 'Income' | 'Expense' | 'Budget' | 'Quote' => {
+    return currentStory &&
+      isTransactionListInterface(currentStory) &&
+      currentStory?.transactionType == 'Expense'
+      ? 'Expense'
+      : currentStory &&
+        isTransactionListInterface(currentStory) &&
+        currentStory?.transactionType == 'Income'
+      ? 'Income'
+      : currentStory && 'budget' in currentStory
+      ? 'Budget'
+      : 'Quote';
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar
         backgroundColor={
-          currentStoryIndex === 0
-            ? appColors.expenseBg
-            : currentStoryIndex === 1
-            ? appColors.incomeBg
+          isLoading
+            ? appColors?.transparentBackground
+            : getCurrentStoryName() == 'Expense'
+            ? appColors?.expenseBg
+            : getCurrentStoryName() == 'Income'
+            ? appColors?.incomeBg
+            : getCurrentStoryName() == 'Budget'
+            ? appColors?.transferBg
             : appColors.primary
         }
         barStyle={'light-content'}
@@ -314,44 +583,88 @@ const FinanceStory = ({monthlyReportData, closeHandler}: any) => {
           },
           styles.container,
           {
-            backgroundColor:
-              currentStoryIndex === 0
-                ? appColors.expenseBg
-                : currentStoryIndex === 1
-                ? appColors.incomeBg
-                : appColors.primary,
+            backgroundColor: isLoading
+              ? appColors?.transparentBackground
+              : getCurrentStoryName() == 'Expense'
+              ? appColors?.expenseBg
+              : getCurrentStoryName() == 'Income'
+              ? appColors?.incomeBg
+              : getCurrentStoryName() == 'Budget'
+              ? appColors?.transferBg
+              : appColors.primary,
           },
         ]}>
-        <View style={styles.container}>
-          <View style={styles.progressBarContainer}>
-            {stories.map((story, index) => (
-              <View key={index} style={styles.progressBarBackground}>
-                <Animated.View
-                  style={[
-                    styles.progressBar,
-                    {
-                      width: getProgressBarWidth(index, currentStoryIndex),
-                    },
-                  ]}
-                />
-              </View>
-            ))}
-          </View>
-          {currentStoryIndex == 0 || currentStoryIndex == 1 ? (
-            renderStoryContent(currentStory)
-          ) : (
-            <View style={{paddingHorizontal: 15, marginTop: 20}}>
-              <CommonButton
-                buttonType="clear"
-                title="See the full detail"
-                onPress={() => {
-                  navigation.navigate('FinanceReport');
-                  closeHandler();
-                }}
-              />
+        {isLoading ? (
+          <CommonLoader />
+        ) : (
+          <View style={styles.container}>
+            <View style={styles.progressBarContainer}>
+              {availableStories?.map((story, index) => (
+                <View key={index} style={styles.progressBarBackground}>
+                  <Animated.View
+                    style={[
+                      styles.progressBar,
+                      {
+                        width: getProgressBarWidth(index, currentStoryIndex),
+                      },
+                    ]}
+                  />
+                </View>
+              ))}
             </View>
-          )}
-        </View>
+            {getCurrentStoryName() === 'Expense' ||
+            getCurrentStoryName() === 'Income' ? (
+              currentStory &&
+              isTransactionListInterface(currentStory) &&
+              renderStoryContent(currentStory)
+            ) : getCurrentStoryName() === 'Budget' ? (
+              currentStory &&
+              'budget' in currentStory &&
+              renderBudetStory(currentStory!)
+            ) : (
+              <View
+                style={{
+                  paddingHorizontal: 15,
+                  marginTop: 20,
+                  flex: 1,
+                  justifyContent: 'space-evenly',
+                }}>
+                <View style={{justifyContent: 'center', gap: 10}}>
+                  <CommonText
+                    content={`"${
+                      currentStory &&
+                      'quote' in currentStory &&
+                      currentStory?.quote
+                    }"`}
+                    color={appColors.lightBg}
+                    bold
+                    size={'appHeader'}
+                  />
+                  <CommonText
+                    content={`-${
+                      currentStory &&
+                      'author' in currentStory &&
+                      currentStory?.author
+                    }`}
+                    color={appColors.light}
+                    size={'header'}
+                  />
+                </View>
+                {currentStoryIndex === 0 &&
+                getCurrentStoryName() === 'Quote' ? undefined : (
+                  <CommonButton
+                    buttonType="clear"
+                    title="See the full detail"
+                    onPress={() => {
+                      navigation.navigate('FinanceReport');
+                      closeHandler();
+                    }}
+                  />
+                )}
+              </View>
+            )}
+          </View>
+        )}
       </Pressable>
     </SafeAreaView>
   );

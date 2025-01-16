@@ -1,5 +1,12 @@
-import {Alert, BackHandler, Platform, StatusBar, View} from 'react-native';
-import React, {SetStateAction, useEffect, useState} from 'react';
+import {
+  Alert,
+  BackHandler,
+  Linking,
+  LogBox,
+  Platform,
+  StatusBar,
+} from 'react-native';
+import React, {useEffect, useState} from 'react';
 import AuthStack from '@navigations/AuthStack';
 import {RootState} from './src/store/store';
 import {useDispatch, useSelector} from 'react-redux';
@@ -8,31 +15,53 @@ import {useNetInfo} from '@react-native-community/netinfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ReactNativeBiometrics from 'react-native-biometrics';
 import messaging from '@react-native-firebase/messaging';
-
+import 'react-native-reanimated';
+import FlashMessage from 'react-native-flash-message';
+import notifee, {EventType} from '@notifee/react-native';
+LogBox.ignoreLogs([
+  '[Reanimated] Reading from `value` during component render',
+]);
 import CommonDataService from '@shared/commonDataServices';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import SplashScreen from '@components/auth/SplashScreen';
 import GetStarted from '@components/auth/getStarted/GetStarted';
 import {updateCurrentUser, updateIsLoggedin} from '@store/slice/appSlice';
 import AuthService from '@services/authService';
-import FlashMessage from 'react-native-flash-message';
 
 import {Toast} from '@shared/ToastConfig';
 import SetUpStack from '@navigations/setupStack';
-import AppContext from '@shared/appContext';
 import {useTranslation} from 'react-i18next';
 import {navigationRef} from './index';
 import {
   MessageType,
   useNotificationChannels,
 } from '@src/hooks/useNotificationChannels';
+import {navigationStore} from '@services/setup/navigationStore';
 
 const App = () => {
+  useEffect(() => {
+    // Handle deep link when app is opened from background
+    const subscription = Linking.addEventListener('url', async ({url}) => {
+      await navigationStore.setPendingDeepLink(url);
+    });
+
+    // Handle deep link when app is closed
+    Linking.getInitialURL().then(async url => {
+      if (url) {
+        await navigationStore.setPendingDeepLink(url);
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
   const isloggedin = useSelector((state: RootState) => state.auth.isLoggedIn);
   const [isGetStartedVisible, setIsGetStartedVisible] = useState<
     boolean | null
   >(null);
-  const [isTransactionAdded, setIsTransactionAdded] = useState(false);
+
   const userDetails = useSelector((state: RootState) => state.auth.userDetails);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isNavigateToLogin, setIsNavigateToLogin] = useState<null | boolean>(
@@ -41,51 +70,56 @@ const App = () => {
   const netInfo = useNetInfo();
   const dispatch = useDispatch();
   const {i18n} = useTranslation();
+  const modalOpen = useSelector((state: RootState) => state.auth.modalOpen);
 
   const handleBiometricAuth = async () => {
-    const rnBiometrics = new ReactNativeBiometrics({
-      allowDeviceCredentials: true,
-    });
-    rnBiometrics
-      .isSensorAvailable()
-      .then(async resultObject => {
-        const {available} = resultObject;
-        if (available) {
-          try {
-            const {success, error} = await rnBiometrics.simplePrompt({
-              promptMessage: 'Authenticate to continue',
-            });
-
-            if (success) {
-              if (navigationRef?.current?.isReady)
-                dispatch(updateIsLoggedin(true));
-            } else {
-              Alert.alert(
-                'Authentication failed',
-                'Biometric authentication failed',
-                [
-                  {text: 'Cancel', onPress: () => BackHandler.exitApp()},
-                  {text: 'Unlock', onPress: () => handleBiometricAuth()},
-                ],
-              );
-            }
-          } catch (error) {
-            console.error('[handleBiometricAuth] Error:', error);
-          }
-        } else {
-          Alert.alert(
-            'Biometrics not supported',
-            'This device does not support biometric authentication.',
-          );
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        Alert.alert(
-          'Error',
-          'An error occurred while checking biometrics availability.',
-        );
+    try {
+      const rnBiometrics = new ReactNativeBiometrics({
+        allowDeviceCredentials: true,
       });
+      rnBiometrics
+        .isSensorAvailable()
+        .then(async resultObject => {
+          const {available} = resultObject;
+          if (available) {
+            try {
+              const {success, error} = await rnBiometrics.simplePrompt({
+                promptMessage: 'Authenticate to continue',
+              });
+
+              if (success) {
+                if (navigationRef?.current?.isReady)
+                  dispatch(updateIsLoggedin(true));
+              } else {
+                Alert.alert(
+                  'Authentication failed',
+                  'Biometric authentication failed',
+                  [
+                    {text: 'Cancel', onPress: () => BackHandler.exitApp()},
+                    {text: 'Unlock', onPress: () => handleBiometricAuth()},
+                  ],
+                );
+              }
+            } catch (error) {
+              console.error('[handleBiometricAuth] Error:', error);
+            }
+          } else {
+            Alert.alert(
+              'Biometrics not supported',
+              'This device does not support biometric authentication.',
+            );
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          Alert.alert(
+            'Error',
+            'An error occurred while checking biometrics availability.',
+          );
+        });
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const getUserDetails = async () => {
@@ -100,6 +134,7 @@ const App = () => {
               picture: res?.user?.picture,
               isSetupDone: res?.user?.isSetupDone,
               currencySymbol: res?.user?.currency,
+              phoneNumber: res?.user?.phoneNumber,
               securityMethod: res?.user?.securityMethod,
               currentLanguage: i18n.language,
             }),
@@ -144,6 +179,7 @@ const App = () => {
 
   const loginStatusCheck = async () => {
     const userToken = await CommonDataService.getToken();
+
     if (userToken) {
       getUserDetails();
     } else {
@@ -157,12 +193,33 @@ const App = () => {
   const {createNotificationChannels, displayNotification} =
     useNotificationChannels();
 
+  const handleNotificationPress = async (remoteMessage: any) => {
+    if (remoteMessage?.data?.screen) {
+      dispatch(updateIsLoggedin(true));
+      setTimeout(() => {
+        navigationRef.current.navigate(
+          remoteMessage?.data?.screen,
+          remoteMessage?.data?.params && {
+            id: remoteMessage?.data?.params,
+          },
+        );
+      }, 1000);
+    }
+  };
+
   useEffect(() => {
     const setupNotificationHandling = async () => {
       try {
         // Request permissions
-        await messaging().requestPermission();
+        const authStatus = await messaging().requestPermission();
+        const enabled =
+          authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+          authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
+        if (!enabled) {
+          console.log('User notification permissions denied');
+          return;
+        }
         // Create initial channels
         await createNotificationChannels();
 
@@ -171,31 +228,66 @@ const App = () => {
           async remoteMessage => {
             // Convert Firebase message to our MessageType
             const message: MessageType = {
-              type: remoteMessage.data?.type || 'default',
+              type: (remoteMessage.data?.type as string) || 'default',
               title: remoteMessage.notification?.title || 'Notification',
               body: remoteMessage.notification?.body || '',
               data: remoteMessage.data as Record<string, string>,
             };
+            console.log(message);
 
             // Display notification
             await displayNotification(message);
           },
         );
+        // Handle notification opened app from background
+        const unsubscribeBackgroundOpen = messaging().onNotificationOpenedApp(
+          remoteMessage => {
+            console.log('Background notification opened:', remoteMessage);
+            handleNotificationPress(remoteMessage);
+          },
+        );
 
-        // Handle background/quit state notifications
-        messaging().setBackgroundMessageHandler(async remoteMessage => {
-          const message: MessageType = {
-            type: remoteMessage.data?.type || 'default',
-            title: remoteMessage.notification?.title || 'Notification',
-            body: remoteMessage.notification?.body || '',
-            data: remoteMessage.data as Record<string, string>,
-          };
+        // Check for initial notification (app opened from quit state)
+        const initialNotification = await messaging().getInitialNotification();
+        if (initialNotification) {
+          console.log('Initial notification:', initialNotification);
+          handleNotificationPress(initialNotification);
+        }
 
-          // You might want to store or process these differently
-          console.log('Background message', message);
-        });
+        // Set up foreground event handler
+        const unsubscribeForegroundEvent = notifee.onForegroundEvent(
+          ({type, detail}) => {
+            switch (type) {
+              case EventType.PRESS:
+                console.log('User pressed notification:', detail.notification);
+                handleNotificationPress(detail.notification);
+                break;
+              case EventType.DISMISSED:
+                console.log(
+                  'User dismissed notification:',
+                  detail.notification,
+                );
+                break;
+            }
+          },
+        );
 
-        return unsubscribeForeground;
+        // // Handle background/quit state notifications
+        // messaging().setBackgroundMessageHandler(async remoteMessage => {
+        //   const message: MessageType = {
+        //     type: (remoteMessage.data?.type as string) || 'default',
+        //     title: remoteMessage.notification?.title || 'Notification',
+        //     body: remoteMessage.notification?.body || '',
+        //     data: remoteMessage.data as Record<string, string>,
+        //   };
+        // });
+
+        // Proper cleanup
+        return () => {
+          unsubscribeForeground();
+          unsubscribeBackgroundOpen();
+          unsubscribeForegroundEvent();
+        };
       } catch (error) {
         console.error('Notification setup failed', error);
       }
@@ -203,10 +295,10 @@ const App = () => {
 
     setupNotificationHandling();
 
-    // Cleanup
-    return () => {
-      messaging().onMessage(() => {});
-    };
+    // // Cleanup
+    // return () => {
+    //   messaging().onMessage(() => {});
+    // };
   }, [createNotificationChannels, displayNotification]);
 
   return (
@@ -221,10 +313,7 @@ const App = () => {
           ) : !isLoading && isloggedin && !userDetails.isSetupDone ? (
             <SetUpStack />
           ) : !isLoading && isloggedin ? (
-            <AppContext.Provider
-              value={{isTransactionAdded, setIsTransactionAdded}}>
-              <AppStack />
-            </AppContext.Provider>
+            <AppStack />
           ) : !isLoading && !isloggedin ? (
             <>
               <AuthStack
@@ -241,16 +330,18 @@ const App = () => {
           )}
         </>
       }
-      <FlashMessage
-        duration={2000}
-        position={'bottom'}
-        style={{
-          marginBottom: Platform.OS == 'ios' ? 30 : 20,
-          marginHorizontal: 20,
-          borderRadius: 10,
-          paddingVertical: Platform.OS == 'ios' ? -25 : null,
-        }}
-      />
+      {!modalOpen ? (
+        <FlashMessage
+          duration={2000}
+          position={'bottom'}
+          style={{
+            marginBottom: Platform.OS == 'ios' ? 30 : 20,
+            marginHorizontal: 20,
+            borderRadius: 10,
+            paddingVertical: Platform.OS == 'ios' ? -25 : null,
+          }}
+        />
+      ) : null}
     </>
   );
 };

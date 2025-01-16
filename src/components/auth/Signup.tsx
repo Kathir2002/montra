@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native';
 import * as yup from 'yup';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {appColors} from '@shared/appColors';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 import {
@@ -28,6 +28,7 @@ import AuthService from '@services/authService';
 import LoginWithGoogle from '@shared/components/auth/LoginWithGoogle';
 import {useTranslation} from 'react-i18next';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
+
 const SignUp = () => {
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const {t} = useTranslation(['signup']);
@@ -102,7 +103,12 @@ const SignUp = () => {
         leftIconPressBack={() => navigation.goBack()}
         leftIcon
       />
-      <StatusBar backgroundColor={appColors.light} barStyle={'dark-content'} />
+      <StatusBar
+        backgroundColor={
+          isLoading ? appColors.transparentBackground : appColors.light
+        }
+        barStyle={'dark-content'}
+      />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
@@ -116,6 +122,12 @@ const SignUp = () => {
             marginTop: 20,
           }}>
           <CommonInput
+            leftIcon={{
+              name: 'user-o',
+              type: 'font-awesome',
+              color: appColors.placeholderColor,
+              size: 20,
+            }}
             placeholder={t('name')}
             value={formik.values.name}
             onChangeText={(text: string) => {
@@ -129,6 +141,12 @@ const SignUp = () => {
             onBlur={formik.handleBlur('name')}
           />
           <CommonInput
+            leftIcon={{
+              name: 'email',
+              type: 'fontisto',
+              color: appColors.placeholderColor,
+              size: 20,
+            }}
             autoCapitalize="none"
             placeholder={t('email')}
             value={formik.values.email}
@@ -143,6 +161,12 @@ const SignUp = () => {
             onBlur={formik.handleBlur('email')}
           />
           <CommonInput
+            leftIcon={{
+              name: 'lock',
+              type: 'feather',
+              color: appColors.placeholderColor,
+              size: 20,
+            }}
             placeholder={t('password')}
             autoCapitalize="none"
             secureTextEntry={!passwordVisible}
@@ -174,10 +198,15 @@ const SignUp = () => {
               justifyContent: 'center',
             }}>
             <TouchableWithoutFeedback
+              hitSlop={{
+                bottom: 20,
+                left: 20,
+                right: 20,
+                top: 20,
+              }}
               onPress={() => {
                 formik.setFieldValue('terms', !formik.values.terms);
-              }}
-              style={{}}>
+              }}>
               <View>
                 <CommonCheckBox
                   width={30}

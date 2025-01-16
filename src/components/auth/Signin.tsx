@@ -30,7 +30,10 @@ import {
   PROD_IOS_CLIENTID,
   PROD_WEB_CLIENTID,
 } from '@env';
-import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import {
+  ConfigureParams,
+  GoogleSignin,
+} from '@react-native-google-signin/google-signin';
 import AuthService from '@services/authService';
 import CommonDataService from '@shared/commonDataServices';
 import {updateCurrentUser, updateIsLoggedin} from '@store/slice/appSlice';
@@ -72,16 +75,16 @@ const Signin = () => {
       fcmToken,
     };
   };
-  const devData = {
+  const devData: ConfigureParams = {
     webClientId: DEV_WEB_CLIENTID,
-    androidClientId: DEV_ANDROID_CLIENTID,
+    // androidClientId: DEV_ANDROID_CLIENTID,
     iosClientId: DEV_IOS_CLIENTID,
     scopes: ['profile', 'email'],
   };
 
-  const prodData = {
+  const prodData: ConfigureParams = {
     webClientId: PROD_WEB_CLIENTID,
-    androidClientId: PROD_ANDROID_CLIENTID,
+    // androidClientId: PROD_ANDROID_CLIENTID,
     iosClientId: PROD_IOS_CLIENTID,
     scopes: ['profile', 'email'],
   };
@@ -92,20 +95,19 @@ const Signin = () => {
 
   const handleSignin = async () => {
     setBtnLoader(true);
-
+    const deviceInfo = await getDeviceDetails();
     const data = {
       email: formik.values.email,
       password: formik.values.password,
-      ...getDeviceDetails(),
+      ...deviceInfo,
     };
-    console.log(data, '=========');
 
-    AuthService.signin({data})
+    await AuthService.signin({data})
       .then(async (res: any) => {
         if (res?.success) {
           setBtnLoader(false);
-          CommonDataService.setToken(res?.token);
           riveRef.current?.setInputState('Login Machine', 'trigSuccess', true);
+          CommonDataService.setToken(res?.token);
           dispatch(
             updateCurrentUser({
               email: res?.user?.email,
@@ -115,6 +117,8 @@ const Signin = () => {
               isSetupDone: res?.user?.isSetupDone,
               currencySymbol: res?.user?.currency,
               currentLanguage: i18n.language,
+              securityMethod: res?.user?.securityMethod,
+              phoneNumber: res?.user?.phoneNumber,
             }),
           );
           await AsyncStorage.getItem('securityPin').then(value => {
@@ -201,9 +205,22 @@ const Signin = () => {
             stateMachineName="Login Machine"
           />
           <CommonInput
+            leftIcon={{
+              name: 'email',
+              type: 'fontisto',
+              color: appColors.placeholderColor,
+              size: 20,
+            }}
             placeholder={t('email')}
             autoCapitalize="none"
             onFocus={() => {
+              if (passwordVisible) {
+                riveRef.current?.setInputState(
+                  'Login Machine',
+                  'isPicking',
+                  false,
+                );
+              }
               riveRef.current?.setInputState(
                 'Login Machine',
                 'isHandsUp',
@@ -234,6 +251,12 @@ const Signin = () => {
             }}
           />
           <CommonInput
+            leftIcon={{
+              name: 'lock',
+              type: 'feather',
+              color: appColors.placeholderColor,
+              size: 20,
+            }}
             onFocus={() => {
               riveRef.current?.setInputState(
                 'Login Machine',

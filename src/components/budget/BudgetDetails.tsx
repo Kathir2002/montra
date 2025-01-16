@@ -45,6 +45,7 @@ const BudgetDetails = () => {
       color: string;
       budget: number;
       spent: number;
+      spentPercent: number;
       _id: string;
     };
   }> = useRoute();
@@ -173,10 +174,7 @@ const BudgetDetails = () => {
               backgroundColor: route?.params?.color,
               height: 10,
               borderRadius: 5,
-              width:
-                route?.params?.spent > route?.params?.budget
-                  ? '100%'
-                  : `${(route?.params?.spent / route?.params.budget) * 100}%`,
+              width: `${route?.params?.spentPercent}%`,
             }}
           />
         </View>

@@ -18,6 +18,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DeviceInfo from 'react-native-device-info';
 import messaging from '@react-native-firebase/messaging';
+import axios from 'axios';
 
 interface LoginWithGoogleProps {
   buttonText: string;
@@ -38,7 +39,6 @@ const LoginWithGoogle = (props: LoginWithGoogleProps) => {
     const appId = DeviceInfo.getBundleId(); // e.g., "com.example.app"
     const manufacturer = await DeviceInfo.getManufacturer(); // e.g., "Apple" or "Samsung"
     const fcmToken = await messaging().getToken();
-    console.log(DeviceInfo.getSystemName());
 
     return {
       platform,
@@ -60,11 +60,11 @@ const LoginWithGoogle = (props: LoginWithGoogleProps) => {
 
       // Get the users ID token
       const getToken = await GoogleSignin.signIn();
+      const tokens = await GoogleSignin.getTokens();
 
       if (getToken?.idToken) {
         setIsLoading(true);
         const data = await getDeviceDetails();
-        console.log(data);
 
         await AuthService.signinWithGoogle({
           data,
@@ -83,6 +83,7 @@ const LoginWithGoogle = (props: LoginWithGoogleProps) => {
                   currencySymbol: res?.user?.currency,
                   currentLanguage: i18n.language,
                   securityMethod: res?.user?.securityMethod,
+                  phoneNumber: res?.user?.phoneNumber,
                 }),
               );
               setIsLoading(false);
@@ -96,7 +97,11 @@ const LoginWithGoogle = (props: LoginWithGoogleProps) => {
             }
           })
           .catch(err => {
-            console.log('Error in signin with google', err?.response?.data);
+            console.log(
+              'Error in signin with google',
+              err?.response?.data?.message,
+            );
+            Toast({message: err?.response?.data?.message, type: 'error'});
             setIsLoading(false);
           });
       }

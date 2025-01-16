@@ -1,7 +1,8 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   FlatList,
   KeyboardAvoidingView,
+  Linking,
   Modal,
   Platform,
   Pressable,
@@ -16,6 +17,7 @@ import {
   NavigationProp,
   ParamListBase,
   useIsFocused,
+  useLinkTo,
   useNavigation,
 } from '@react-navigation/native';
 import {Avatar, Icon} from '@rneui/base';
@@ -32,18 +34,21 @@ import TransactionRenderItem from '@shared/components/TransactionRenderItem';
 import TransactionService from '@services/transactionService';
 import {Toast} from '@shared/ToastConfig';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
-import moment, {Moment} from 'moment';
+import moment, {Moment, utc} from 'moment';
 import NotificationIcon from '@assets/svg/notification.svg';
 import LottieView from 'lottie-react-native';
 import AccountService from '@services/setup/accountService';
 import DashBoardBarChart from '@components/charts/DashboardBarChart';
 import CommonDropDown from '@shared/components/commonDropdown/CommonDropDown';
 import FinanceStory from '@components/financeReport/FinanceStory';
-import AppContext from '@shared/appContext';
-import {updateIsFabToggleOpen} from '@store/slice/appSlice';
+import {
+  updateIsFabToggleOpen,
+  updateIsTransactionAdded,
+} from '@store/slice/appSlice';
 import {getCurrencySymbol} from '@src/lib/functions';
 import callPermission from '@services/permission';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {navigationStore} from '@services/setup/navigationStore';
 
 export interface TransactionListInterface {
   _id: string;
@@ -68,33 +73,68 @@ export interface TransactionListInterface {
   };
   from: {
     paymentMode: string;
-    wallet: string;
+    wallet: {
+      walletName: string;
+      id: string;
+    };
   };
   to: {
     paymentMode: string;
-    wallet: string;
+    wallet: {walletName: string; id: string};
   };
   transactionType: 'Expense' | 'Income' | 'Transfer' | 'Budget';
-  wallet: string;
+  wallet: {
+    walletName: string;
+    id: string;
+  };
   paymentMode: string;
   endAfter: string;
 }
 
 const Dashboard = () => {
+  useEffect(() => {
+    checkPendingDeepLink();
+  }, []);
+
+  const checkPendingDeepLink = async () => {
+    const pendingUrl = await navigationStore.getPendingDeepLink();
+    if (pendingUrl) {
+      handleDeepLink(pendingUrl);
+    }
+  };
+
+  const handleDeepLink = (url: string) => {
+    try {
+      // Remove the scheme from the URL
+      const path = url.replace(/.*?:\/\//g, '');
+      const screen = path?.split('montra.netlify.app')[1];
+      // Navigate based on the screen path
+      switch (screen) {
+        case '/profile/settings/security':
+          navigation.navigate('Security');
+          break;
+        case '/help-center':
+          navigation.navigate('Help');
+          break;
+
+        // Add more cases as needed
+        default:
+          Toast({message: `Unknown deep link path: ${screen}`, type: 'error'});
+      }
+    } catch (error) {
+      console.error('Error handling deep link:', error);
+    }
+  };
+
   // Set Monday as the first day of the week
   moment.updateLocale('en', {
     week: {
       dow: 1, // Monday is the first day of the week
     },
   });
+
   const splitMonthIntoWeeks = (startDate: Moment, endDate: Moment) => {
     const weeks = [];
-    // Set Monday as the first day of the week
-    moment.updateLocale('en', {
-      week: {
-        dow: 1, // Monday is the first day of the week
-      },
-    });
     let startOfWeek = moment(startDate).startOf('week');
     let endOfWeek = moment(startOfWeek).endOf('week');
 
@@ -114,7 +154,6 @@ const Dashboard = () => {
       startOfWeek.add(1, 'week');
       endOfWeek = moment(startOfWeek).endOf('week');
     }
-
     return weeks;
   };
   const isFocused = useIsFocused();
@@ -122,24 +161,47 @@ const Dashboard = () => {
   const userDetails = useSelector((state: RootState) => state.auth.userDetails);
   const [accountBalanceData, setAccountBalanceData] = useState<any>({});
   const [chartDropdownOpen, setChartDropdownOpen] = useState(false);
+  const [isUpdated, setIsUpdated] = useState(true);
   const [filterData, setFilterData] = useState<{
     filterMonth: Date;
   }>({filterMonth: new Date()});
 
   const monthFirstdate = moment(filterData.filterMonth).startOf('month');
   const monthLastdate = moment(filterData.filterMonth).endOf('month');
+
   const monthRange = splitMonthIntoWeeks(monthFirstdate, monthLastdate);
 
   const [chartDropdownData, setChartDropdownData] =
     useState<{label: string; value: string}[]>(monthRange);
 
-  const data = monthRange.find(month => {
-    return month.value.includes(`start:${moment().startOf('week')},`);
+  useEffect(() => {
+    if (isFocused) {
+      setChartDropdownData(monthRange);
+    }
+  }, [filterData.filterMonth]);
+
+  const getChartDropdownValue = (): string => {
+    const currentMoment = moment();
+    const calculatedStartOfWeek = currentMoment.clone().startOf('week');
+    const calculatedEndOfWeek = currentMoment.clone().endOf('week');
+    const startOfMonth = currentMoment.clone().startOf('month');
+    const endOfMonth = currentMoment.clone().endOf('month');
+
+    let startOfWeek = calculatedStartOfWeek.isBefore(startOfMonth)
+      ? startOfMonth
+      : calculatedStartOfWeek;
+
+    let endOfWeek = calculatedEndOfWeek.isAfter(endOfMonth)
+      ? endOfMonth
+      : calculatedEndOfWeek;
+    return `start:${startOfWeek.toString()},end:${endOfWeek.toString()}`;
+  };
+
+  const [chartDropdownValue, setChartDropdownvalue] = useState(() => {
+    const dropdownValue = getChartDropdownValue();
+    return dropdownValue;
   });
 
-  const [chartDropdownValue, setChartDropdownvalue] = useState(
-    `start:${moment().startOf('week')},end:${moment().endOf('week')}`,
-  );
   const navigation: NavigationProp<ParamListBase> = useNavigation();
 
   const isToggleOpen = useSelector(
@@ -147,7 +209,6 @@ const Dashboard = () => {
   );
 
   const [isLoading, setIsLoading] = useState(false);
-  const [monthlyReportData, setMonthlyReportData] = useState({});
 
   const [show, setShow] = useState(false);
   const [isFinanceStoryVisible, setIsFinanceStoryVisible] = useState(false);
@@ -157,22 +218,33 @@ const Dashboard = () => {
   >([]);
   const [chartData, setChartData] = useState<number[]>([]);
   const [refreshing, setRefreshing] = useState<boolean>(false);
-  const {isTransactionAdded, setIsTransactionAdded} = useContext(AppContext);
-
+  const isTransactionAdded = useSelector(
+    (state: RootState) => state.auth.isTransactionAdded,
+  );
   const days = {Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0, Sun: 0};
 
   // useEffect which is used to initialize the service call functionality
   useEffect(() => {
     if (isFocused) {
-      accountBalance();
+      if (isUpdated && chartDropdownValue) {
+        accountBalance(true);
+      } else {
+        accountBalance();
+      }
     }
-  }, [filterData.filterMonth]);
+  }, [filterData.filterMonth, chartDropdownValue]);
 
-  useEffect(() => {
-    if (isFocused) {
-      accountBalance(true);
-    }
-  }, [chartDropdownValue]);
+  // useEffect(() => {
+  //   if (isFocused) {
+  //     accountBalance();
+  //   }
+  // }, [filterData.filterMonth]);
+
+  // useEffect(() => {
+  //   if (isFocused && isUpdated) {
+  //     accountBalance(true);
+  //   }
+  // }, [chartDropdownValue]);
 
   // useEffect which is used to initialize the service call when the transaction entry is modified
   useEffect(() => {
@@ -183,16 +255,20 @@ const Dashboard = () => {
 
   const accountBalance = (isChartDropdownValueUpdated = false) => {
     setIsLoading(true);
-    getAccountBalance();
-
+    setIsUpdated(false);
     if (!isChartDropdownValueUpdated) {
       if (!moment(filterData.filterMonth).isSame(moment(), 'month')) {
-        // setChartDropdownvalue(monthRange[0]?.value);
+        setChartDropdownvalue(monthRange[0]?.value);
+        getAccountBalance(monthRange[0]?.value);
       } else {
-        // setChartDropdownvalue(
-        //   `start:${moment().startOf('week')},end:${moment().endOf('week')}`,
-        // );
+        const dropdownValue = getChartDropdownValue();
+        setChartDropdownvalue(() => {
+          return dropdownValue;
+        });
+        getAccountBalance(dropdownValue);
       }
+    } else {
+      getAccountBalance(chartDropdownValue);
     }
   };
 
@@ -218,22 +294,6 @@ const Dashboard = () => {
     }
   };
 
-  const getMaxTransaction = (
-    transactions: TransactionListInterface[],
-    type: 'Income' | 'Expense',
-  ) => {
-    const currentMonth = moment().month(); // 0-indexed (e.g., 7 for August)
-    const currentYear = moment().year();
-    return transactions
-      .filter(
-        t =>
-          moment(t.transactionDate).year() === currentYear &&
-          moment(t.transactionDate).month() === currentMonth &&
-          t.transactionType === type,
-      )
-      .reduce((max, t) => (t.amount > max.amount ? t : max), {amount: 0});
-  };
-
   const onValueChange = (event: EventTypes, newDate: Date) => {
     setShow(false);
     if (newDate) {
@@ -246,19 +306,19 @@ const Dashboard = () => {
     return date.format('MMM, YYYY');
   };
 
-  const getAccountBalance = async () => {
+  const getAccountBalance = async (dataDrop: any) => {
     const data = {
       month: filterData.filterMonth,
     };
+
     await AccountService.getAccountBalance(data)
       .then(async (res: any) => {
         if (res?.success) {
           setAccountBalanceData(res?.balanceData);
-
           const data = {
             transactionType: 'Expense',
-            weekStartDate: chartDropdownValue.split(',')[0].split('start:')[1],
-            weekEndDate: chartDropdownValue.split(',')[1].split('end:')[1],
+            weekStartDate: dataDrop.split(',')[0].split('start:')[1],
+            weekEndDate: dataDrop.split(',')[1].split('end:')[1],
           };
 
           await AccountService.getWeeklyTransactions(data).then(
@@ -280,24 +340,8 @@ const Dashboard = () => {
                 })
                   .then((response: any) => {
                     if (response?.success) {
-                      const maxExpense = getMaxTransaction(
-                        response?.rows,
-                        'Expense',
-                      );
-                      const maxIncome = getMaxTransaction(
-                        response?.rows,
-                        'Income',
-                      );
-
-                      setMonthlyReportData({
-                        maxIncomeData: maxIncome,
-                        maxExpenseData: maxExpense,
-                        totalIncome: res?.balanceData?.totalIncome,
-                        totalExpenses: res?.balanceData?.totalExpenses,
-                      });
-
                       setTransactionDetails(response?.rows);
-                      setIsTransactionAdded(false);
+                      dispatch(updateIsTransactionAdded(false));
                     }
 
                     setIsLoading(false);
@@ -306,7 +350,7 @@ const Dashboard = () => {
                   .catch(err => {
                     setIsLoading(false);
                     setRefreshing(false);
-                    setIsTransactionAdded(false);
+                    dispatch(updateIsTransactionAdded(false));
 
                     Toast({
                       message: err?.response?.data?.message,
@@ -325,7 +369,7 @@ const Dashboard = () => {
 
   const onRefresh = () => {
     setRefreshing(true);
-    getAccountBalance();
+    getAccountBalance(chartDropdownValue);
   };
 
   const HeaderComponent = () => {
@@ -375,9 +419,9 @@ const Dashboard = () => {
           <Pressable
             style={{
               backgroundColor: appColors.incomeBg,
-              paddingHorizontal: 25,
+              paddingHorizontal: 20,
               paddingVertical: 15,
-              borderRadius: 25,
+              borderRadius: 20,
               flexDirection: 'row',
               alignItems: 'center',
               justifyContent: 'space-between',
@@ -385,7 +429,7 @@ const Dashboard = () => {
             }}>
             <View
               style={{
-                padding: 10,
+                padding: 8,
                 backgroundColor: appColors.lightBg,
                 borderRadius: 15,
               }}>
@@ -410,9 +454,9 @@ const Dashboard = () => {
           <Pressable
             style={{
               backgroundColor: appColors.expenseBg,
-              paddingHorizontal: 25,
+              paddingHorizontal: 20,
               paddingVertical: 15,
-              borderRadius: 25,
+              borderRadius: 20,
               flexDirection: 'row',
               alignItems: 'center',
               justifyContent: 'space-between',
@@ -420,7 +464,7 @@ const Dashboard = () => {
             }}>
             <View
               style={{
-                padding: 10,
+                padding: 8,
                 backgroundColor: appColors.lightBg,
                 borderRadius: 15,
               }}>
@@ -475,7 +519,7 @@ const Dashboard = () => {
                 value={chartDropdownValue}
                 setValue={setChartDropdownvalue}
                 onSelectItem={val => {
-                  console.log(val);
+                  setIsUpdated(true);
                 }}
               />
             </View>
@@ -574,11 +618,11 @@ const Dashboard = () => {
             />
           </TouchableOpacity>
         }
-        customRightHeaderComponent={
-          <TouchableOpacity activeOpacity={0.7} onPress={() => {}}>
-            <NotificationIcon height={30} width={30} />
-          </TouchableOpacity>
-        }
+        // customRightHeaderComponent={
+        //   <TouchableOpacity activeOpacity={0.7} onPress={() => {}}>
+        //     <NotificationIcon height={30} width={30} />
+        //   </TouchableOpacity>
+        // }
       />
 
       <FocusAwareStatusBar
@@ -593,11 +637,9 @@ const Dashboard = () => {
         <FlatList
           style={{paddingHorizontal: 15}}
           ListHeaderComponent={HeaderComponent}
-          renderItem={({item, index}) => {
-            return (
-              <TransactionRenderItem item={item} navigation={navigation} />
-            );
-          }}
+          renderItem={({item}) => (
+            <TransactionRenderItem item={item} navigation={navigation} />
+          )}
           refreshControl={
             <RefreshControl
               onRefresh={onRefresh}
@@ -663,10 +705,7 @@ const Dashboard = () => {
       <Modal
         visible={isFinanceStoryVisible}
         onRequestClose={() => setIsFinanceStoryVisible(false)}>
-        <FinanceStory
-          closeHandler={() => setIsFinanceStoryVisible(false)}
-          monthlyReportData={monthlyReportData}
-        />
+        <FinanceStory closeHandler={() => setIsFinanceStoryVisible(false)} />
       </Modal>
     </KeyboardAvoidingView>
   );
@@ -674,4 +713,57 @@ const Dashboard = () => {
 
 export default Dashboard;
 
-const styles = StyleSheet.create({});
+// import notifee, {AndroidImportance, EventType} from '@notifee/react-native';
+// import React from 'react';
+// import {View} from 'react-native';
+// import CommonButton from '@shared/components/commonButton/CommonButton'; // Replace with your button component path
+
+// const Dashboard = () => {
+//   const setupNotificationChannel = async () => {
+//     await notifee.createChannel({
+//       id: 'default',
+//       name: 'Default Channel',
+//       importance: AndroidImportance.HIGH,
+//     });
+//   };
+
+//   React.useEffect(() => {
+//     setupNotificationChannel();
+
+//     // Listener for quick actions
+//     const unsubscribe = notifee.onForegroundEvent(({type, detail}) => {
+//       if (type === EventType.ACTION_PRESS && detail.pressAction.id === 'stop') {
+//         console.log('Stop action pressed');
+//         // Additional logic to stop your service
+//       }
+//     });
+
+//     return () => unsubscribe();
+//   }, []);
+
+//   const handlePress = async () => {
+//     await notifee.displayNotification({
+//       title: 'Foreground Service Notification',
+//       body: 'Press the Quick Action to stop the service',
+//       android: {
+//         channelId: 'default',
+//         actions: [
+//           {
+//             title: 'Stop',
+//             pressAction: {
+//               id: 'stop',
+//             },
+//           },
+//         ],
+//       },
+//     });
+//   };
+
+//   return (
+//     <View>
+//       <CommonButton onPress={handlePress} title="Press" />
+//     </View>
+//   );
+// };
+
+// export default Dashboard;

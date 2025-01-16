@@ -3,7 +3,7 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Modal,
-  ScrollView,
+  Platform,
   StatusBar,
   StyleSheet,
   TouchableOpacity,
@@ -30,17 +30,24 @@ import {Toast} from '@shared/ToastConfig';
 import Popover from 'react-native-popover-view/dist/Popover';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
 import {useDispatch, useSelector} from 'react-redux';
-import {SecurityType, updateCurrentUser} from '@store/slice/appSlice';
+import {
+  SecurityType,
+  updateCurrentUser,
+  updateIsModalOpen,
+} from '@store/slice/appSlice';
 import {RootState} from '@store/store';
 import {useTranslation} from 'react-i18next';
 import ReactNativeBiometrics from 'react-native-biometrics';
-import CommonInput from '@shared/components/commonInput/CommonInput';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import OTPInput from '@components/auth/OTPInput';
+import FlashMessage from 'react-native-flash-message';
 
 const Security = () => {
   const dispatch = useDispatch();
   const {t} = useTranslation();
   const rbSheetRef = useRef<RBSheetRef>(null);
+  const [pin, setPin] = useState(new Array(6).fill(null));
+
   const userDetails = useSelector((state: RootState) => state.auth.userDetails);
   const [securityType, setSecurityType] = useState<SecurityType>(
     userDetails?.securityMethod!,
@@ -52,7 +59,6 @@ const Security = () => {
     {label: t('FingerPrint'), value: 'FINGERPRINT'},
   ];
   const [rbSheetOpen, setRbSheetOpen] = useState(false);
-  const [pin, setPin] = useState('');
   const navigation: NavigationProp<ParamListBase> = useNavigation();
 
   const renderItem = ({
@@ -70,6 +76,7 @@ const Security = () => {
         onPress={() => {
           setSecurityType(item?.value as SecurityType);
           rbSheetRef.current?.open();
+          dispatch(updateIsModalOpen(true));
           setRbSheetOpen(true);
         }}
         style={{
@@ -161,8 +168,16 @@ const Security = () => {
   };
 
   const updateSecurityPin = async () => {
-    if (pin.length === 6) {
-      await AsyncStorage.setItem('securityPin', pin);
+    if (pin.length === 6 && !pin.includes(null)) {
+      await AsyncStorage.setItem('securityPin', JSON.stringify(pin?.join('')))
+        .then(() => {
+          Toast({message: 'PIN changed successfuly', type: 'success'});
+          Vibration.vibrate(100);
+          navigation.goBack();
+        })
+        .catch(err => {
+          console.log('Error in updating user PIN', err);
+        });
     } else {
       Toast({message: 'Please enter a 6-digit PIN.', type: 'error'});
     }
@@ -187,9 +202,8 @@ const Security = () => {
             : 'dark-content'
         }
       />
-      <ScrollView contentContainerStyle={{flexGrow: 1}}>
+      <View>
         <FlatList
-          style={{}}
           scrollEnabled={false}
           initialNumToRender={25}
           contentContainerStyle={{paddingHorizontal: 15}}
@@ -199,19 +213,25 @@ const Security = () => {
           onEndReachedThreshold={0.01}
           keyExtractor={(_, index) => index.toString()}
         />
-        <View style={{paddingHorizontal: 15}}>
-          <CommonText content="Change Pin" size={'large'} bold />
-          <CommonInput
-            value={pin}
-            onChangeText={val => setPin(val)}
-            placeholder="Security PIN"
-          />
-          <CommonButton title="Update" onPress={updateSecurityPin} />
-        </View>
-      </ScrollView>
+      </View>
+      <View style={{paddingHorizontal: 15, marginTop: 150}}>
+        <CommonText
+          content="Change Pin"
+          size={'large'}
+          bold
+          style={{marginBottom: 5}}
+        />
+        <OTPInput otp={pin} setOtp={setPin} isFromSettings={true} />
+        <CommonButton
+          title="Update"
+          onPress={updateSecurityPin}
+          buttonStyle={{marginTop: 25}}
+        />
+      </View>
       <CommonRBSheet
         onClose={() => {
           setRbSheetOpen(false);
+          dispatch(updateIsModalOpen(false));
         }}
         ref={rbSheetRef}
         height={200}
@@ -248,6 +268,7 @@ const Security = () => {
                 title="No"
                 buttonType="clear"
                 onPress={() => {
+                  dispatch(updateIsModalOpen(false));
                   rbSheetRef.current?.close();
                   setRbSheetOpen(false);
                 }}
@@ -265,6 +286,16 @@ const Security = () => {
             </View>
           </View>
         </View>
+        <FlashMessage
+          duration={2000}
+          position={'bottom'}
+          style={{
+            marginBottom: Platform.OS == 'ios' ? 30 : 20,
+            marginHorizontal: 20,
+            borderRadius: 10,
+            paddingVertical: Platform.OS == 'ios' ? -25 : null,
+          }}
+        />
       </CommonRBSheet>
       <Popover
         isVisible={isSuccessPopoverVisible}

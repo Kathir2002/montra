@@ -34,7 +34,7 @@ class commonDataService {
             DocumentPicker.types.pdf,
             'application/msword', // For DOC files
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // For DOCX files
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // For XLSX files
+            // 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // For XLSX files
           ],
           // allowMultiSelection: true,
         });

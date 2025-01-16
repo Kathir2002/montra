@@ -8,7 +8,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import React, {FC, useEffect, useState} from 'react';
-import {Avatar, Button, Header, Icon} from '@rneui/base';
+import {Header} from '@rneui/base';
 import {appColors} from '@shared/appColors';
 import CommonText from '../commonText/CommonText';
 import BackArrowIcon from '@assets/svg/back-arrow.svg';

@@ -56,7 +56,7 @@ export type ItemTypeValue = ItemType<ValueType>;
 
 interface ItemType<T> {
   // needs to be removed
-  data?: string;
+  data?: {[key: string]: string};
   label: string;
   value: T;
   parent?: string;
@@ -407,8 +407,6 @@ const DropdownPicker: FC<DropdownInterface<ValueType>> = ({
       try {
         return item.label;
       } catch (e) {
-        console.log(e);
-
         return fallback;
       }
     },

@@ -16,7 +16,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import {appColors} from '@shared/appColors';
 
-export interface ZenSwitchProps {
+export interface SwitchProps {
   inActiveColor: string;
   activeColor: string;
   onValueChange?: ((value: boolean) => Promise<void> | void) | null | undefined;
@@ -25,7 +25,7 @@ export interface ZenSwitchProps {
   disabled?: boolean;
 }
 
-const CommonSwitch: FC<ZenSwitchProps> = ({
+const CommonSwitch: FC<SwitchProps> = ({
   activeColor,
   inActiveColor,
   onValueChange,

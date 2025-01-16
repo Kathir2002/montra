@@ -5,8 +5,10 @@ import {
   TouchableOpacity,
   View,
   KeyboardAvoidingView,
+  Modal,
+  BackHandler,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {appColors} from '@shared/appColors';
 import {useFormik} from 'formik';
 import * as yup from 'yup';
@@ -14,6 +16,7 @@ import CommonInput from '@shared/components/commonInput/CommonInput';
 import {Icon} from '@rneui/base';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 import {
+  CommonActions,
   NavigationProp,
   ParamListBase,
   useNavigation,
@@ -23,13 +26,41 @@ import CommonButton from '@shared/components/commonButton/CommonButton';
 import {encryptDetails} from '@src/lib/functions';
 import AuthService from '@services/authService';
 import {Toast} from '@shared/ToastConfig';
+import CommonLoader from '@shared/components/commonLoader/CommonLoader';
 
 const ResetPassword = () => {
   const route: any = useRoute().params;
-
+  const [isLoading, setIsLoading] = useState(false);
   const [newPasswordVisible, setNewPasswordVisible] = useState<boolean>(false);
   const [rePasswordVisible, setRePasswordVisible] = useState<boolean>(false);
   const navigation: NavigationProp<ParamListBase> = useNavigation();
+
+  useEffect(() => {
+    // Add back button handler
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      handleBackPress,
+    );
+
+    // Cleanup
+    return () => backHandler.remove();
+  }, [navigation]);
+
+  const handleBackPress = () => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+      return true;
+    } else {
+      // If there's no screen to go back to, reset to home screen
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{name: 'SignIn'}], // Replace 'Home' with your default screen
+        }),
+      );
+      return true;
+    }
+  };
 
   const validationSchema = yup.object().shape({
     newPassword: yup
@@ -59,21 +90,24 @@ const ResetPassword = () => {
     validateOnChange: true,
     validateOnMount: true,
     validateOnBlur: true,
-    onSubmit: () => {
-      AuthService.resetPassword({
+    onSubmit: async () => {
+      setIsLoading(true);
+      await AuthService.resetPassword({
         data: {newPassword: formik.values.rePassword},
         token: encryptDetails(route?.userToken)!,
       })
         .then((res: any) => {
+          setIsLoading(false);
           if (res?.success) {
             navigation.navigate('SignIn');
             Toast({message: 'Password reset successfully', type: 'success'});
           }
         })
         .catch(err => {
-          console.log(err?.response);
+          setIsLoading(false);
+          console.log(err?.response?.data);
 
-          Toast({message: err?.data?.message, type: 'error'});
+          Toast({message: err?.response?.data?.message, type: 'error'});
         });
     },
   });
@@ -82,13 +116,19 @@ const ResetPassword = () => {
     <KeyboardAvoidingView style={{flex: 1, backgroundColor: appColors.light}}>
       <CommonHeader
         title="Rest Password"
-        leftIconPressBack={() => navigation.goBack()}
+        leftIconPressBack={() => handleBackPress()}
         leftIcon
       />
       <StatusBar backgroundColor={appColors.light} barStyle={'dark-content'} />
       <ScrollView contentContainerStyle={{flexGrow: 1}}>
         <View style={{flex: 1, paddingHorizontal: 15, marginTop: 30, gap: 10}}>
           <CommonInput
+            leftIcon={{
+              name: 'lock',
+              type: 'feather',
+              color: appColors.placeholderColor,
+              size: 20,
+            }}
             placeholder="New Password"
             autoCapitalize="none"
             secureTextEntry={!newPasswordVisible}
@@ -114,7 +154,13 @@ const ResetPassword = () => {
             onBlur={formik.handleBlur('newPassword')}
           />
           <CommonInput
-            placeholder="Retype new Password"
+            leftIcon={{
+              name: 'lock',
+              type: 'feather',
+              color: appColors.placeholderColor,
+              size: 20,
+            }}
+            placeholder="Confirm new Password"
             autoCapitalize="none"
             secureTextEntry={!rePasswordVisible}
             value={formik.values.rePassword}
@@ -147,6 +193,9 @@ const ResetPassword = () => {
           />
         </View>
       </ScrollView>
+      <Modal visible={isLoading} animationType="fade" transparent={true}>
+        <CommonLoader />
+      </Modal>
     </KeyboardAvoidingView>
   );
 };

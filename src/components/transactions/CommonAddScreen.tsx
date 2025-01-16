@@ -1,7 +1,9 @@
+import React, {FC, memo, useEffect, useMemo, useRef, useState} from 'react';
 import {
   BackHandler,
   Dimensions,
   Image,
+  Keyboard,
   KeyboardAvoidingView,
   Modal,
   ScrollView,
@@ -10,14 +12,7 @@ import {
   Vibration,
   View,
 } from 'react-native';
-import React, {
-  FC,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import DocumentPicker from 'react-native-document-picker';
 import {appColors} from '@shared/appColors';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 import * as yup from 'yup';
@@ -59,24 +54,30 @@ import {Toast} from '@shared/ToastConfig';
 import CommonLoader from '../../shared/components/commonLoader/CommonLoader';
 import AccountService from '@services/setup/accountService';
 import TransferIcon from '@assets/svg/transfer.svg';
-import {useSelector} from 'react-redux';
-import {RootState} from '@store/store';
-import AppContext from '@shared/appContext';
-import {formatBytes, getCurrencySymbol} from '@src/lib/functions';
+import {
+  formatBytes,
+  getCurrencySymbol,
+  openFileFromUrl,
+} from '@src/lib/functions';
 import {TransactionListInterface} from '@screens/Dashboard';
-import {ItemTypeValue} from 'react-native-animated-dropdown-picker';
+import {ItemTypeValue} from '@shared/components/commonDropdown/src';
 import Popover from 'react-native-popover-view';
 import LottieView from 'lottie-react-native';
 import CommonSlider from '../../shared/components/CommonSlider';
 import BudgetService from '@services/setup/budgetSerice';
-
+import DeleteDocumetSvg from '@assets/svg/delete-document.svg';
+import {updateIsTransactionAdded} from '@store/slice/appSlice';
+import {useDispatch} from 'react-redux';
+import {Mode} from 'react-native-popover-view/dist/Types';
 interface FormValues {
   newDropdownItem: string;
   description: string;
   notes: string;
   category: string;
   amount: string;
+  isDocumentUpdate: boolean;
   wallet: string;
+  walletName: string;
   endAfter: string;
   frequency: string;
   month: string;
@@ -87,10 +88,12 @@ interface FormValues {
   from: {
     wallet: string;
     paymentMode: string;
+    walletName: string;
   };
   to: {
     wallet: string;
     paymentMode: string;
+    walletName: string;
   };
   paymentMode: string;
   currentScreenName: 'Expense' | 'Income' | 'Transfer' | 'Budget';
@@ -115,8 +118,10 @@ const CommonAddScreen: FC<{
       category: string;
       isReceiveAlert: boolean;
       alertValue: number;
+      spentPercent: number;
     };
   }> = useRoute();
+  const deleteRBSheetRef = useRef<RBSheetRef>(null);
 
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const [categoryOpen, setCategoryOpen] = useState(false);
@@ -133,16 +138,26 @@ const CommonAddScreen: FC<{
     {label: string; value: string}[]
   >([]);
   const dirtyRBSheetRef = useRef<RBSheetRef>(null);
-  const userDetails = useSelector((state: RootState) => state.auth.userDetails);
   const [isButtonLoader, setIsButtonLoader] = useState(false);
   const [isRepeactDateVisible, setIsRepeatDateVisible] = useState(false);
   const [isAddPopoverOpen, setIsAddPopoverOpen] = useState(false);
-  const {setIsTransactionAdded} = useContext(AppContext);
+  const dispatch = useDispatch();
   const [isYearlyFrequencyDateVisible, setIsYearlyFrequencyDateVisible] =
     useState(false);
   const [isSuccessPopoverVisible, setIsSuccessPopoverVisible] = useState(false);
+
   const [dateVisible, setDateVisible] = useState(false);
-  const [document, setDocument] = useState<DocumentInterface>();
+  const data: DocumentInterface = {
+    ext: route?.params?.document?.fileFormat?.split('/')[0],
+    name: route?.params?.document?.fileName,
+    size: route?.params?.document?.fileSize,
+    type: route?.params?.document?.fileFormat,
+    url: route?.params?.document?.fileUrl,
+  };
+
+  const [document, setDocument] = useState<DocumentInterface | undefined>(
+    route?.params?.document?.fileUrl ? data : undefined,
+  );
   const [isLoading, setIsLoading] = useState(false);
   const rbSheetRef = useRef<RBSheetRef>(null);
   const [rbSheetOpen, setRbSheetOpen] = useState(false);
@@ -155,6 +170,28 @@ const CommonAddScreen: FC<{
     }
   }, [isFocused]);
 
+  const deleteDocumentHandler = async () => {
+    setIsLoading(true);
+    const data = {
+      transactionId: route?.params?._id,
+    };
+    await TransactionService.deleteDocument(data)
+      .then((res: any) => {
+        setIsLoading(false);
+        setRbSheetOpen(false);
+        deleteRBSheetRef.current?.close();
+        setDocument(undefined);
+        formik?.setFieldTouched('isDocumentUpdate', false);
+        navigation.setParams({document: undefined});
+        Toast({message: res?.message, type: 'success'});
+      })
+      .catch(err => {
+        setIsLoading(false);
+        setRbSheetOpen(false);
+        Toast({message: err?.response?.data?.message, type: 'error'});
+      });
+  };
+
   const getWalletData = async () => {
     setIsLoading(true);
     await AccountService.getWalletList()
@@ -162,23 +199,32 @@ const CommonAddScreen: FC<{
         if (res?.success) {
           setWalletDropdownData(
             res?.rows?.map((item: any) => ({
-              label: item.provider?.providerName,
-              value: item?.provider?.providerCode,
-              data: item?.accountType,
+              label: `${item?.name} (${item.provider?.providerName})`,
+              value: item?._id,
+              data: {
+                paymentMode: item?.accountType,
+                walletName: item?.provider?.providerCode,
+              },
             })),
           );
           setFromWalletDropdownData(
             res?.rows?.map((item: any) => ({
-              label: item.provider?.providerName,
-              value: item?.provider?.providerCode,
-              data: item?.accountType,
+              label: `${item?.name} (${item.provider?.providerName})`,
+              value: item?._id,
+              data: {
+                paymentMode: item?.accountType,
+                walletName: item?.provider?.providerCode,
+              },
             })),
           );
           setToWalletDropdownData(
             res?.rows?.map((item: any) => ({
-              label: item.provider?.providerName,
-              value: item?.provider?.providerCode,
-              data: item?.accountType,
+              label: `${item?.name} (${item.provider?.providerName})`,
+              value: item?._id,
+              data: {
+                paymentMode: item?.accountType,
+                walletName: item?.provider?.providerCode,
+              },
             })),
           );
 
@@ -190,6 +236,7 @@ const CommonAddScreen: FC<{
         }
       })
       .catch(err => {
+        console.log('Get wallet list data api call failed', err);
         Toast({message: err?.response?.data?.message, type: 'error'});
       });
   };
@@ -216,8 +263,8 @@ const CommonAddScreen: FC<{
         }
       })
       .catch(err => {
+        console.log('Get category data api call failed', err);
         Toast({message: err?.response?.data?.message, type: 'error'});
-        console.log(err);
         setIsLoading(false);
       });
   };
@@ -262,6 +309,12 @@ const CommonAddScreen: FC<{
         } amount`,
       ),
     wallet: yup.string().when('currentScreenName', (data, schema) => {
+      if (data[0] === 'Expense' || data[0] === 'Income') {
+        return schema.required('This field is required');
+      }
+      return schema;
+    }),
+    walletName: yup.string().when('currentScreenName', (data, schema) => {
       if (data[0] === 'Expense' || data[0] === 'Income') {
         return schema.required('This field is required');
       }
@@ -330,12 +383,11 @@ const CommonAddScreen: FC<{
 
   const initialDate = useMemo(() => {
     return route?.params?.transactionDate
-      ? route?.params?.transactionDate
+      ? new Date(route?.params?.transactionDate)
       : new Date();
   }, []); // Initialize the date once
 
   const handleTransactionSubmit = async () => {
-    setIsLoading(true);
     const formData = new FormData();
     if (document) {
       formData.append('file', {
@@ -352,14 +404,20 @@ const CommonAddScreen: FC<{
       formData.append(
         'from',
         JSON.stringify({
-          wallet: formik.values.from.wallet,
+          wallet: {
+            id: formik.values.from.wallet,
+            walletName: formik?.values?.from?.walletName,
+          },
           paymentMode: formik.values.from.paymentMode,
         }),
       );
       formData.append(
         'to',
         JSON.stringify({
-          wallet: formik.values.to.wallet,
+          wallet: {
+            id: formik.values.to.wallet,
+            walletName: formik?.values?.to?.walletName,
+          },
           paymentMode: formik.values.to.paymentMode,
         }),
       );
@@ -369,8 +427,15 @@ const CommonAddScreen: FC<{
       formik.values.transactionDate.toString(),
     );
     formData.append('paymentMode', formik.values.paymentMode);
-    formData.append('wallet', formik.values.wallet);
-    formData.append('amount', stringToFloatHandler(formik.values.amount));
+    formData.append(
+      'wallet',
+      JSON.stringify({
+        id: formik.values.wallet,
+        walletName: formik?.values?.walletName,
+      }),
+    );
+    const amount = stringToFloatHandler(formik.values.amount);
+    formData.append('amount', amount);
     formData.append('type', screenName);
     if (formik.values.description !== '') {
       formData.append('description', formik.values.description);
@@ -400,33 +465,23 @@ const CommonAddScreen: FC<{
       formData.append('frequency', JSON.stringify(frequency));
     }
 
-    TransactionService.addTransaction(formData)
-      .then((res: any) => {
+    await TransactionService.addTransaction(formData)
+      .then(async (res: any) => {
         if (res?.success) {
-          setIsSuccessPopoverVisible(true);
+          setIsLoading(false);
           Vibration.vibrate(50);
-          setIsTransactionAdded(true);
-          setTimeout(() => {
-            setIsSuccessPopoverVisible(false);
-            Toast({message: res?.message, type: 'success'});
-            navigation.navigate('BottomTab', {screen: 'Transaction'});
-          }, 2000);
-        } else {
-          Toast({message: res?.message, type: 'error'});
+          Toast({message: res?.message, type: 'success'});
+          dispatch(updateIsTransactionAdded(true));
+          navigation.navigate('BottomTab', {screen: 'Transaction'});
         }
-        setIsLoading(false);
       })
       .catch(err => {
-        Toast({message: err?.response?.data?.message, type: 'error'});
-        console.log(err.response?.data);
-      })
-      .finally(() => {
         setIsLoading(false);
+        Toast({message: err?.response?.data?.message, type: 'error'});
       });
   };
 
   const updateTransaction = async () => {
-    setIsLoading(true);
     const formData = new FormData();
     formData.append('id', route?.params?._id);
     if (document) {
@@ -444,14 +499,20 @@ const CommonAddScreen: FC<{
       formData.append(
         'from',
         JSON.stringify({
-          wallet: formik.values.from.wallet,
+          wallet: {
+            id: formik.values.from.wallet,
+            walletName: formik?.values?.from?.walletName,
+          },
           paymentMode: formik.values.from.paymentMode,
         }),
       );
       formData.append(
         'to',
         JSON.stringify({
-          wallet: formik.values.to.wallet,
+          wallet: {
+            id: formik.values.to.wallet,
+            walletName: formik?.values?.to?.walletName,
+          },
           paymentMode: formik.values.to.paymentMode,
         }),
       );
@@ -461,7 +522,13 @@ const CommonAddScreen: FC<{
       formik.values.transactionDate.toString(),
     );
     formData.append('paymentMode', formik.values.paymentMode);
-    formData.append('wallet', formik.values.wallet);
+    formData.append(
+      'wallet',
+      JSON.stringify({
+        id: formik.values.wallet,
+        walletName: formik?.values?.walletName,
+      }),
+    );
     formData.append('amount', stringToFloatHandler(formik.values.amount));
     formData.append('type', screenName);
     if (formik.values.description !== '') {
@@ -491,12 +558,14 @@ const CommonAddScreen: FC<{
       );
       formData.append('frequency', JSON.stringify(frequency));
     }
-    TransactionService.updateTransaction(formData)
+
+    await TransactionService.updateTransaction(formData)
       .then((res: any) => {
         if (res?.success) {
           Vibration.vibrate(50);
+          setIsLoading(false);
           setIsSuccessPopoverVisible(true);
-          setIsTransactionAdded(true);
+          dispatch(updateIsTransactionAdded(true));
           setTimeout(() => {
             navigation.navigate('BottomTab', {screen: 'Transaction'});
             Toast({message: res?.message, type: 'success'});
@@ -505,11 +574,10 @@ const CommonAddScreen: FC<{
         } else {
           Toast({message: res?.message, type: 'error'});
         }
-        setIsLoading(false);
       })
       .catch(err => {
         Toast({message: err?.response?.data?.message, type: 'error'});
-        console.log(err.response);
+        console.log('Error in update transaction', err);
       })
       .finally(() => {
         setIsLoading(false);
@@ -517,7 +585,6 @@ const CommonAddScreen: FC<{
   };
 
   const addBudgetHandler = async () => {
-    setIsLoading(true);
     const data: AddBudgetPayloadData = {
       category: formik.values?.category,
       budget: stringToFloatHandler(formik?.values?.amount),
@@ -547,7 +614,6 @@ const CommonAddScreen: FC<{
   };
 
   const updateBudgetHandler = async () => {
-    setIsLoading(true);
     const data: AddBudgetPayloadData = {
       category: formik.values?.category,
       budget: stringToFloatHandler(formik?.values?.amount),
@@ -563,7 +629,7 @@ const CommonAddScreen: FC<{
         if (res?.success) {
           Vibration.vibrate(50);
           setIsSuccessPopoverVisible(true);
-          setIsTransactionAdded(true);
+          dispatch(updateIsTransactionAdded(true));
           setTimeout(() => {
             navigation.navigate('Budget');
             Toast({message: res?.message, type: 'success'});
@@ -581,6 +647,7 @@ const CommonAddScreen: FC<{
     enableReinitialize: true,
     initialValues: {
       newDropdownItem: '',
+      isDocumentUpdate: false,
       description: route?.params?.description ? route?.params?.description : '',
       notes: route?.params?.notes ? route?.params?.notes : '',
       category:
@@ -598,7 +665,10 @@ const CommonAddScreen: FC<{
           ? getCurrencySymbol(Number(route?.params?.budget))
           : ''
         : '',
-      wallet: route?.params?.wallet ? route?.params?.wallet : '',
+      wallet: route?.params?.wallet?.id ? route?.params?.wallet?.id : '',
+      walletName: route?.params?.wallet?.walletName
+        ? route?.params?.wallet?.walletName
+        : '',
       endAfter: route?.params?.endAfter ? route?.params?.endAfter : '',
       frequency: route?.params?.frequency?.frequencyType
         ? route?.params?.frequency?.frequencyType
@@ -611,13 +681,23 @@ const CommonAddScreen: FC<{
         : '',
       day: route?.params?.frequency?.day ? route?.params?.frequency?.day : '',
       from: {
-        wallet: route?.params?.from?.wallet ? route?.params?.from?.wallet : '',
+        walletName: route?.params?.from?.wallet?.walletName
+          ? route?.params?.from?.wallet?.walletName
+          : '',
+        wallet: route?.params?.from?.wallet?.id
+          ? route?.params?.from?.wallet?.id
+          : '',
         paymentMode: route?.params?.from?.paymentMode
           ? route?.params?.from?.paymentMode
           : '',
       },
       to: {
-        wallet: route?.params?.to?.wallet ? route?.params?.to?.wallet : '',
+        walletName: route?.params?.to?.wallet?.walletName
+          ? route?.params?.to?.wallet?.walletName
+          : '',
+        wallet: route?.params?.to?.wallet?.id
+          ? route?.params?.to?.wallet?.id
+          : '',
         paymentMode: route?.params?.to?.paymentMode
           ? route?.params?.to?.paymentMode
           : '',
@@ -640,6 +720,7 @@ const CommonAddScreen: FC<{
     validateOnMount: true,
     validateOnBlur: true,
     onSubmit: () => {
+      setIsLoading(true);
       if (screenName == 'Budget') {
         route?.params?.budget ? updateBudgetHandler() : addBudgetHandler();
       } else {
@@ -655,11 +736,11 @@ const CommonAddScreen: FC<{
       handleBackPress,
     );
     return () => backHandler.remove();
-  }, [formik.dirty, document]);
+  }, [formik.dirty, formik?.touched?.isDocumentUpdate]);
 
   // Custom function to handle the back button press
   const handleBackPress = () => {
-    if (formik.dirty || document) {
+    if (formik.dirty || formik?.touched?.isDocumentUpdate) {
       dirtyRBSheetRef.current?.open();
       return true;
     } else {
@@ -682,7 +763,7 @@ const CommonAddScreen: FC<{
    * method to get the currency symbol
    * @param amount, currencyCode
    */
-  const getCurrencySymbolFormat = (amount: any) => {
+  const getCurrencySymbolFormat = (amount: string) => {
     if (formik?.values?.amount) {
       let valueWithoutFormatting = stringToFloatHandler(amount);
       formik.setFieldValue(
@@ -729,8 +810,6 @@ const CommonAddScreen: FC<{
   ];
 
   const isFieldValid = (fieldName: keyof FormValues) => {
-    console.log(formik.errors[fieldName], formik.touched[fieldName], fieldName);
-
     return !formik.errors[fieldName] && formik.touched[fieldName];
   };
 
@@ -850,7 +929,7 @@ const CommonAddScreen: FC<{
               : screenName
           }
           leftIconPressBack={() => {
-            formik.dirty || document
+            formik.dirty || formik?.touched?.isDocumentUpdate
               ? dirtyRBSheetRef.current?.open()
               : navigation.goBack();
           }}
@@ -964,7 +1043,8 @@ const CommonAddScreen: FC<{
                       onSelectItem={val => {
                         formik.setFieldValue('from', {
                           wallet: val.value,
-                          paymentMode: val.data,
+                          walletName: val?.data?.walletName,
+                          paymentMode: val.data?.paymentMode,
                         });
                         setToWalletDropdownData(prev => {
                           return prev?.filter(
@@ -1020,7 +1100,8 @@ const CommonAddScreen: FC<{
                       onSelectItem={val => {
                         formik.setFieldValue('to', {
                           wallet: val.value,
-                          paymentMode: val.data,
+                          walletName: val?.data?.walletName,
+                          paymentMode: val.data?.paymentMode,
                         });
                         setFromWalletDropdownData(prev => {
                           return prev?.filter(
@@ -1051,6 +1132,11 @@ const CommonAddScreen: FC<{
                   <CommonDropDown
                     items={categoryDropdownData}
                     placeholder="Category"
+                    onPress={() => {
+                      setWalletOpen(false);
+                      setFromOpen(false);
+                      setToOpen(false);
+                    }}
                     open={categoryOpen}
                     setOpen={setCategoryOpen}
                     zIndex={4}
@@ -1116,6 +1202,11 @@ const CommonAddScreen: FC<{
                             : 0,
                       }}>
                       <CommonDropDown
+                        onPress={() => {
+                          setCategoryOpen(false);
+                          setFromOpen(false);
+                          setToOpen(false);
+                        }}
                         items={walletDropdownData}
                         placeholder="Wallet"
                         open={walletOpen}
@@ -1125,7 +1216,15 @@ const CommonAddScreen: FC<{
                         setValue={() => undefined}
                         onSelectItem={val => {
                           formik.setFieldValue('wallet', val.value);
-                          formik.setFieldValue('paymentMode', val.data);
+
+                          formik.setFieldValue(
+                            'walletName',
+                            val.data?.walletName,
+                          );
+                          formik.setFieldValue(
+                            'paymentMode',
+                            val.data?.paymentMode,
+                          );
                         }}
                       />
                       {formik.errors.wallet && formik.touched.wallet ? (
@@ -1138,7 +1237,6 @@ const CommonAddScreen: FC<{
                       ) : undefined}
                     </View>
                   ) : undefined}
-
                   <CommonInput
                     onPress={dropdownCloseHandler}
                     placeholder="Date"
@@ -1189,8 +1287,17 @@ const CommonAddScreen: FC<{
                         size={'medium'}
                       />
                     </TouchableOpacity>
-                  ) : document?.type == 'image/jpeg' ? (
-                    <View>
+                  ) : document?.type?.startsWith('image/') ? (
+                    <TouchableOpacity
+                      activeOpacity={0.7}
+                      onLongPress={() => {
+                        Vibration.vibrate(50);
+                        openFileFromUrl(
+                          document?.url!,
+                          document?.type,
+                          !document?.url?.includes('https://')!,
+                        );
+                      }}>
                       <Image
                         resizeMode="cover"
                         resizeMethod="auto"
@@ -1208,7 +1315,14 @@ const CommonAddScreen: FC<{
                       <TouchableOpacity
                         activeOpacity={0.7}
                         onPress={() => {
-                          setDocument(undefined);
+                          route?.params?.document?.fileUrl
+                            ? (deleteRBSheetRef?.current?.open(),
+                              setRbSheetOpen(true))
+                            : (setDocument(undefined),
+                              formik?.setFieldTouched(
+                                'isDocumentUpdate',
+                                false,
+                              ));
                         }}
                         style={{
                           position: 'absolute',
@@ -1221,11 +1335,25 @@ const CommonAddScreen: FC<{
                           alignItems: 'center',
                           justifyContent: 'center',
                         }}>
-                        <CloseIcon height={12} width={12} />
+                        {route?.params?.document?.fileUrl ? (
+                          <DeleteDocumetSvg height={20} width={20} />
+                        ) : (
+                          <CloseIcon height={12} width={12} />
+                        )}
                       </TouchableOpacity>
-                    </View>
+                    </TouchableOpacity>
                   ) : (
-                    <View style={{width: 200}}>
+                    <TouchableOpacity
+                      activeOpacity={0.7}
+                      onLongPress={() => {
+                        Vibration.vibrate(50);
+                        openFileFromUrl(
+                          document?.url!,
+                          document?.type,
+                          !document?.url?.includes('https://')!,
+                        );
+                      }}
+                      style={{maxWidth: 210}}>
                       <View
                         style={{
                           gap: 5,
@@ -1238,9 +1366,10 @@ const CommonAddScreen: FC<{
                           paddingHorizontal: 10,
                           paddingVertical: 5,
                         }}>
-                        {document?.type == 'application/pdf' ? (
+                        {document?.type === DocumentPicker.types.pdf ? (
                           <PDFIcon width={35} height={35} />
-                        ) : document?.type == 'application/msword' ? (
+                        ) : document?.type === 'application/msword' ||
+                          'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ? (
                           <WordIcon width={35} height={35} />
                         ) : (
                           <ExcelIcon width={35} height={35} />
@@ -1248,7 +1377,14 @@ const CommonAddScreen: FC<{
                         <View style={{flex: 1, gap: 5}}>
                           <CommonText
                             size={'medium'}
-                            content={document?.name}
+                            content={`${document?.name}${
+                              route?.params?.document
+                                ? '.' +
+                                  document?.url?.split('.')[
+                                    document?.url?.split('.')?.length - 1
+                                  ]
+                                : ''
+                            }`}
                             color={appColors.placeholderColor}
                           />
                           <CommonText
@@ -1261,7 +1397,14 @@ const CommonAddScreen: FC<{
                       <TouchableOpacity
                         activeOpacity={0.7}
                         onPress={() => {
-                          setDocument(undefined);
+                          route?.params?.document?.fileUrl
+                            ? (deleteRBSheetRef?.current?.open(),
+                              setRbSheetOpen(true))
+                            : (setDocument(undefined),
+                              formik?.setFieldTouched(
+                                'isDocumentUpdate',
+                                false,
+                              ));
                         }}
                         style={{
                           position: 'absolute',
@@ -1274,9 +1417,13 @@ const CommonAddScreen: FC<{
                           alignItems: 'center',
                           justifyContent: 'center',
                         }}>
-                        <CloseIcon height={12} width={12} />
+                        {route?.params?.document?.fileUrl ? (
+                          <DeleteDocumetSvg height={20} width={20} />
+                        ) : (
+                          <CloseIcon height={12} width={12} />
+                        )}
                       </TouchableOpacity>
-                    </View>
+                    </TouchableOpacity>
                   )}
                   {screenName !== 'Transfer' ? (
                     <View
@@ -1459,7 +1606,7 @@ const CommonAddScreen: FC<{
                   </View>
                   {formik?.values?.isReceiveAlert && (
                     <CommonSlider
-                      min={0}
+                      min={40}
                       max={100}
                       defaultStartValue={
                         route?.params?.alertValue
@@ -1490,7 +1637,7 @@ const CommonAddScreen: FC<{
                       getCurrencySymbolFormat(formik?.values?.amount);
                     }
 
-                    if (formik.dirty) {
+                    if (formik.dirty || formik?.touched?.isDocumentUpdate) {
                       formik.handleSubmit();
                     } else {
                       Toast({
@@ -1534,6 +1681,7 @@ const CommonAddScreen: FC<{
         }}>
         <FileUploadRbSheet
           setDocument={setDocument}
+          formik={formik}
           closeHandler={() => rbSheetRef.current?.close()}
         />
       </CommonRBSheet>
@@ -1911,7 +2059,11 @@ const CommonAddScreen: FC<{
         />
         <CommonText
           content={
-            route?.params?.amount
+            screenName === 'Budget'
+              ? route?.params?.spentPercent
+                ? 'Budget has been successfully updated'
+                : 'Budget has been successfully added'
+              : route?.params?.amount
               ? 'Transaction has been successfully updated'
               : 'Transaction has been successfully added'
           }
@@ -1920,6 +2072,9 @@ const CommonAddScreen: FC<{
         />
       </Popover>
       <Popover
+        onRequestClose={() => {
+          Keyboard.dismiss();
+        }}
         popoverStyle={{
           borderRadius: 8,
           width: 350,
@@ -1973,8 +2128,63 @@ const CommonAddScreen: FC<{
           </View>
         </ScrollView>
       </Popover>
+      <CommonRBSheet
+        onClose={() => {
+          setRbSheetOpen(false);
+        }}
+        ref={deleteRBSheetRef}
+        height={230}
+        closeOnPressBack={true}
+        closeOnPressMask={true}
+        draggable={true}
+        customStyles={{
+          container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
+        }}>
+        <View style={{padding: 15, gap: 10}}>
+          <CommonText
+            content="Delete this Document?"
+            bold
+            size={'large'}
+            style={{textAlign: 'center'}}
+          />
+          <CommonText
+            content={`${document?.name}.${
+              document?.url?.split('.')[document?.url?.split('.')?.length - 1]
+            }`}
+            color={appColors.primary}
+            size={'label'}
+            style={{textAlign: 'center', paddingHorizontal: 15}}
+          />
+          <CommonText
+            content="Are you sure do you wanna delete this document?"
+            color={appColors.placeholderColor}
+            size={'label'}
+            style={{textAlign: 'center', paddingHorizontal: 15}}
+          />
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}>
+            <View style={{flex: 0.45}}>
+              <CommonButton
+                title="No"
+                buttonType="clear"
+                onPress={() => {
+                  deleteRBSheetRef.current?.close();
+                  setRbSheetOpen(false);
+                }}
+              />
+            </View>
+            <View style={{flex: 0.45}}>
+              <CommonButton title="Yes" onPress={deleteDocumentHandler} />
+            </View>
+          </View>
+        </View>
+      </CommonRBSheet>
     </KeyboardAvoidingView>
   );
 };
 
-export default CommonAddScreen;
+export default memo(CommonAddScreen);

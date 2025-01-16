@@ -15,7 +15,7 @@ const authServiceApi = async (data: any, url: string, token: string = '') => {
         headers: {
           'Content-type': 'application/json',
           'Access-control-allow-origin': '*',
-          Authorization: token,
+          Authorization: `Bearer ${token}`,
         },
       })
       .then(res => {

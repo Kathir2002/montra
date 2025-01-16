@@ -2,6 +2,7 @@ import HttpRoutingService from '@services/httpRoutingService';
 import axios from 'axios';
 import {config} from '../../environment';
 import CommonDataService from '@shared/commonDataServices';
+
 class transactionService {
   async addTransaction(data: any) {
     const token = await CommonDataService.getToken();
@@ -10,7 +11,6 @@ class transactionService {
         try {
           const response = await axios.post(
             config.apiUrldb + 'api/transaction/add-transaction',
-
             data,
             {
               headers: {
@@ -19,7 +19,7 @@ class transactionService {
               },
             },
           );
-          resolve(response.data);
+          resolve(response?.data);
         } catch (err) {
           reject(err);
         }
@@ -33,7 +33,6 @@ class transactionService {
         try {
           const response = await axios.post(
             config.apiUrldb + 'api/transaction/update-transaction',
-
             data,
             {
               headers: {
@@ -42,7 +41,7 @@ class transactionService {
               },
             },
           );
-          resolve(response.data);
+          resolve(response?.data);
         } catch (err) {
           reject(err);
         }
@@ -67,9 +66,29 @@ class transactionService {
       data,
     );
   }
+  async getQuote() {
+    return await HttpRoutingService.getMethod(
+      'api/transaction/get-random-quote',
+    );
+  }
+  async getTransactionDetails(data: any) {
+    return await HttpRoutingService.getMethod('api/transaction/details', data);
+  }
   async addTransactionCategory(data: any) {
     return await HttpRoutingService.postMethod(
       'api/transaction/add-category',
+      data,
+    );
+  }
+  async deleteDocument(data: any) {
+    return await HttpRoutingService.postMethod(
+      'api/transaction/delete-document',
+      data,
+    );
+  }
+  async exportData(data: any) {
+    return await HttpRoutingService.getMethod(
+      'api/transaction/export-transction',
       data,
     );
   }

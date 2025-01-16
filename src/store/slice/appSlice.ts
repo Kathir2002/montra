@@ -4,6 +4,8 @@ export type SecurityType = 'FINGERPRINT' | 'PIN';
 interface IntialStateInterface {
   isLoggedIn: boolean;
   isFabToggleOpen: boolean;
+  isTransactionAdded: boolean;
+  modalOpen: boolean;
   userDetails: {
     name?: string;
     picture?: string;
@@ -13,6 +15,7 @@ interface IntialStateInterface {
     currencySymbol?: string;
     currentLanguage?: string;
     securityMethod?: SecurityType;
+    phoneNumber?: string;
   };
 }
 
@@ -20,6 +23,8 @@ const initialState: IntialStateInterface = {
   isLoggedIn: false,
   userDetails: {},
   isFabToggleOpen: false,
+  isTransactionAdded: false,
+  modalOpen: false,
 };
 
 export const AppSlice = createSlice({
@@ -32,6 +37,12 @@ export const AppSlice = createSlice({
     updateIsFabToggleOpen: (state, action: PayloadAction<boolean>) => {
       state.isFabToggleOpen = action.payload;
     },
+    updateIsTransactionAdded: (state, action: PayloadAction<boolean>) => {
+      state.isTransactionAdded = action.payload;
+    },
+    updateIsModalOpen: (state, action: PayloadAction<boolean>) => {
+      state.modalOpen = action.payload;
+    },
     updateCurrentUser: (
       state,
       action: PayloadAction<IntialStateInterface['userDetails']>,
@@ -42,5 +53,10 @@ export const AppSlice = createSlice({
 });
 
 export default AppSlice.reducer;
-export const {updateIsLoggedin, updateCurrentUser, updateIsFabToggleOpen} =
-  AppSlice.actions;
+export const {
+  updateIsLoggedin,
+  updateCurrentUser,
+  updateIsFabToggleOpen,
+  updateIsTransactionAdded,
+  updateIsModalOpen,
+} = AppSlice.actions;

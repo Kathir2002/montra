@@ -1,5 +1,6 @@
 import {
   KeyboardAvoidingView,
+  Linking,
   NativeSyntheticEvent,
   ScrollView,
   StyleSheet,
@@ -27,24 +28,18 @@ import CommonButton from '@shared/components/commonButton/CommonButton';
 import LottieView from 'lottie-react-native';
 import {Toast} from '@shared/ToastConfig';
 import AuthService from '@services/authService';
+import OTPInput from './OTPInput';
 
 const EmailVerification = () => {
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const [otp, setOtp] = useState(new Array(6).fill(null));
   const [remainingTime, setRemainingTime] = useState<number>(300);
-  const inputs = useRef<TextInputProps & {focus: () => void}[]>([]);
 
   const route: RouteProp<{
     params: {
       email: string;
     };
   }> = useRoute();
-
-  useEffect(() => {
-    if (otp[0] == null) {
-      inputs.current[0].focus();
-    }
-  }, [otp]);
 
   //UseEffect for updating the timer
   useEffect(() => {
@@ -67,37 +62,6 @@ const EmailVerification = () => {
     const minutes = String(Math.floor(time / 60)).padStart(2, '0');
     const seconds = String(time % 60).padStart(2, '0');
     return `${minutes}:${seconds}`;
-  };
-
-  const handleOtpChange = (value: string, index: number) => {
-    if (/^[0-9]*$/.test(value)) {
-      const newOtp = [...otp];
-      newOtp[index] = value;
-      setOtp(newOtp);
-      if (index < newOtp?.length - 1 && value) {
-        inputs.current[index + 1].focus();
-      }
-    }
-  };
-
-  const handleKeyPress = (
-    e: NativeSyntheticEvent<TextInputKeyPressEventData>,
-    index: number,
-  ) => {
-    if (e.nativeEvent.key === 'Backspace') {
-      const newOtp = [...otp];
-      newOtp[index] = '';
-      setOtp(newOtp);
-      if (index > 0) {
-        inputs.current[index - 1].focus();
-      }
-    } else {
-      if (index < otp.length - 1 && /^[0-9]*$/.test(e.nativeEvent.key)) {
-        inputs.current[index + 1].focus();
-        const {key} = e.nativeEvent;
-        handleOtpChange(key, index);
-      }
-    }
   };
 
   const maskEmail = (email: string) => {
@@ -128,7 +92,7 @@ const EmailVerification = () => {
       }}>
       <CommonHeader
         leftIcon={true}
-        title="Verification"
+        title="Email Verification"
         leftIconPressBack={() => navigation.goBack()}
       />
       <ScrollView contentContainerStyle={{flex: 1}}>
@@ -161,25 +125,7 @@ const EmailVerification = () => {
             color={appColors.dark}
             size={20}
           />
-          <View style={styles?.otpContainer}>
-            {otp?.map((digit: string, index: number) => (
-              <TextInput
-                key={index}
-                maxLength={1}
-                style={[
-                  styles?.otpInputContainerStyle,
-                  otp[index] ? {borderColor: appColors.primary} : null,
-                ]}
-                keyboardType="numeric"
-                onChangeText={value => handleOtpChange(value, index)}
-                onKeyPress={e => handleKeyPress(e, index)}
-                value={digit}
-                ref={(input: TextInput) => {
-                  inputs.current[index] = input;
-                }}
-              />
-            ))}
-          </View>
+          <OTPInput otp={otp} setOtp={setOtp} />
           <CommonText
             content={formatTime(remainingTime)}
             size={'header'}
@@ -191,7 +137,11 @@ const EmailVerification = () => {
             size={'large'}
             style={{marginVertical: 10}}>
             We send verification code to your email{' '}
-            <CommonText content={undefined} color={appColors.primary} bold>
+            <CommonText
+              content={undefined}
+              onPress={() => Linking.openURL('https://gmail.app.goo.gl')}
+              color={appColors.primary}
+              bold>
               {maskEmail(route?.params?.email)}
             </CommonText>
             . You can check your inbox.
@@ -240,25 +190,3 @@ const EmailVerification = () => {
 };
 
 export default EmailVerification;
-
-const styles = StyleSheet.create({
-  otpContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 15,
-    marginVertical: 20,
-  },
-  otpInputContainerStyle: {
-    borderWidth: 1,
-    height: 40,
-    paddingHorizontal: 5,
-    borderColor: '#ddd',
-    width: 40,
-    fontSize: 14,
-    color: appColors.dark,
-    fontFamily: appFonts.medium,
-    textAlign: 'center',
-    backgroundColor: appColors.formBorderColor,
-    borderRadius: 25,
-  },
-});

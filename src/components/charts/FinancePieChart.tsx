@@ -1,4 +1,4 @@
-import {useWindowDimensions} from 'react-native';
+import {useWindowDimensions, View} from 'react-native';
 import SvgChart, {SVGRenderer} from '@wuba/react-native-echarts/svgChart';
 import * as echarts from 'echarts/core';
 import {PieChart} from 'echarts/charts';
@@ -32,7 +32,7 @@ const FinancePieChart = (props: {
     PieChart,
   ]);
 
-  const E_HEIGHT = 350;
+  const E_HEIGHT = 280;
   const E_WIDTH = width - 30;
 
   const svgRef = useRef<any>(null);
@@ -79,7 +79,6 @@ const FinancePieChart = (props: {
           show: false,
         },
         data: chartData,
-        top: '10%',
       },
     ],
   };
@@ -98,7 +97,11 @@ const FinancePieChart = (props: {
     return () => chart?.dispose();
   }, [option]);
 
-  return <SvgChart ref={svgRef} useRNGH style={{marginTop: -30}} />;
+  return (
+    <View style={{height: E_HEIGHT}}>
+      <SvgChart ref={svgRef} useRNGH />
+    </View>
+  );
 };
 
 export default gestureHandlerRootHOC(FinancePieChart);

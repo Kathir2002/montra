@@ -35,20 +35,11 @@ const CommonText: FC<Props> = ({
   numberOfLines,
   ...props
 }) => {
-  const {height, width} = useWindowDimensions();
-  const [resolutionRatio, setResolutionRatio] = useState(1);
-  let orgHeight = 841.0909090909091;
-  let orgWidth = 392.72727272727275;
-  useEffect(() => {
-    const ratio = (height * width) / (orgWidth * orgHeight);
-    setResolutionRatio(ratio);
-  }, [height, width]);
-
-  const error = 12 * resolutionRatio;
-  const large = 16 * resolutionRatio;
-  const medium = 14 * resolutionRatio;
-  const header = 18 * resolutionRatio;
-  const appHeader = 28 * resolutionRatio;
+  const error = 12;
+  const large = 16;
+  const medium = 14;
+  const header = 18;
+  const appHeader = 28;
   const boldFont = appFonts.bold;
   const mediumFont = appFonts.medium;
 
@@ -76,7 +67,6 @@ const CommonText: FC<Props> = ({
         style,
       ]}
       {...props}
-      // numberOfLines={numberOfLines ? numberOfLines : 1}
       ellipsizeMode={ellipsizeMode}>
       {content}
       {props.children}

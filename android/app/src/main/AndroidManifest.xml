@@ -8,31 +8,32 @@
   <uses-permission android:name="android.permission.VIBRATE" />
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
+  <!-- To reduce the apk size - android:extractNativeLibs="true" -->
   <application
-    android:name=".MainApplication"
-    android:label="@string/app_name"
-    android:icon="@mipmap/ic_launcher"
-    android:roundIcon="@mipmap/ic_launcher_round"
-    android:allowBackup="false"
-    android:theme="@style/AppTheme"
-    android:usesCleartextTraffic="true"
-  >
-    <!-- For push Notification -->
-    <!-- <meta-data
-      android:name="com.google.firebase.messaging.default_notification_icon"
-      android:resource="@drawable/ic_notification_icon" /> -->
+      android:name=".MainApplication"
+      android:label="@string/app_name"
+      android:icon="@mipmap/ic_launcher"
+      android:roundIcon="@mipmap/ic_launcher_round"
+      android:allowBackup="false"
+      android:theme="@style/AppTheme"
+      android:extractNativeLibs="true"
+      android:usesCleartextTraffic="true">
+    <!-- for push notification popup-->
+    <meta-data
+        android:name="com.dieam.reactnativepushnotification.notification_foreground"
+        android:value="true" />
 
     <meta-data
-      android:name="asset_statements"
-      android:resource="@string/asset_statements" />
+        android:name="asset_statements"
+        android:resource="@string/asset_statements" />
+
     <activity
-      android:name=".MainActivity"
-      android:label="@string/app_name"
-      android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|screenSize|smallestScreenSize|uiMode"
-      android:launchMode="singleTask"
-      android:windowSoftInputMode="adjustResize"
-      android:exported="true"
-    >
+        android:name=".MainActivity"
+        android:label="@string/app_name"
+        android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|screenSize|smallestScreenSize|uiMode"
+        android:launchMode="singleTask"
+        android:windowSoftInputMode="adjustResize"
+        android:exported="true">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />
@@ -43,8 +44,8 @@
         <category android:name="android.intent.category.DEFAULT" />
         <category android:name="android.intent.category.BROWSABLE" />
 
-        <data android:scheme="http" />
-        <data android:host="montra-hero.onrender.com" />
+        <data android:scheme="https" />
+        <data android:host="montra.netlify.app" />
       </intent-filter>
     </activity>
   </application>

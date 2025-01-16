@@ -2,7 +2,7 @@
  * @format
  */
 
-import { AppRegistry } from 'react-native';
+import { AppRegistry, Linking } from 'react-native';
 import App from './App';
 import { name as appName } from './app.json';
 import { Provider } from 'react-redux';
@@ -24,7 +24,7 @@ const AppWrapper = () => {
     <Provider store={store}>
       <NavigationContainer
         linking={{
-          prefixes: ['https://montra-hero.onrender.com/'],
+          prefixes: ['https://montra.netlify.app/'],
           config: {
             screens: {
               SignIn: {
@@ -45,7 +45,31 @@ const AppWrapper = () => {
                   userToken: (userToken) => `${userToken}`,
                 },
               },
+              Help: {
+                path: "help-center"
+              },
+              Security: {
+                path: "profile/settings/security"
+              }
             },
+          },
+          async getInitialURL() {
+            // Handle app launch with deep link
+            const url = await Linking.getInitialURL();
+            if (url != null) {
+              return url;
+            }
+            return null;
+          },
+          // Handle deep link when app is running
+          subscribe(listener) {
+            const linkingSubscription = Linking.addEventListener('url', ({ url }) => {
+              listener(url);
+            });
+
+            return () => {
+              linkingSubscription.remove();
+            };
           },
         }}
         ref={navigationRef}>

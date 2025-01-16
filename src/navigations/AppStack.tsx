@@ -21,6 +21,8 @@ import ExportData from '@components/profile/ExportData';
 import Security from '@components/profile/Security';
 import {PanResponder, PanResponderInstance, View} from 'react-native';
 import {forSlideFromLeftAnimation} from '@src/lib/functions';
+import EditProfile from '@components/profile/EditProfile';
+import ChangePassword from '@components/profile/ChangePassword';
 
 const AppStack = () => {
   const AppStack = createStackNavigator();
@@ -51,7 +53,7 @@ const AppStack = () => {
   const resetInactivityTimeout = useCallback(() => {
     clearTimeout(timerId?.current!);
     timerId.current = setTimeout(() => {
-      console.log('==========TIMEOUT==========');
+      // console.log('==========TIMEOUT==========');
     }, 10000);
   }, []);
 
@@ -96,6 +98,8 @@ const AppStack = () => {
         <AppStack.Screen name="Currency" component={Currency} />
         <AppStack.Screen name="ExportData" component={ExportData} />
         <AppStack.Screen name="Security" component={Security} />
+        <AppStack.Screen name="EditProfile" component={EditProfile} />
+        <AppStack.Screen name="ChangePassword" component={ChangePassword} />
       </AppStack.Navigator>
     </View>
   );

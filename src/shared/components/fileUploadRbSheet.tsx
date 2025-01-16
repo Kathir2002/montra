@@ -1,5 +1,13 @@
 import {StyleSheet, View} from 'react-native';
-import React, {forwardRef, SetStateAction, Dispatch} from 'react';
+import React, {
+  forwardRef,
+  SetStateAction,
+  Dispatch,
+  useEffect,
+  JSXElementConstructor,
+  ReactElement,
+  SVGProps,
+} from 'react';
 
 import CameraIcon from '@assets/svg/camera.svg';
 import GalleryIcon from '@assets/svg/gallery.svg';
@@ -17,6 +25,7 @@ import {TouchableOpacity} from 'react-native';
 import {appColors} from '@shared/appColors';
 import {RBSheetRef} from './commonRBSheet/CommonRBSheet';
 import {Toast} from '@shared/ToastConfig';
+import {FormikValues} from 'formik';
 
 export interface DocumentInterface {
   ext: string;
@@ -26,13 +35,28 @@ export interface DocumentInterface {
   size: number;
 }
 
+interface Props {
+  name: string;
+  icon: (
+    props: SVGProps<SVGSVGElement>,
+  ) => ReactElement<any, string | JSXElementConstructor<any>>;
+  onPress: () => void;
+}
+
 interface PropsInterface {
   setDocument: Dispatch<SetStateAction<DocumentInterface | undefined>>;
   closeHandler: () => void;
+  formik?: FormikValues;
+  isUploadDocumentVisible?: boolean;
 }
 
-const FileUploadRbSheet = ({setDocument, closeHandler}: PropsInterface) => {
-  const uploadStaticData = [
+const FileUploadRbSheet = ({
+  setDocument,
+  closeHandler,
+  isUploadDocumentVisible = true,
+  formik,
+}: PropsInterface) => {
+  const uploadStaticData: Props[] = [
     {
       name: 'Camera',
       icon: CameraIcon,
@@ -43,13 +67,16 @@ const FileUploadRbSheet = ({setDocument, closeHandler}: PropsInterface) => {
       icon: GalleryIcon,
       onPress: () => openGallery(),
     },
-    {
+  ];
+  if (isUploadDocumentVisible) {
+    uploadStaticData.push({
       name: 'Document',
       icon: DocumentIcon,
       onPress: () => {
         CommonDataService.pickDocument()
           .then(res => {
             setDocument(res);
+            formik && formik?.setFieldTouched('isDocumentUpdate', true);
             closeHandler();
           })
           .catch(err => {
@@ -57,8 +84,8 @@ const FileUploadRbSheet = ({setDocument, closeHandler}: PropsInterface) => {
             Toast({message: err, type: 'error'});
           });
       },
-    },
-  ];
+    });
+  }
   const profilePictureUploadLimit = 2097152;
 
   let options: CameraOptions = {
@@ -90,6 +117,7 @@ const FileUploadRbSheet = ({setDocument, closeHandler}: PropsInterface) => {
                   type: result?.assets[0]?.type,
                 };
                 setDocument(data);
+                formik && formik?.setFieldTouched('isDocumentUpdate', true);
                 closeHandler();
               }
             } else {
@@ -127,6 +155,8 @@ const FileUploadRbSheet = ({setDocument, closeHandler}: PropsInterface) => {
                 type: result?.assets[0]?.type,
               };
               setDocument(data);
+
+              formik && formik?.setFieldTouched('isDocumentUpdate', true);
               closeHandler();
             }
           } else {
@@ -143,9 +173,11 @@ const FileUploadRbSheet = ({setDocument, closeHandler}: PropsInterface) => {
       style={{
         marginVertical: 10,
         flexDirection: 'row',
-        gap: 5,
+        gap: isUploadDocumentVisible ? 5 : 15,
         alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: isUploadDocumentVisible
+          ? 'space-between'
+          : 'flex-start',
         paddingHorizontal: 15,
       }}>
       {uploadStaticData.map((item, index) => {

@@ -1,17 +1,6 @@
 import React, {Dispatch, SetStateAction} from 'react';
 import moment from 'moment';
-import {
-  Platform,
-  TouchableNativeFeedback,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  View,
-} from 'react-native';
-import {
-  NavigationProp,
-  ParamListBase,
-  useNavigation,
-} from '@react-navigation/native';
+import {TouchableOpacity, View} from 'react-native';
 
 import {appColors} from '@shared/appColors';
 import CommonText from './commonText/CommonText';
@@ -24,7 +13,6 @@ import RentIcon from '@assets/svg/income/salary.svg';
 import TransferIcon from '@assets/svg/transfer.svg';
 import {paymentData, PaymentDataInterface} from '@assets/svg';
 import {getCurrencySymbol} from '@src/lib/functions';
-import RippleButton from './commonButton/RippleButton';
 
 const TransactionRenderItem = ({
   item,
@@ -35,8 +23,6 @@ const TransactionRenderItem = ({
   navigation: any;
   setChartDropdownOpen?: Dispatch<SetStateAction<boolean>>;
 }) => {
-  // const navigation: NavigationProp<ParamListBase> = useNavigation();
-
   const getIcon = () => {
     if (item?.transactionType === 'Expense') {
       switch (item?.transactionFor) {
@@ -67,7 +53,7 @@ const TransactionRenderItem = ({
     return forTransfer
       ? paymentData[item?.from?.paymentMode as keyof PaymentDataInterface]?.map(
           res => {
-            if (res?.nameCode === item?.from?.wallet) {
+            if (res?.nameCode === item?.from?.wallet?.walletName) {
               return <res.image width={25} height={25} key={res.nameCode} />;
             }
             return null;
@@ -75,7 +61,7 @@ const TransactionRenderItem = ({
         ) || null
       : paymentData[item?.paymentMode as keyof PaymentDataInterface]?.map(
           res => {
-            if (res.nameCode === item.wallet) {
+            if (res.nameCode === item.wallet?.walletName) {
               return <res.image width={25} height={25} key={res.nameCode} />;
             }
             return null;
@@ -84,77 +70,93 @@ const TransactionRenderItem = ({
   };
 
   return (
-    <RippleButton
+    <TouchableOpacity
+      activeOpacity={0.5}
       onPress={() => {
         if (setChartDropdownOpen) {
           setChartDropdownOpen(false);
         }
-        navigation.navigate(`${item.transactionType}Details`, item);
+        navigation.navigate(`${item.transactionType}Details`, {id: item?._id});
+      }}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 15,
+        borderWidth: 1,
+        borderColor: appColors.formBorderColor,
+        borderRadius: 5,
+        gap: 10,
+        padding: 5,
       }}>
       <View
         style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 10,
+          flex: 0.1,
+          backgroundColor: '#FCEED4',
+          padding: 10,
+          borderRadius: 20,
         }}>
-        <View
-          style={{
-            flex: 0.1,
-            backgroundColor: '#FCEED4',
-            padding: 10,
-            borderRadius: 20,
-          }}>
-          {getIcon()}
+        {getIcon()}
+      </View>
+      <View
+        style={{
+          flex: 0.9,
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}>
+        <View style={{gap: 3, flex: 0.5}}>
+          <CommonText
+            content={
+              item?.transactionFor
+                ? item?.transactionFor
+                : item?.transactionType
+            }
+            color={appColors.dark}
+            size={'label'}
+          />
+          <CommonText
+            content={moment(item?.transactionDate).format('DD MMM, hh:mm A')}
+            color={appColors.placeholderColor}
+            size={'error'}
+          />
         </View>
         <View
           style={{
-            flex: 0.9,
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
+            gap: 3,
+            flex: 0.5,
+            flexWrap: 'wrap',
           }}>
-          <View style={{gap: 3, flex: 0.75}}>
+          <CommonText
+            content={`${
+              item?.transactionType == 'Expense'
+                ? '-'
+                : item?.transactionType == 'Income'
+                ? '+'
+                : '-'
+            } ${getCurrencySymbol(item?.amount)}`}
+            color={appColors.dark}
+            size={'label'}
+            style={{textAlign: 'right'}}
+          />
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 5,
+              justifyContent: 'flex-end',
+            }}>
             <CommonText
-              content={
-                item?.transactionFor
-                  ? item?.transactionFor
-                  : item?.transactionType
-              }
-              color={appColors.dark}
-              size={'label'}
-            />
-            <CommonText
-              content={moment(item?.transactionDate).format('DD MMM, hh:mm A')}
-              color={appColors.placeholderColor}
               size={'error'}
+              content={item?.transactionType == 'Income' ? 'In' : 'From'}
+              color={appColors.placeholderColor}
             />
-          </View>
-          <View style={{gap: 3, flex: 0.25}}>
-            <CommonText
-              content={`${
-                item?.transactionType == 'Expense'
-                  ? '-'
-                  : item?.transactionType == 'Income'
-                  ? '+'
-                  : '-'
-              } ${getCurrencySymbol(item?.amount, false)}`}
-              color={appColors.dark}
-              size={'label'}
-            />
-            <View style={{flexDirection: 'row', alignItems: 'center', gap: 5}}>
-              <CommonText
-                size={'error'}
-                content={item?.transactionType == 'Income' ? 'In' : 'From'}
-                color={appColors.placeholderColor}
-              />
-              {getPaymentIcon(
-                item?.transactionType !== 'Transfer' ? false : true,
-              )}
-            </View>
+            {getPaymentIcon(
+              item?.transactionType !== 'Transfer' ? false : true,
+            )}
           </View>
         </View>
       </View>
-    </RippleButton>
+    </TouchableOpacity>
   );
 };
 

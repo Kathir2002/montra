@@ -252,7 +252,6 @@ const Budget = () => {
             borderTopRightRadius: 30,
             backgroundColor: appColors.light,
             padding: 15,
-            paddingBottom: 120,
           }}>
           {filterDate.getMonth() >= new Date().getMonth() && (
             <TouchableOpacity
@@ -289,6 +288,7 @@ const Budget = () => {
             contentContainerStyle={{
               flex: budget?.length === 0 ? 1 : undefined,
               gap: 10,
+              paddingBottom: 120,
             }}
             ListEmptyComponent={
               <View

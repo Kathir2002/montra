@@ -1,4 +1,4 @@
-import React, {useContext, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   Image,
   Modal,
@@ -12,9 +12,11 @@ import {
   NavigationProp,
   ParamListBase,
   RouteProp,
+  useIsFocused,
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
+import DocumentPicker from 'react-native-document-picker';
 
 import CommonButton from '../../shared/components/commonButton/CommonButton';
 import CommonHeader from '../../shared/components/commonHeader/CommonHeader';
@@ -25,59 +27,94 @@ import PDFIcon from '@assets/svg/fileFormats/pdf.svg';
 import WordIcon from '@assets/svg/fileFormats/word.svg';
 import {appColors} from '@shared/appColors';
 import {TransactionListInterface} from '@screens/Dashboard';
-import {formatBytes, getCurrencySymbol} from '@src/lib/functions';
+import {
+  formatBytes,
+  getCurrencySymbol,
+  openFileFromUrl,
+} from '@src/lib/functions';
 import CommonRBSheet, {
   RBSheetRef,
 } from '../../shared/components/commonRBSheet/CommonRBSheet';
 import TransactionService from '@services/transactionService';
 import {Toast} from '@shared/ToastConfig';
 import CommonLoader from '../../shared/components/commonLoader/CommonLoader';
-import AppContext from '@shared/appContext';
 import {paymentData, PaymentDataInterface} from '@assets/svg';
 import Popover from 'react-native-popover-view';
 import LottieView from 'lottie-react-native';
+import {useDispatch} from 'react-redux';
+import {updateIsTransactionAdded} from '@store/slice/appSlice';
+
+interface PropInterface {
+  id: string;
+}
 
 const CommonDetailsScreen = ({
   screenName,
 }: {
   screenName: 'Expense' | 'Income' | 'Transfer';
 }) => {
-  const route: RouteProp<{transactionDetails: TransactionListInterface}> =
-    useRoute();
-  const {setIsTransactionAdded} = useContext(AppContext);
+  const route: RouteProp<{transactionDetails: PropInterface}> = useRoute();
+  const dispatch = useDispatch();
   const navigation: NavigationProp<ParamListBase> = useNavigation();
+  const [transactionDetails, setTransactionDetails] =
+    useState<TransactionListInterface | null>(null);
+
   const [rbSheetOpen, setRbSheetOpen] = useState(false);
   const [isSuccessPopoverVisible, setIsSuccessPopoverVisible] = useState(false);
 
   const transferData = {
     fromAccount: paymentData[
-      route.params?.from?.paymentMode as keyof PaymentDataInterface
-    ]?.filter(item => item?.nameCode === route?.params?.from?.wallet)[0].name,
+      transactionDetails?.from?.paymentMode as keyof PaymentDataInterface
+    ]?.filter(
+      item => item?.nameCode === transactionDetails?.from?.wallet?.walletName,
+    )[0].name,
     toAccount: paymentData[
-      route.params?.to?.paymentMode as keyof PaymentDataInterface
-    ]?.filter(item => item?.nameCode === route?.params?.to?.wallet)[0].name,
+      transactionDetails?.to?.paymentMode as keyof PaymentDataInterface
+    ]?.filter(
+      item => item?.nameCode === transactionDetails?.to?.wallet?.walletName,
+    )[0].name,
     wallet: paymentData[
-      route.params?.paymentMode as keyof PaymentDataInterface
-    ]?.filter(item => item?.nameCode === route?.params?.wallet)[0]?.name,
+      transactionDetails?.paymentMode as keyof PaymentDataInterface
+    ]?.filter(item => {
+      return item?.nameCode === transactionDetails?.wallet?.walletName;
+    })[0]?.name,
   };
 
-  const [openDocumentViewPanel, setOpenDocumentViewPanel] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const isFocused = useIsFocused();
+  const [isLoading, setIsLoading] = useState(true);
   const deleteRBSheetRef = useRef<RBSheetRef>(null);
+  useEffect(() => {
+    if (isFocused) {
+      getTransactionDetails();
+    }
+  }, [isFocused]);
+
+  const getTransactionDetails = async () => {
+    await TransactionService.getTransactionDetails({id: route?.params?.id})
+      .then((res: any) => {
+        setTransactionDetails(res?.transaction);
+        setIsLoading(false);
+      })
+      .catch(err => {
+        setIsLoading(false);
+        Toast({type: 'error', message: err?.response?.data?.message});
+      });
+  };
 
   const handleDeleteTransaction = async () => {
     setIsLoading(true);
     await TransactionService.deleteTransaction({
-      transactionId: route?.params?._id,
+      transactionId: route?.params?.id,
     })
       .then((res: any) => {
         if (res?.success) {
           setIsLoading(false);
           deleteRBSheetRef.current?.close();
           setRbSheetOpen(false);
+          dispatch(updateIsTransactionAdded(true));
           setIsSuccessPopoverVisible(true);
-          setIsTransactionAdded(true);
           Vibration.vibrate(50);
+
           setTimeout(() => {
             navigation.navigate('Transaction');
             setIsSuccessPopoverVisible(false);
@@ -120,7 +157,7 @@ const CommonDetailsScreen = ({
       />
       <StatusBar
         backgroundColor={
-          rbSheetOpen || isSuccessPopoverVisible
+          rbSheetOpen || isSuccessPopoverVisible || isLoading
             ? appColors.transparentBackground
             : screenName == 'Income'
             ? appColors.incomeBg
@@ -145,19 +182,22 @@ const CommonDetailsScreen = ({
         }}>
         <View style={{alignItems: 'center', gap: 10}}>
           <CommonText
-            content={getCurrencySymbol(route?.params?.amount, false)}
+            content={getCurrencySymbol(
+              transactionDetails?.amount as number,
+              false,
+            )}
             color={appColors.light}
             size={'appHeader'}
             bold
           />
 
           <CommonText
-            content={route?.params?.notes}
+            content={transactionDetails?.notes}
             color={appColors.light}
             size={'header'}
           />
           <CommonText
-            content={moment(route?.params?.transactionDate).format(
+            content={moment(transactionDetails?.transactionDate).format(
               'dddd D MMMM YYYY  HH:mm',
             )}
             color={appColors.lightBg}
@@ -181,7 +221,7 @@ const CommonDetailsScreen = ({
         }}>
         <View style={{flex: 0.2, alignItems: 'center'}}>
           <CommonText content="Type" color={appColors.placeholderColor} />
-          <CommonText bold content={route.params.transactionType} />
+          <CommonText bold content={transactionDetails?.transactionType} />
         </View>
         <View style={{flex: 0.35, alignItems: 'center'}}>
           <CommonText
@@ -194,7 +234,7 @@ const CommonDetailsScreen = ({
             content={`${
               screenName === 'Transfer'
                 ? transferData?.fromAccount
-                : route.params?.transactionFor
+                : transactionDetails?.transactionFor
             }`}
           />
         </View>
@@ -224,33 +264,39 @@ const CommonDetailsScreen = ({
       />
       <View style={{flex: 1, backgroundColor: appColors.light, padding: 15}}>
         <View style={{}}>
+          {transactionDetails?.description && (
+            <CommonText
+              content={'Description'}
+              color={appColors.placeholderColor}
+            />
+          )}
           <CommonText
-            content={'Description'}
-            color={appColors.placeholderColor}
-          />
-          <CommonText
-            content={route.params.description}
+            content={transactionDetails?.description}
             color={appColors.dark}
           />
         </View>
-        {route?.params?.document ? (
+        {transactionDetails?.document ? (
           <View>
             <CommonText
               content="Attachment"
               color={appColors.placeholderColor}
             />
-            {route?.params?.document?.fileFormat == 'image/jpeg' ? (
+            {transactionDetails?.document?.fileFormat?.startsWith('image/') ? (
               <TouchableOpacity
                 activeOpacity={0.5}
                 onLongPress={() => {
-                  setOpenDocumentViewPanel(true);
+                  openFileFromUrl(
+                    transactionDetails?.document?.fileUrl,
+                    transactionDetails?.document?.fileFormat,
+                    false,
+                  );
                   Vibration.vibrate(50);
                 }}>
                 <Image
                   resizeMode="cover"
                   resizeMethod="auto"
                   source={{
-                    uri: route.params?.document?.fileUrl,
+                    uri: transactionDetails?.document?.fileUrl,
                   }}
                   height={150}
                   style={{
@@ -262,7 +308,17 @@ const CommonDetailsScreen = ({
                 />
               </TouchableOpacity>
             ) : (
-              <View style={{width: 200}}>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onLongPress={() => {
+                  Vibration.vibrate(50);
+                  openFileFromUrl(
+                    transactionDetails?.document?.fileUrl,
+                    transactionDetails?.document?.fileFormat,
+                    false,
+                  );
+                }}
+                style={{maxWidth: 210}}>
                 <View
                   style={{
                     gap: 5,
@@ -275,10 +331,12 @@ const CommonDetailsScreen = ({
                     paddingHorizontal: 10,
                     paddingVertical: 5,
                   }}>
-                  {route?.params?.document?.fileFormat == 'application/pdf' ? (
+                  {transactionDetails?.document?.fileFormat ===
+                  DocumentPicker.types.pdf ? (
                     <PDFIcon width={35} height={35} />
-                  ) : route?.params?.document?.fileFormat ==
-                    'application/msword' ? (
+                  ) : transactionDetails?.document?.fileFormat ===
+                      'application/msword' ||
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ? (
                     <WordIcon width={35} height={35} />
                   ) : (
                     <ExcelIcon width={35} height={35} />
@@ -286,19 +344,24 @@ const CommonDetailsScreen = ({
                   <View style={{flex: 1, gap: 5}}>
                     <CommonText
                       size={'medium'}
-                      content={route?.params?.document?.fileName}
+                      content={`${transactionDetails?.document?.fileName}.${
+                        transactionDetails?.document?.fileUrl?.split('.')[
+                          transactionDetails?.document?.fileUrl?.split('.')
+                            ?.length - 1
+                        ]
+                      }`}
                       color={appColors.placeholderColor}
                     />
                     <CommonText
                       size={'error'}
                       content={String(
-                        formatBytes(route?.params?.document?.fileSize),
+                        formatBytes(transactionDetails?.document?.fileSize),
                       )}
                       color={appColors.placeholderColor}
                     />
                   </View>
                 </View>
-              </View>
+              </TouchableOpacity>
             )}
           </View>
         ) : undefined}
@@ -312,7 +375,7 @@ const CommonDetailsScreen = ({
           <CommonButton
             title="Edit"
             onPress={() =>
-              navigation.navigate(`Add${screenName}`, route.params)
+              navigation.navigate(`Add${screenName}`, transactionDetails!)
             }
           />
         </View>
@@ -367,10 +430,6 @@ const CommonDetailsScreen = ({
       <Modal visible={isLoading} transparent animationType="fade">
         <CommonLoader />
       </Modal>
-      <Modal
-        visible={openDocumentViewPanel}
-        animationType="fade"
-        onRequestClose={() => setOpenDocumentViewPanel(false)}></Modal>
       <Popover
         isVisible={isSuccessPopoverVisible}
         popoverStyle={{

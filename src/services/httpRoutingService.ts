@@ -17,6 +17,12 @@ class httpRoutingService {
       params: queryParams,
     });
   }
+
+  /** Delete method Function which is used for delete method */
+  deleteMethod<T>(url: string, data: any, queryParams: boolean = false) {
+    // console.log('inside post method', url, data);
+    return axiosInstance.delete<T>(config.apiUrldb + url, data);
+  }
 }
 const HttpRoutingService = new httpRoutingService();
 export default HttpRoutingService;

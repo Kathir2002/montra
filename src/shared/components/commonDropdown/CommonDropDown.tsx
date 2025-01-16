@@ -60,15 +60,6 @@ const CommonDropDown: FC<CommonDropdownInterface> = ({
   listEmptyText = 'No Record Found',
   maxHeight,
 }) => {
-  const {height, width} = useWindowDimensions();
-  const [resolutionRatio, setResolutionRatio] = useState(1);
-  let orgHeight = 841.0909090909091;
-  let orgWidth = 392.72727272727275;
-  useEffect(() => {
-    const ratio = (height * width) / (orgWidth * orgHeight);
-    setResolutionRatio(ratio);
-  }, [height, width]);
-
   return (
     <AnimatedDropdown
       placeholder={placeholder}
@@ -92,21 +83,21 @@ const CommonDropDown: FC<CommonDropdownInterface> = ({
       showTickIcon={showTickIcon}
       selectedItemLabelStyle={[
         commonDropDownStyle?.selectedItemLabelStyle,
-        {fontSize: 13 * resolutionRatio},
+        {fontSize: 13},
         selectedItemLabelStyle,
       ]}
       autoScroll={true}
       labelStyle={[
         commonDropDownStyle?.labelStyle,
         {
-          fontSize: 13 * resolutionRatio,
+          fontSize: 13,
           color: disabled ? appColors.greyColor : '#000000',
         },
         labelStyle,
       ]}
       listItemLabelStyle={[
         commonDropDownStyle.listItemLabelStyle,
-        {fontSize: 13 * resolutionRatio},
+        {fontSize: 13},
         listItemLabelStyle,
       ]}
       selectedItemContainerStyle={[
@@ -118,10 +109,7 @@ const CommonDropDown: FC<CommonDropdownInterface> = ({
       arrowIconStyle={
         {tintColor: appColors.placeholderColor} as StyleProp<ViewStyle>
       }
-      placeholderStyle={[
-        commonDropDownStyle.placeholderStyle,
-        {fontSize: 13 * resolutionRatio},
-      ]}
+      placeholderStyle={[commonDropDownStyle.placeholderStyle, {fontSize: 13}]}
       ListEmptyComponent={({
         listMessageTextStyle,
         ActivityIndicatorComponent,

@@ -7,5 +7,6 @@
   "help": "Help",
   "fingerPrint": "FingerPrint",
   "pin": "PIN",
-  "settings": "Settings"
+  "settings": "Settings",
+  "changePassword": "Change Password"
 }

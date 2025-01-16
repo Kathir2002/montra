@@ -1,4 +1,7 @@
 import HttpRoutingService from '@services/httpRoutingService';
+import CommonDataService from '@shared/commonDataServices';
+import axios from 'axios';
+import {config} from '../../../environment';
 
 class accountService {
   addAccount(data: any) {
@@ -50,6 +53,38 @@ class accountService {
   }
   logoutUser(data: any) {
     return HttpRoutingService.postMethod('api/account/logout-user', data);
+  }
+  changePassword(data: any) {
+    return HttpRoutingService.postMethod('api/auth/change-password', data);
+  }
+  async updateUserDetails(data: any) {
+    const token = await CommonDataService.getToken();
+    if (token) {
+      return await new Promise(async (resolve, reject) => {
+        try {
+          const response = await axios.post(
+            config.apiUrldb + 'api/account/update-user-details',
+
+            data,
+            {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+                Authorization: `Bearer ${token}`,
+              },
+            },
+          );
+          resolve(response.data);
+        } catch (err) {
+          reject(err);
+        }
+      });
+    }
+  }
+  async deactivateAccount(data?: any) {
+    return HttpRoutingService.deleteMethod(
+      'api/account/deactivate-account',
+      data,
+    );
   }
 }
 const AccountService = new accountService();

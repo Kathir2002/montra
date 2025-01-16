@@ -177,7 +177,16 @@ const FinanceReport = () => {
     index: number;
   }) => {
     return (
-      <View key={index} style={{paddingVertical: 10, gap: 5}}>
+      <View
+        key={index}
+        style={{
+          marginVertical: 15,
+          borderWidth: 1,
+          borderColor: appColors.formBorderColor,
+          borderRadius: 5,
+          gap: 10,
+          padding: 5,
+        }}>
         <View
           style={{
             flex: 1,
@@ -213,7 +222,7 @@ const FinanceReport = () => {
             style={{}}
             content={`${
               filterData?.filterBy == 'Expense' ? '-' : '+'
-            } ${getCurrencySymbol(item?.value, false)}`}
+            } ${getCurrencySymbol(item?.value)}`}
             bold
             size={'large'}
             color={
@@ -283,6 +292,7 @@ const FinanceReport = () => {
         }
       />
       <ScrollView
+        scrollEnabled
         refreshControl={
           <RefreshControl
             onRefresh={onRefresh}
@@ -381,13 +391,12 @@ const FinanceReport = () => {
           </View>
 
           {selectedChart == 'Line' ? (
-            <>
+            <View>
               <CommonText
                 content={getCurrencySymbol(
                   filterData?.filterBy == 'Expense'
                     ? monthlyBalanceData?.totalExpense
                     : monthlyBalanceData?.totalIncome,
-                  false,
                 )}
                 bold
                 size={'header'}
@@ -399,9 +408,9 @@ const FinanceReport = () => {
                     Number(moment(b?.date)?.format('YYYYMMDD')),
                 )}
               />
-            </>
+            </View>
           ) : (
-            <View style={{flex: 1}}>
+            <View>
               <FinancePieChart
                 chartData={chartData?.pieChart}
                 transactionType={filterData?.filterBy}

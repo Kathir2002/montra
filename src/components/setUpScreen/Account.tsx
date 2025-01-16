@@ -4,7 +4,6 @@ import {
   Modal,
   StatusBar,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -58,7 +57,9 @@ const Account = () => {
   const renderItem = ({item, index}: {item: any; index: number}) => {
     const CurrentImage = paymentData[
       item?.accountType as keyof PaymentDataInterface
-    ].filter(ind => item.provider?.providerCode === ind.nameCode)[0].image;
+    ].filter(ind => {
+      return item?.provider?.providerCode === ind?.nameCode;
+    })[0]?.image;
 
     return (
       <TouchableOpacity
@@ -86,7 +87,7 @@ const Account = () => {
               padding: 10,
               borderRadius: 12,
             }}>
-            <CurrentImage height={30} width={30} />
+            {CurrentImage && <CurrentImage height={30} width={30} />}
           </View>
           <CommonText content={item?.name} bold />
         </View>
@@ -97,7 +98,6 @@ const Account = () => {
 
   return (
     <View style={{flex: 1, backgroundColor: appColors.light}}>
-      <StatusBar barStyle={'dark-content'} backgroundColor={appColors.light} />
       <View style={{flex: 1}}>
         <ImageBackground
           resizeMode="cover"
@@ -108,6 +108,12 @@ const Account = () => {
             title="Account"
             headerBgc="transparent"
           />
+          <StatusBar
+            barStyle={isLoading ? 'light-content' : 'dark-content'}
+            backgroundColor={
+              isLoading ? appColors.transparentBackground : appColors.light
+            }
+          />
           <CommonText
             content="Account Balance"
             style={{textAlign: 'center'}}
@@ -117,7 +123,7 @@ const Account = () => {
           <CommonText
             content={
               walletData?.totalAccountBalance
-                ? getCurrencySymbol(walletData?.totalAccountBalance, false)
+                ? getCurrencySymbol(walletData?.totalAccountBalance)
                 : `☹️`
             }
             style={{textAlign: 'center'}}

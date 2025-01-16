@@ -2,13 +2,11 @@ import {
   FlatList,
   I18nManager,
   KeyboardAvoidingView,
-  Modal,
   StatusBar,
   StyleSheet,
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
 import {appColors} from '@shared/appColors';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 import languageValue from '@assets/data/language.json';
@@ -23,19 +21,12 @@ import CommonText from '@shared/components/commonText/CommonText';
 import {useSelector} from 'react-redux';
 import {RootState} from '@store/store';
 import {useTranslation} from 'react-i18next';
-import CommonLoader from '@shared/components/commonLoader/CommonLoader';
 
 const Settings = () => {
-  const {t, i18n} = useTranslation(['settings']);
+  const {t} = useTranslation(['settings']);
 
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const userDetails = useSelector((state: RootState) => state.auth.userDetails);
-
-  const [isLoading, setIsLoading] = useState(false);
-  const securityData = [
-    {label: t('pin'), value: 'PIN'},
-    {label: t('fingerPrint'), value: 'FINGERPRINT'},
-  ];
 
   const RightComponent = ({data}: {data?: string}) => {
     return (
@@ -95,6 +86,11 @@ const Settings = () => {
       rightContent: () => <RightComponent />,
     },
     {
+      title: t('changePassword'),
+      onPress: () => navigation.navigate('ChangePassword'),
+      rightContent: () => <RightComponent />,
+    },
+    {
       title: t('about'),
       onPress: () => navigation.navigate('About'),
       rightContent: () => <RightComponent />,
@@ -141,21 +137,13 @@ const Settings = () => {
         leftIcon
         leftIconPressBack={() => navigation.goBack()}
       />
-      <StatusBar
-        backgroundColor={
-          isLoading ? appColors?.transparentBackground : appColors.light
-        }
-        barStyle={isLoading ? 'light-content' : 'dark-content'}
-      />
+      <StatusBar backgroundColor={appColors.light} barStyle={'dark-content'} />
       <FlatList
         data={settingsDataArray}
         renderItem={renderItem}
         contentContainerStyle={{paddingHorizontal: 15}}
         keyExtractor={(item, index) => index.toString()}
       />
-      <Modal visible={isLoading} transparent={true} animationType="fade">
-        <CommonLoader />
-      </Modal>
     </KeyboardAvoidingView>
   );
 };

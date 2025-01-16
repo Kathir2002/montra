@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useRef, useState} from 'react';
 import {
   FlatList,
   I18nManager,
@@ -17,7 +17,6 @@ import {
   NavigationProp,
   ParamListBase,
   RouteProp,
-  useIsFocused,
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
@@ -28,7 +27,6 @@ import CommonRBSheet, {
   RBSheetRef,
 } from '@shared/components/commonRBSheet/CommonRBSheet';
 import LottieView from 'lottie-react-native';
-import AccountService from '@services/setup/accountService';
 import {Toast} from '@shared/ToastConfig';
 import Popover from 'react-native-popover-view/dist/Popover';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
@@ -99,7 +97,6 @@ const Language = () => {
       </TouchableOpacity>
     );
   };
-  console.log(i18n.language);
 
   const handleChangeLanguage = async () => {
     await i18n

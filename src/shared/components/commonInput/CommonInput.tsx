@@ -10,7 +10,6 @@ import {
   ViewStyle,
   Animated,
   NativeTouchEvent,
-  useWindowDimensions,
 } from 'react-native';
 import {IconNode, Input} from '@rneui/base';
 import {appColors} from '@shared/appColors';
@@ -27,7 +26,9 @@ interface CommonInputInterface {
   errorStyle?: StyleProp<TextStyle>;
   labelStyle?: StyleProp<TextStyle>;
   inputContainerStyle?: StyleProp<ViewStyle>;
+  containerStyle?: StyleProp<ViewStyle>;
   disabled?: boolean;
+  maxLength?: number;
   value: string;
   editable?: boolean;
   onFocus?: () => void;
@@ -36,6 +37,8 @@ interface CommonInputInterface {
     | undefined;
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
   onPress?: ((e: NativeSyntheticEvent<NativeTouchEvent>) => void) | undefined;
+  labelVisible?: boolean;
+  leftIcon?: IconNode;
 }
 
 const CommonInput: FC<CommonInputInterface> = ({
@@ -56,16 +59,11 @@ const CommonInput: FC<CommonInputInterface> = ({
   autoCapitalize,
   onPress,
   onFocus,
+  maxLength,
+  containerStyle,
+  labelVisible = true,
+  leftIcon,
 }) => {
-  const {height, width} = useWindowDimensions();
-  const [resolutionRatio, setResolutionRatio] = useState(1);
-  let orgHeight = 841.0909090909091;
-  let orgWidth = 392.72727272727275;
-  useEffect(() => {
-    const ratio = (height * width) / (orgWidth * orgHeight);
-    setResolutionRatio(ratio);
-  }, [height, width]);
-
   const [isFocused, setIsFocused] = useState(false);
   const animatedIsFocused = useRef(new Animated.Value(0)).current;
 
@@ -92,14 +90,17 @@ const CommonInput: FC<CommonInputInterface> = ({
 
   const animatedLabelStyle = {
     fontFamily: appFonts.medium,
-
+    left: animatedIsFocused.interpolate({
+      inputRange: [0, 1],
+      outputRange: [leftIcon ? 35 : 5, 5],
+    }),
     top: animatedIsFocused.interpolate({
       inputRange: [0, 1],
       outputRange: [32, -8],
     }),
     fontSize: animatedIsFocused.interpolate({
       inputRange: [0, 1],
-      outputRange: [14 * resolutionRatio, 14 * resolutionRatio],
+      outputRange: [14, 14],
     }),
     color: animatedIsFocused.interpolate({
       inputRange: [0, 1],
@@ -108,34 +109,30 @@ const CommonInput: FC<CommonInputInterface> = ({
   };
 
   return (
-    <Animated.View style={{paddingTop: 18}}>
-      <Animated.Text
-        style={[CommonInputStyle.labelStyle, animatedLabelStyle, labelStyle]}>
-        {placeholder}
-      </Animated.Text>
+    <Animated.View style={{paddingTop: labelVisible ? 18 : 0}}>
+      {labelVisible ? (
+        <Animated.Text
+          style={[CommonInputStyle.labelStyle, animatedLabelStyle, labelStyle]}>
+          {placeholder}
+        </Animated.Text>
+      ) : undefined}
       <Input
         onPress={onPress}
+        maxLength={maxLength}
         value={value}
         onChangeText={onChangeText}
         placeholder=""
         keyboardType={keyboardType}
+        leftIcon={leftIcon}
         rightIcon={rightIcon}
         secureTextEntry={secureTextEntry}
         errorMessage={error ? error : undefined}
         autoCapitalize={autoCapitalize}
         placeholderTextColor={appColors.placeholderColor}
-        errorStyle={[
-          CommonInputStyle.errorStyle,
-          {fontSize: 12 * resolutionRatio},
-          errorStyle,
-        ]}
-        inputStyle={[
-          CommonInputStyle.inputStyle,
-          {fontSize: 14 * resolutionRatio},
-          inputStyle,
-        ]}
+        errorStyle={[CommonInputStyle.errorStyle, {fontSize: 12}, errorStyle]}
+        inputStyle={[CommonInputStyle.inputStyle, {fontSize: 14}, inputStyle]}
         labelStyle={labelStyle}
-        containerStyle={CommonInputStyle.containerStyle}
+        containerStyle={[CommonInputStyle.containerStyle, containerStyle]}
         inputContainerStyle={[
           CommonInputStyle.inputContainerStyle,
           inputContainerStyle,

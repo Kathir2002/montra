@@ -21,8 +21,16 @@ import {
   useNavigation,
 } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {updateIsLoggedin} from '@store/slice/appSlice';
+import {RootState} from '@store/store';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 
 interface ItemType {
   id: number | string;
@@ -32,15 +40,19 @@ interface ItemType {
 interface Props {}
 
 const PinGerneration = () => {
+  // Shared value for shake animation
+  const shakeValue = useSharedValue(0);
   const [pinValue, setPinValue] = useState('');
   const [isRetype, setIsRetype] = useState(false);
   const [Loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+  const userDetails = useSelector((state: RootState) => state.auth.userDetails);
   const [retypePinValue, setRetypePinValue] = useState('');
   const maxPinLength = 6; // Maximum length of the PIN
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const [isPinSetupDone, setIsPinSetupDone] = useState(false);
   const isFocused = useIsFocused();
+
   useEffect(() => {
     AsyncStorage.getItem('securityPin').then(value => {
       if (value) {
@@ -59,7 +71,9 @@ const PinGerneration = () => {
         .then(() => {
           setLoading(false);
           dispatch(updateIsLoggedin(true));
-          navigation.navigate('Setup');
+          if (!userDetails.isSetupDone) {
+            navigation.navigate('Setup');
+          }
           Toast({
             message: 'Security pin generated sucessfully',
             type: 'success',
@@ -70,21 +84,28 @@ const PinGerneration = () => {
           Toast({message: 'Something went wrong', type: 'error'});
         });
     } else {
-      await AsyncStorage.getItem('securityPin')
-        .then(value => {
-          const savedPin = value ? JSON.parse(value) : null;
+      if (pinValue.length === maxPinLength) {
+        await AsyncStorage.getItem('securityPin')
+          .then(value => {
+            const savedPin = value ? JSON.parse(value) : null;
 
-          if (savedPin === pinValue) {
+            if (savedPin === pinValue) {
+              setLoading(false);
+              dispatch(updateIsLoggedin(true));
+            } else {
+              triggerShakeAnimation();
+              setPinValue('');
+              Toast({message: 'Invalid user pin', type: 'error'});
+            }
+          })
+          .catch(() => {
             setLoading(false);
-            dispatch(updateIsLoggedin(true));
-          } else {
-            Toast({message: 'Invalid user pin', type: 'error'});
-          }
-        })
-        .catch(() => {
-          setLoading(false);
-          Toast({message: 'Something went wrong', type: 'error'});
-        });
+            Toast({message: 'Something went wrong', type: 'error'});
+          });
+      } else {
+        triggerShakeAnimation();
+        Toast({message: 'Please Enter PIN', type: 'error'});
+      }
     }
   };
 
@@ -159,7 +180,9 @@ const PinGerneration = () => {
         if (retypePinValue === pinValue) {
           userAddPinHandler();
         } else {
-          Toast({message: "Pin doesn't same", type: 'error'});
+          triggerShakeAnimation();
+          setRetypePinValue('');
+          Toast({message: "Pin doesn't match", type: 'error'});
         }
       } else {
         Toast({message: 'Please enter the pin', type: 'error'});
@@ -186,6 +209,24 @@ const PinGerneration = () => {
         }}>
         {item.value}
       </TouchableOpacity>
+    );
+  };
+
+  // Animation style for container
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{translateX: shakeValue.value}],
+    };
+  });
+  const triggerShakeAnimation = () => {
+    shakeValue.value = withSequence(
+      withTiming(-20, {duration: 100}),
+      withSpring(0, {
+        damping: 8,
+        mass: 0.5,
+        stiffness: 1000,
+        restDisplacementThreshold: 0.1,
+      }),
     );
   };
 
@@ -216,14 +257,17 @@ const PinGerneration = () => {
           }
           size={'large'}
         />
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 10,
-            marginTop: 30,
-          }}>
+        <Animated.View
+          style={[
+            {
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 10,
+              marginTop: 30,
+            },
+            animatedStyle,
+          ]}>
           {Array.from({length: maxPinLength}).map((pin, index) => {
             return (
               <View
@@ -244,7 +288,7 @@ const PinGerneration = () => {
               />
             );
           })}
-        </View>
+        </Animated.View>
       </View>
       <FlatList
         contentContainerStyle={{

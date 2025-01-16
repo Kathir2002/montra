@@ -52,15 +52,17 @@ const Transaction = () => {
 
   const transactionTypes = ['Income', 'Expense', 'Transfer'];
   const sortTypes = ['Highest', 'Lowest', 'Newest', 'Oldest'];
-  const categoryData = [
-    'Salary',
-    'Interest',
-    'Dividend',
-    'Rent',
-    'Shopping',
-    'Transportation',
-    'Food',
-  ];
+  // const categoryData = [
+  //   'Salary',
+  //   'Interest',
+  //   'Dividend',
+  //   'Rent',
+  //   'Shopping',
+  //   'Transportation',
+  //   'Food',
+  // ];
+
+  const [categoryData, setCategoryData] = useState<string[]>([]);
 
   const isToggleOpen = useSelector(
     (state: RootState) => state.auth.isFabToggleOpen,
@@ -85,7 +87,6 @@ const Transaction = () => {
     TransactionListInterface[]
   >([]);
   const [contentVerticalOffset, setContentVerticalOffset] = useState(0);
-  const [monthlyReportData, setMonthlyReportData] = useState({});
 
   useEffect(() => {
     if (isFocused) {
@@ -109,6 +110,26 @@ const Transaction = () => {
     setRefreshing(true);
     getTransactionList();
   };
+
+  const getCategoryData = async () => {
+    await TransactionService.getTransactionCategory({
+      type: 'All',
+      isAdd: true,
+    })
+      .then((res: any) => {
+        if (res?.success) {
+          setIsLoading(false);
+          setRefreshing(false);
+          setCategoryData(res?.rows);
+        }
+      })
+      .catch(err => {
+        setIsLoading(false);
+        setRefreshing(false);
+        Toast({message: err?.response?.data?.message, type: 'error'});
+      });
+  };
+
   const onValueChange = (event: EventTypes, newDate: Date) => {
     setShow(false);
     if (newDate) {
@@ -116,54 +137,15 @@ const Transaction = () => {
     }
   };
 
-  const getMaxTransaction = (
-    transactions: TransactionListInterface[],
-    type: 'Income' | 'Expense',
-  ) => {
-    const currentMonth = moment().month(); // 0-indexed (e.g., 7 for August)
-    const currentYear = moment().year();
-    return transactions
-      .filter(
-        t =>
-          moment(t.transactionDate).year() === currentYear &&
-          moment(t.transactionDate).month() === currentMonth &&
-          t.transactionType === type,
-      )
-      .reduce((max, t) => (t.amount > max.amount ? t : max), {amount: 0});
-  };
-
   const getTransactionList = async () => {
     await TransactionService.getTransactionList(filterData)
       .then(async (res: any) => {
         if (res?.success) {
           setTransactionDetails(res?.rows);
-          const data = {
-            month: new Date(),
-          };
-          await AccountService.getAccountBalance(data)
-            .then((response: any) => {
-              if (response?.success) {
-                const maxExpense = getMaxTransaction(res?.rows, 'Expense');
-                const maxIncome = getMaxTransaction(res?.rows, 'Income');
-
-                setMonthlyReportData({
-                  maxIncomeData: maxIncome,
-                  maxExpenseData: maxExpense,
-                  totalIncome: response?.balanceData?.totalIncome,
-                  totalExpenses: response?.balanceData?.totalExpenses,
-                });
-                setIsLoading(false);
-                setRefreshing(false);
-              }
-            })
-            .catch(error => {
-              setIsLoading(false);
-              setRefreshing(false);
-            });
+          getCategoryData();
         }
       })
       .catch(err => {
-        console.log(err.response?.data?.message);
         Toast({message: err?.response?.data?.message, type: 'error'});
       });
   };
@@ -276,7 +258,7 @@ const Transaction = () => {
         <ArrowRightIcon height={15} width={15} />
       </TouchableOpacity>
       <FlatList
-        renderItem={({item, index}) => (
+        renderItem={({item}) => (
           <TransactionRenderItem item={item} navigation={navigation} />
         )}
         data={transactionDetails}
@@ -382,8 +364,8 @@ const Transaction = () => {
             <View
               style={{
                 flexDirection: 'row',
-                justifyContent: 'space-between',
                 alignItems: 'center',
+                gap: 15,
                 paddingTop: 10,
               }}>
               {transactionTypes.map((item, index) => {
@@ -591,10 +573,7 @@ const Transaction = () => {
       <Modal
         visible={isFinanceStoryVisible}
         onRequestClose={() => setIsFinanceStoryVisible(false)}>
-        <FinanceStory
-          closeHandler={() => setIsFinanceStoryVisible(false)}
-          monthlyReportData={monthlyReportData}
-        />
+        <FinanceStory closeHandler={() => setIsFinanceStoryVisible(false)} />
       </Modal>
     </View>
   );

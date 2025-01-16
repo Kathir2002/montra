@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import {paymentData, PaymentDataInterface, PaymentType} from '@assets/svg';
 
-import React, {useContext, useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {appColors} from '@shared/appColors';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 import * as yup from 'yup';
@@ -39,11 +39,13 @@ import CommonDropDown from '@shared/components/commonDropdown/CommonDropDown';
 import MoreIcon from '@assets/svg/more.svg';
 import {Toast} from '@shared/ToastConfig';
 import {useDispatch, useSelector} from 'react-redux';
-import {updateCurrentUser} from '@store/slice/appSlice';
+import {
+  updateCurrentUser,
+  updateIsTransactionAdded,
+} from '@store/slice/appSlice';
 import {RootState} from '@store/store';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
 import AccountService from '@services/setup/accountService';
-import AppContext from '@shared/appContext';
 import DeleteIcon from '@assets/svg/delete.svg';
 import Popover from 'react-native-popover-view/dist/Popover';
 import {getCurrencySymbol} from '@src/lib/functions';
@@ -83,9 +85,10 @@ const AddNewAccount = () => {
   const [paymentDataList, setPaymentDataList] = useState({...paymentData});
   const [open, setOpen] = useState(false);
   const [isSuccessPopoverVisible, setIsSuccessPopoverVisible] = useState(false);
-  const {setIsTransactionAdded} = useContext(AppContext);
+
   const dirtyRBSheetRef = useRef<RBSheetRef>(null);
   const deleteRBSheetRef = useRef<RBSheetRef>(null);
+  const [selectedBanks, setSelectedBanks] = useState<PaymentType[]>([]);
 
   const [isLoading, setIsLoading] = useState(false);
   const rbSheetRef = useRef<RBSheetRef>(null);
@@ -196,6 +199,24 @@ const AddNewAccount = () => {
       });
   };
 
+  // Add new useEffect to handle initial selected bank positioning
+  useEffect(() => {
+    if (formik.values.provider.providerCode && formik.values.accountType) {
+      const allBanks =
+        paymentDataList[
+          formik.values.accountType as keyof PaymentDataInterface
+        ] || [];
+      const selectedBankIndex = allBanks.findIndex(
+        bank => bank.nameCode === formik.values.provider.providerCode,
+      );
+
+      if (selectedBankIndex > 7) {
+        const selectedBank = allBanks[selectedBankIndex];
+        setSelectedBanks([selectedBank]);
+      }
+    }
+  }, [formik.values.accountType, paymentDataList]);
+
   /**
    * function to change the accountBalance format
    * @param accountBalance
@@ -241,7 +262,7 @@ const AddNewAccount = () => {
         if (res?.success) {
           Toast({message: res?.message, type: 'success'});
           setSetupModalVisible(true);
-          setIsTransactionAdded(true);
+          dispatch(updateIsTransactionAdded(true));
           Vibration.vibrate(50);
           setTimeout(() => {
             dispatch(updateCurrentUser({...userDetails, isSetupDone: true}));
@@ -281,7 +302,7 @@ const AddNewAccount = () => {
         if (res?.success) {
           Toast({message: res?.message, type: 'success'});
           setSetupModalVisible(true);
-          setIsTransactionAdded(true);
+          dispatch(updateIsTransactionAdded(true));
           Vibration.vibrate(50);
           setTimeout(() => {
             setSetupModalVisible(false);
@@ -299,20 +320,36 @@ const AddNewAccount = () => {
       });
   };
 
-  const handlePress = (name: string, nameCode: string) => {
+  const handlePress = (name: string, nameCode: string, index: number) => {
     const {provider} = formik.values;
+    const allBanks =
+      paymentDataList[
+        formik.values.accountType as keyof PaymentDataInterface
+      ] || [];
+
     if (provider.providerCode === nameCode) {
       formik.setFieldValue('provider', {
         providerName: '',
         providerCode: '',
       });
-    } else {
-      formik.setFieldValue('provider', {
-        providerName: name,
-        providerCode: nameCode,
-      });
-      rbSheetRef.current?.close();
+      // Remove from selected banks if exists
+      setSelectedBanks(prev => prev.filter(bank => bank.nameCode !== nameCode));
+      return;
     }
+    formik.setFieldValue('provider', {
+      providerName: name,
+      providerCode: nameCode,
+    });
+    const selectedBankIndex = allBanks.findIndex(
+      bank => bank.nameCode === nameCode,
+    );
+    if (selectedBankIndex > 7) {
+      const selectedBank = allBanks[selectedBankIndex];
+      setSelectedBanks([selectedBank]);
+    } else {
+      setSelectedBanks([]);
+    }
+    rbSheetRef.current?.close();
   };
 
   const handleDeleteBankAccount = async () => {
@@ -327,7 +364,7 @@ const AddNewAccount = () => {
           setIsLoading(false);
           deleteRBSheetRef.current?.close();
           setIsSuccessPopoverVisible(true);
-          setIsTransactionAdded(true);
+          dispatch(updateIsTransactionAdded(true));
           Vibration.vibrate(50);
           setTimeout(() => {
             navigation.navigate('Account');
@@ -338,27 +375,49 @@ const AddNewAccount = () => {
       .catch(err => {
         deleteRBSheetRef.current?.close();
         setIsLoading(false);
+        console.log(err?.response?.data?.message);
         Toast({message: err?.response?.data?.message, type: 'error'});
       });
   };
 
-  const displayedBanks =
-    paymentDataList[formik.values.accountType as keyof PaymentDataInterface]
-      ?.length > 8
-      ? paymentDataList[
-          formik.values.accountType as keyof PaymentDataInterface
-        ]?.slice(0, 7)
-      : paymentDataList[
-          formik.values.accountType as keyof PaymentDataInterface
-        ];
+  // Function to get displayed banks including selected one
+  const getDisplayedBanks = () => {
+    const allBanks =
+      paymentDataList[
+        formik.values.accountType as keyof PaymentDataInterface
+      ] || [];
+    let displayedBanks: PaymentType[] = [];
 
-  displayedBanks?.length === 7
-    ? displayedBanks?.splice(7, 0, {
+    // Start with selected banks if any
+    if (selectedBanks.length > 0) {
+      displayedBanks = [...selectedBanks];
+    }
+
+    // Add remaining banks until we reach 7 total (excluding selected ones)
+    const remainingCount = 7 - displayedBanks.length;
+    const remainingBanks = allBanks
+      .filter(
+        bank =>
+          !selectedBanks.some(selected => selected.nameCode === bank.nameCode),
+      )
+      .slice(0, remainingCount);
+
+    displayedBanks = [...displayedBanks, ...remainingBanks];
+
+    // Add "See More" if there are more banks
+    if (allBanks.length > 7) {
+      displayedBanks.push({
         name: 'See More',
         nameCode: 'seeMore',
         image: MoreIcon,
-      })
-    : displayedBanks;
+      });
+    }
+
+    return displayedBanks;
+  };
+
+  const displayedBanks = getDisplayedBanks();
+
   return (
     <KeyboardAvoidingView
       onStartShouldSetResponder={() => {
@@ -487,7 +546,6 @@ const AddNewAccount = () => {
                     items={[
                       {label: 'UPI', value: 'UPI'},
                       {label: 'Bank', value: 'Bank'},
-                      {label: 'Pay Later', value: 'PayLater'},
                       {label: 'Cash', value: 'Cash'},
                     ]}
                     placeholder="Account Type"
@@ -529,9 +587,14 @@ const AddNewAccount = () => {
                                 activeOpacity={0.7}
                                 key={index}
                                 onPress={() => {
-                                  index === 7
+                                  index === displayedBanks.length - 1 &&
+                                  item.nameCode === 'seeMore'
                                     ? rbSheetRef?.current?.open()
-                                    : handlePress(item.name, item?.nameCode);
+                                    : handlePress(
+                                        item.name,
+                                        item?.nameCode,
+                                        index,
+                                      );
                                 }}
                                 style={{
                                   backgroundColor:
@@ -665,7 +728,7 @@ const AddNewAccount = () => {
                   activeOpacity={0.7}
                   key={index}
                   onPress={() => {
-                    handlePress(item.name, item?.nameCode);
+                    handlePress(item.name, item?.nameCode, index);
                   }}
                   style={{
                     backgroundColor:

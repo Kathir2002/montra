@@ -5,13 +5,6 @@ import notifee, {
   AndroidStyle,
 } from '@notifee/react-native';
 
-interface IChannelMappings {
-  urgent: string;
-  promotional: string;
-  system: string;
-  default: string;
-}
-
 interface IColorMap {
   urgent: string;
   promotional: string;
@@ -38,16 +31,16 @@ export interface MessageType {
 }
 
 // Fallback default channels
-const getDefaultChannels = (): NotificationChannelConfig[] => [
+const getDefaultChannels: NotificationChannelConfig[] = [
   {
-    id: 'income',
-    name: 'Income Alerts',
-    importance: AndroidImportance.DEFAULT,
+    id: 'budget',
+    name: 'Budget Alerts',
+    importance: AndroidImportance.HIGH,
     vibration: true,
     lights: true,
     badge: true,
     description:
-      'Stay informed about all income transactions, ensuring you never miss any credit to your accounts',
+      'Stay informed with timely notifications about your budget usage, helping you track and control your spending effectively.',
   },
   {
     id: 'expense',
@@ -60,14 +53,24 @@ const getDefaultChannels = (): NotificationChannelConfig[] => [
       'Get timely updates and reminders for all your expenses, helping you stay on top of your spending.',
   },
   {
-    id: 'transfer',
-    name: 'Transfer Alerts',
-    importance: AndroidImportance.LOW,
+    id: 'tips&articles',
+    name: 'Tips & Articles',
+    importance: AndroidImportance.HIGH,
     vibration: true,
     lights: true,
     badge: true,
     description:
-      'Receive notifications for all account transfers, keeping you updated on fund movements.',
+      'Receive valuable tips and tricks to help you manage your finances better.',
+  },
+  {
+    id: 'account',
+    name: 'Account Notifications',
+    importance: AndroidImportance.HIGH,
+    vibration: true,
+    lights: true,
+    badge: true,
+    description:
+      'Stay informed with notifications about account status changes, including deactivations and reactivations.',
   },
 ];
 
@@ -88,7 +91,7 @@ const useNotificationChannels = () => {
   const createNotificationChannels = useCallback(async () => {
     try {
       // Fetch channel configurations
-      const channelConfigs = getDefaultChannels();
+      const channelConfigs = getDefaultChannels;
 
       // Create channels and store their IDs
       const createdChannels = await Promise.all(
@@ -120,15 +123,7 @@ const useNotificationChannels = () => {
   // Determine channel for a specific message
   const determineChannelForMessage = useCallback(
     async (message: MessageType): Promise<string> => {
-      const channelMappings = {
-        urgent: 'critical',
-        promotional: 'marketing',
-        system: 'system_updates',
-        default: 'general',
-      };
-
-      const channelId =
-        channelMappings[message.type as keyof IChannelMappings] || 'general';
+      const channelId = message?.type || 'general';
 
       // Ensure channel exists
       await createNotificationChannels();
@@ -144,7 +139,6 @@ const useNotificationChannels = () => {
       try {
         // Determine appropriate channel
         const channelId = await determineChannelForMessage(message);
-
         // Display notification
         await notifee.displayNotification({
           title: message.title,
@@ -154,6 +148,7 @@ const useNotificationChannels = () => {
             importance: AndroidImportance.HIGH,
             color: getColorForMessageType(message.type),
             visibility: AndroidVisibility.PUBLIC,
+
             // Optional: Add more Android-specific styling
             style: message.data?.imageUrl
               ? {

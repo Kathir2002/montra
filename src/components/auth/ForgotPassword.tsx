@@ -1,5 +1,6 @@
 import {
   KeyboardAvoidingView,
+  Linking,
   Modal,
   ScrollView,
   StyleSheet,
@@ -18,11 +19,12 @@ import CommonText from '@shared/components/commonText/CommonText';
 import CommonInput from '@shared/components/commonInput/CommonInput';
 import {useFormik} from 'formik';
 import CommonButton from '@shared/components/commonButton/CommonButton';
-import {Image} from '@rneui/base';
+import {Icon, Image} from '@rneui/base';
 import LottieView from 'lottie-react-native';
 import AuthService from '@services/authService';
 import {Toast} from '@shared/ToastConfig';
 import {useTranslation} from 'react-i18next';
+import {TouchableOpacity} from 'react-native';
 
 const ForgotPassword = () => {
   const {t} = useTranslation('forgotPassword');
@@ -48,11 +50,12 @@ const ForgotPassword = () => {
     validateOnChange: true,
     validateOnMount: true,
     validateOnBlur: true,
-    onSubmit: () => {
+    onSubmit: async () => {
       const data = {
         email: formik.values.email,
       };
-      AuthService.forgotPassword({data})
+
+      await AuthService.forgotPassword({data})
         .then((res: any) => {
           if (res?.success) {
             setEmailModalVisible(true);
@@ -97,6 +100,12 @@ const ForgotPassword = () => {
           </View>
           <CommonInput
             autoCapitalize="none"
+            leftIcon={{
+              name: 'email',
+              type: 'fontisto',
+              color: appColors.placeholderColor,
+              size: 20,
+            }}
             placeholder={t('email')}
             value={formik.values.email}
             onChangeText={(text: string) => {
@@ -124,12 +133,18 @@ const ForgotPassword = () => {
         onRequestClose={() => {
           setEmailModalVisible(false);
         }}>
-        <View
-          style={{
-            flex: 1,
+        <CommonHeader
+          leftIconPressBack={() => setEmailModalVisible(false)}
+          title=""
+        />
+        <ScrollView
+          contentContainerStyle={{
+            flexGrow: 1,
             backgroundColor: appColors.light,
             justifyContent: 'space-evenly',
             paddingHorizontal: 15,
+            // justifyContent: 'center',
+            paddingBottom: 15,
           }}>
           <View
             style={{
@@ -143,7 +158,7 @@ const ForgotPassword = () => {
                 width: 320,
                 resizeMode: 'contain',
               }}
-              source={require('../../assets/images/emailOnTheWay.png')}
+              source={require('@assets/images/emailOnTheWay.png')}
             />
             <CommonText
               content={t('mailOnWay')}
@@ -160,14 +175,48 @@ const ForgotPassword = () => {
               style={{textAlign: 'center'}}
             />
           </View>
-          <CommonButton
-            title={t('backToLogin')}
-            onPress={() => {
-              setEmailModalVisible(false);
-              navigation.navigate('SignIn');
-            }}
-          />
-        </View>
+          <View
+            style={{
+              gap: 10,
+            }}>
+            <TouchableOpacity
+              onPress={() => {
+                Linking.openURL('https://gmail.app.goo.gl');
+              }}
+              activeOpacity={0.5}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                borderWidth: 1,
+                borderColor: appColors.formBorderColor,
+                borderRadius: 15,
+                justifyContent: 'center',
+                paddingVertical: 8,
+                gap: 10,
+                marginVertical: 15,
+                backgroundColor: appColors.buttonClear,
+              }}>
+              <Icon
+                name="email"
+                type="fontisto"
+                size={25}
+                color={appColors.dark}
+              />
+              <CommonText
+                content="Open Email App"
+                color={appColors.dark}
+                bold
+              />
+            </TouchableOpacity>
+            <CommonButton
+              title={t('backToLogin')}
+              onPress={() => {
+                setEmailModalVisible(false);
+                navigation.navigate('SignIn');
+              }}
+            />
+          </View>
+        </ScrollView>
       </Modal>
     </KeyboardAvoidingView>
   );

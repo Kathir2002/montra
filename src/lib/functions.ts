@@ -4,6 +4,9 @@ import {
 } from '@react-navigation/stack';
 import {store} from '@store/store';
 import * as CryptoJS from 'react-native-crypto-js';
+import RNFetchBlob from 'react-native-blob-util';
+import {Alert, Linking, Platform} from 'react-native';
+
 /**
  * async function for encrypting the tokens and id details
  */
@@ -46,17 +49,62 @@ export const generateUniqueColors = (count: number) => {
 };
 
 export const getCurrencySymbol = (amount: number, formatting = true) => {
-  const curencySymbol = store.getState().auth.userDetails.currencySymbol;
+  const currencySymbol = store.getState().auth.userDetails.currencySymbol;
+
+  // Define currency-specific formatting rules
+  const currencyFormats: Record<
+    string,
+    {
+      minimumFractionDigits: number;
+      maximumFractionDigits: number;
+      useGrouping: boolean;
+    }
+  > = {
+    USD: {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+      useGrouping: true,
+    },
+    EUR: {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+      useGrouping: true,
+    },
+    JPY: {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+      useGrouping: false,
+    },
+    // Add more currencies as needed
+    INR: {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+      useGrouping: true,
+    },
+    // Default formatting
+    default: {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+      useGrouping: false,
+    },
+  };
+
+  // Get the appropriate format for the currency, or fall back to 'default'
+  const currencyFormat =
+    currencyFormats[currencySymbol!] || currencyFormats['default'];
 
   if (formatting) {
     return amount?.toLocaleString('en-US', {
       style: 'currency',
-      currency: curencySymbol,
+      currency: currencySymbol,
+      minimumFractionDigits: currencyFormat.minimumFractionDigits,
+      maximumFractionDigits: currencyFormat.maximumFractionDigits,
+      useGrouping: currencyFormat.useGrouping,
     });
   } else {
     return amount?.toLocaleString('en', {
       style: 'currency',
-      currency: curencySymbol,
+      currency: currencySymbol,
       minimumFractionDigits: 0, // No decimal places
       maximumFractionDigits: 0, // No decimal places
       useGrouping: false, // No commas
@@ -77,4 +125,58 @@ export const forSlideFromLeftAnimation = ({
       transform: [{translateX}],
     },
   };
+};
+
+export const openFileFromUrl = async (
+  fileUrl: string,
+  mimeType: string,
+  isLocalFile: boolean,
+) => {
+  try {
+    // Extract the file name from the URL
+    const fileName = fileUrl.split('/').pop();
+    if (!isLocalFile) {
+      // Define the path to save the file
+      const {dirs} = RNFetchBlob.fs;
+      const filePath =
+        Platform.OS === 'ios'
+          ? `${dirs.DocumentDir}/${fileName}`
+          : `${dirs.LegacyDownloadDir}/${fileName}`;
+
+      // Download the file
+      const response = await RNFetchBlob.config({
+        fileCache: true,
+        path: filePath, // Path where the file will be saved
+      }).fetch('GET', fileUrl);
+
+      if (response.path()) {
+        // Open the file
+        if (Platform.OS === 'ios') {
+          // Open the file using the default iOS viewer
+          Linking.openURL(`file://${response.path()}`);
+        } else {
+          RNFetchBlob.android.actionViewIntent(response.path(), mimeType);
+        }
+      } else {
+        Alert.alert('Error', 'File download failed');
+      }
+    } else {
+      // Handle Android
+      if (Platform.OS === 'android') {
+        const sanitizedFilePath = fileUrl.replace('file://', '');
+        await RNFetchBlob.android.actionViewIntent(sanitizedFilePath, mimeType);
+      }
+      // Handle iOS
+      else if (Platform.OS === 'ios') {
+        if (fileUrl.startsWith('file://')) {
+          await Linking.openURL(fileUrl);
+        } else {
+          await Linking.openURL(`file://${fileUrl}`);
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error opening file:', error);
+    Alert.alert('Error', 'Unable to open the file.');
+  }
 };

@@ -4,8 +4,6 @@ import GPay from '../svg/upi/gpay.svg';
 import Paytm from '../svg/upi/paytm.svg';
 import PhonePe from '../svg/upi/phonepe.svg';
 
-import AmazonPayLater from '../svg/paylater/amazonPayLater.svg';
-
 import AxisBank from '../svg/bank/axis.svg';
 import BankOfBaroda from '../svg/bank/bankOfBaroda.svg';
 import CanaraBank from '../svg/bank/canara.svg';
@@ -57,14 +55,6 @@ const upiData = [
     name: 'PhonePe',
     nameCode: 'phonePe',
     image: PhonePe,
-  },
-];
-
-const payLaterData = [
-  {
-    name: 'Amazon Pay Later',
-    nameCode: 'amazonPayLater',
-    image: AmazonPayLater,
   },
 ];
 
@@ -166,14 +156,12 @@ const cashData = [
 
 export const paymentData = {
   UPI: upiData,
-  PayLater: payLaterData,
   Bank: bankData,
   Cash: cashData,
 };
 
 export interface PaymentDataInterface {
   UPI: PaymentType[];
-  PayLater: PaymentType[];
   Bank: PaymentType[];
   Cash: PaymentType[];
 }
