@@ -1,5 +1,6 @@
 import {
   Modal,
+  NativeModules,
   Platform,
   ScrollView,
   StatusBarProps,
@@ -87,6 +88,15 @@ const Profile = () => {
 
   const logoutUser = async () => {
     await GoogleSignin.signOut();
+    if (Platform.OS === 'android') {
+      try {
+        // Before clearing user data
+        await NativeModules.ShortcutModule.removeShortcuts();
+        // Proceed with logout
+      } catch (error) {
+        console.error('Failed to remove shortcuts:', error);
+      }
+    }
     // Perform additional cleanup and logout operations.
     const ASYNC_KEYS = await AsyncStorage.getAllKeys();
     await EncryptedStorage.clear();

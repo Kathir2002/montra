@@ -2,6 +2,8 @@ import {
   Dimensions,
   KeyboardAvoidingView,
   Modal,
+  NativeModules,
+  Platform,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -105,6 +107,14 @@ const Signin = () => {
     await AuthService.signin({data})
       .then(async (res: any) => {
         if (res?.success) {
+          if (Platform.OS === 'android') {
+            try {
+              // After successful login API call
+              await NativeModules.ShortcutModule.createShortcuts();
+            } catch (error) {
+              console.error('Failed to create shortcuts:', error);
+            }
+          }
           setBtnLoader(false);
           riveRef.current?.setInputState('Login Machine', 'trigSuccess', true);
           CommonDataService.setToken(res?.token);

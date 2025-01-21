@@ -19,14 +19,19 @@ import Help from '@components/profile/Help';
 import Currency from '@components/profile/Currency';
 import ExportData from '@components/profile/ExportData';
 import Security from '@components/profile/Security';
-import {PanResponder, PanResponderInstance, View} from 'react-native';
+import {NativeEventEmitter, NativeModules, Platform, View} from 'react-native';
 import {forSlideFromLeftAnimation} from '@src/lib/functions';
 import EditProfile from '@components/profile/EditProfile';
 import ChangePassword from '@components/profile/ChangePassword';
+import {
+  NavigationProp,
+  ParamListBase,
+  useNavigation,
+} from '@react-navigation/native';
 
 const AppStack = () => {
   const AppStack = createStackNavigator();
-
+  const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const AddIncome = () => {
     return <CommonAddScreen screenName="Income" />;
   };
@@ -48,30 +53,46 @@ const AppStack = () => {
   const TransferDetails = () => {
     return <CommonDetailsScreen screenName="Transfer" />;
   };
-  const timerId = useRef<NodeJS.Timeout | null>(null);
-
-  const resetInactivityTimeout = useCallback(() => {
-    clearTimeout(timerId?.current!);
-    timerId.current = setTimeout(() => {
-      // console.log('==========TIMEOUT==========');
-    }, 10000);
-  }, []);
 
   useEffect(() => {
-    resetInactivityTimeout();
-  }, [resetInactivityTimeout]);
+    if (Platform.OS === 'android') {
+      NativeModules.InitialRoute.getInitialRoute()
+        .then((route: string | null) => {
+          if (route) {
+            handleNavigation(route);
+          }
+        })
+        .catch((err: any) => {
+          console.log('Error in handling shortcut navigation', err);
+        });
 
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponderCapture: () => {
-        resetInactivityTimeout();
-        return false;
-      },
-    }),
-  ).current;
+      // Listen for shortcut events (app is running)
+      const eventEmitter = new NativeEventEmitter(NativeModules.ShortcutModule);
+      const subscription = eventEmitter.addListener('handleShortcut', event => {
+        if (event.route) {
+          handleNavigation(event.route);
+        }
+      });
+
+      return () => {
+        subscription.remove();
+      };
+    }
+  }, []);
+
+  const handleNavigation = (route: string) => {
+    switch (route) {
+      case 'expense':
+        navigation.navigate('AddExpense');
+        break;
+      case 'income':
+        navigation.navigate('AddIncome');
+        break;
+    }
+  };
 
   return (
-    <View {...panResponder.panHandlers} style={{flex: 1}}>
+    <View style={{flex: 1}}>
       <AppStack.Navigator
         initialRouteName="BottomTab"
         screenOptions={{

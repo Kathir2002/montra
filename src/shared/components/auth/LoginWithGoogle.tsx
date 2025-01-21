@@ -1,5 +1,10 @@
 import React, {Dispatch, SetStateAction} from 'react';
-import {StyleSheet, TouchableOpacity} from 'react-native';
+import {
+  NativeModules,
+  Platform,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import {useDispatch} from 'react-redux';
 import AuthService from '@services/authService';
@@ -72,6 +77,14 @@ const LoginWithGoogle = (props: LoginWithGoogleProps) => {
         })
           .then(async (res: any) => {
             if (res?.success) {
+              if (Platform.OS === 'android') {
+                try {
+                  // After successful login API call
+                  await NativeModules.ShortcutModule.createShortcuts();
+                } catch (error) {
+                  console.error('Failed to create shortcuts:', error);
+                }
+              }
               CommonDataService.setToken(res?.token);
               dispatch(
                 updateCurrentUser({

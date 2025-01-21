@@ -11,11 +11,6 @@ import {
 
 const SplashScreen = () => {
   // const navigation: NavigationProp<ParamListBase> = useNavigation();
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     navigation.navigate('SignIn');
-  //   }, 2000);
-  // }, []);
 
   return (
     <View

@@ -3,6 +3,7 @@ import {
   BackHandler,
   Linking,
   LogBox,
+  NativeModules,
   Platform,
   StatusBar,
 } from 'react-native';
