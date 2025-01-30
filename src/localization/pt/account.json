@@ -1,0 +1,29 @@
+{
+    "ACCOUNT": "Conta",
+    "ACCOUNT_BALANCE": "Saldo da conta",
+    "NO_ACCOUNT_FOUND": "Nenhuma conta encontrada",
+    "ADD_NEW_WALLET": "+ Adicione nova carteira",
+    "NO": "Não",
+    "YES": "Sim",
+    "WALLET_BALACE_INVALID": "Digite um saldo de carteira válido",
+    "WALLET_BALACE_REQUIRED": "Digite o saldo da carteira para continuar",
+    "FIELD_REQUIRED": "Este campo é obrigatório",
+    "SELECT_ACCOUNT": "Selecione uma conta bancária",
+    "EDIT_WALLET": "Editar carteira",
+    "ADD_NEW_WALLET_HEADING": "Adicione nova carteira",
+    "NAME": "Nome",
+    "ACCOUNT_TYPE": "Tipo de conta",
+    "ACCOUNT_TYPE_LABEL": {
+        "UPI": "Upi",
+        "BANK": "Banco",
+        "CASH": "Dinheiro"
+    },
+    "NO_CHANGES": "Você não tem nenhuma alteração para salvar!",
+    "YOURE_SET": "Você está definido!",
+    "REMOVE_WALLET": "Remover esta carteira?",
+    "REMOVE_WALLET_DESCRIPTION": "Tem certeza que você quer remover esta carteira?",
+    "WALLET_REMOVED_SUCCESS": "A carteira foi removida com sucesso",
+    "SETUP_ACCOUNT": "Vamos configurar sua conta!",
+    "SETUP_ACCOUNT_DESCRIPTION": "A conta pode ser seu banco, cartão de crédito ou sua carteira.",
+    "LETS_GO": "Vamos"
+}

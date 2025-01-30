@@ -33,6 +33,7 @@ import moment from 'moment';
 import AccountService from '@services/setup/accountService';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
 import BudgetService from '@services/setup/budgetSerice';
+import {useTranslation} from 'react-i18next';
 
 interface BudgetInterface {
   _id: string;
@@ -92,7 +93,8 @@ const getIcon = (story: {transactionFor: string; transactionType: string}) => {
   }
 };
 
-const FinanceStory = ({closeHandler}: any) => {
+const FinanceStory = ({closeHandler}: {closeHandler: () => void}) => {
+  const {t} = useTranslation('finaceReport');
   const {width} = useWindowDimensions();
   const pausedProgress = useRef(0);
   const progressAnim = useRef(new Animated.Value(0)).current;
@@ -325,7 +327,7 @@ const FinanceStory = ({closeHandler}: any) => {
           paddingHorizontal: 15,
         }}>
         <CommonText
-          content="This Month"
+          content={t('THIS_MONTH')}
           color={appColors.light}
           size={'large'}
           style={{textAlign: 'center', marginTop: 10}}
@@ -334,8 +336,8 @@ const FinanceStory = ({closeHandler}: any) => {
           style={{paddingTop: 150, textAlign: 'center'}}
           content={
             story?.transactionType == 'Expense'
-              ? 'You Spend 💸'
-              : 'You Earned 💰'
+              ? t('YOU_SPEND')
+              : t('YOU_EARNED')
           }
           color={appColors.light}
           bold
@@ -369,15 +371,7 @@ const FinanceStory = ({closeHandler}: any) => {
             <View>
               <CommonText
                 style={{textAlign: 'center'}}
-                content="and your biggest"
-                bold
-                size={'label'}
-              />
-              <CommonText
-                style={{textAlign: 'center'}}
-                content={`${
-                  currentStoryIndex == 0 ? 'spending' : 'income'
-                } is from`}
+                content={currentStoryIndex == 0 ? t('SPENDING') : t('INCOME')}
                 bold
                 size={'label'}
               />
@@ -456,7 +450,7 @@ const FinanceStory = ({closeHandler}: any) => {
           justifyContent: 'flex-start',
         }}>
         <CommonText
-          content="This Month"
+          content={t('THIS_MONTH')}
           color={appColors.light}
           size={'large'}
           style={{textAlign: 'center', marginTop: 10}}
@@ -473,12 +467,14 @@ const FinanceStory = ({closeHandler}: any) => {
               justifyContent: 'center',
             }}>
             <CommonText
-              content={`${story?.budget?.length} of ${story?.totalQuantity} Budget is`}
+              content={`${story?.budget?.length} of ${story?.totalQuantity} ${t(
+                'BUDGET_IS',
+              )}`}
               color={appColors.light}
               size={'appHeader'}
             />
             <CommonText
-              content={`exceeds the limit`}
+              content={t('EXCEEDS_LIMIT')}
               color={appColors.light}
               size={'appHeader'}
             />
@@ -654,7 +650,7 @@ const FinanceStory = ({closeHandler}: any) => {
                 getCurrentStoryName() === 'Quote' ? undefined : (
                   <CommonButton
                     buttonType="clear"
-                    title="See the full detail"
+                    title={t('SEE_FULL_DETAIL')}
                     onPress={() => {
                       navigation.navigate('FinanceReport');
                       closeHandler();

@@ -69,6 +69,7 @@ import DeleteDocumetSvg from '@assets/svg/delete-document.svg';
 import {updateIsTransactionAdded} from '@store/slice/appSlice';
 import {useDispatch} from 'react-redux';
 import {Mode} from 'react-native-popover-view/dist/Types';
+import {useTranslation} from 'react-i18next';
 interface FormValues {
   newDropdownItem: string;
   description: string;
@@ -122,7 +123,7 @@ const CommonAddScreen: FC<{
     };
   }> = useRoute();
   const deleteRBSheetRef = useRef<RBSheetRef>(null);
-
+  const {t} = useTranslation('transaction');
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [walletOpen, setWalletOpen] = useState(false);
@@ -250,7 +251,7 @@ const CommonAddScreen: FC<{
         if (res?.success) {
           setIsLoading(false);
           res?.rows?.push({
-            categoryName: '+ Add item',
+            categoryName: t('ADD_ITEM'),
             categoryId: 'custom',
           });
 
@@ -275,19 +276,19 @@ const CommonAddScreen: FC<{
     description: yup.string(),
     notes: yup.string().when('currentScreenName', (data, schema) => {
       if (data[0] === 'Expense' || data[0] === 'Income') {
-        return schema.required('This field is required');
+        return schema.required(t('FIELD_REQUIRED'));
       }
       return schema;
     }),
     category: yup.string().when('currentScreenName', (data, schema) => {
       if (data[0] !== 'Transfer') {
-        return schema.required('This field is required');
+        return schema.required(t('FIELD_REQUIRED'));
       }
       return schema;
     }),
     transactionDate: yup.date().when('currentScreenName', (data, schema) => {
       if (data[0] !== 'Budget') {
-        return schema.required('Transaction date is required');
+        return schema.required(t('DATE_REQUIRED'));
       }
       return schema;
     }),
@@ -295,60 +296,58 @@ const CommonAddScreen: FC<{
       .string()
       .matches(
         /(?:₹|USD|EUR|AUG)?[a-zA-Z]*[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?/,
-        'Enter a valid amount',
+        t('ENTER_VALID_AMOUNT'),
       )
       .required(
-        `Please Enter the ${
-          screenName == 'Income'
-            ? 'income'
-            : screenName == 'Expense'
-            ? 'expense'
-            : screenName == 'Transfer'
-            ? 'transfer'
-            : 'budget'
-        } amount`,
+        screenName == 'Income'
+          ? t('ENTER_INCOME_AMOUNT')
+          : screenName == 'Expense'
+          ? t('ENTER_EXPENSE_AMOUNT')
+          : screenName == 'Transfer'
+          ? t('ENTER_TRANSFER_AMOUNT')
+          : t('ENTER_BUDGET_AMOUNT'),
       ),
     wallet: yup.string().when('currentScreenName', (data, schema) => {
       if (data[0] === 'Expense' || data[0] === 'Income') {
-        return schema.required('This field is required');
+        return schema.required(t('FIELD_REQUIRED'));
       }
       return schema;
     }),
     walletName: yup.string().when('currentScreenName', (data, schema) => {
       if (data[0] === 'Expense' || data[0] === 'Income') {
-        return schema.required('This field is required');
+        return schema.required(t('FIELD_REQUIRED'));
       }
       return schema;
     }),
 
     from: yup.object().when('currentScreenName', (data, schema) => {
       if (data[0] === 'Transfer') {
-        return schema.required('This field is required');
+        return schema.required(t('FIELD_REQUIRED'));
       }
       return schema;
     }),
     to: yup.object().when('currentScreenName', (data, schema) => {
       if (data[0] === 'Transfer') {
-        return schema.required('This field is required');
+        return schema.required(t('FIELD_REQUIRED'));
       }
       return schema;
     }),
 
     endAfter: yup.date().when('isRepeatSelected', (data, schema) => {
       if (data[0]) {
-        return schema.required('This field is required');
+        return schema.required(t('FIELD_REQUIRED'));
       }
       return schema;
     }),
     receiveAlertValue: yup.date().when('isReceiveAlert', (data, schema) => {
       if (data[0]) {
-        return schema.required('This field is required');
+        return schema.required(t('FIELD_REQUIRED'));
       }
       return schema;
     }),
     frequency: yup.string().when('isRepeatSelected', (data, schema) => {
       if (data[0]) {
-        return schema.required('This field is required');
+        return schema.required(t('FIELD_REQUIRED'));
       }
       return schema;
     }),
@@ -356,7 +355,7 @@ const CommonAddScreen: FC<{
       .string()
       .when(['isRepeatSelected', 'frequency'], (data, schema) => {
         if (data[0] && data[1] === 'yearly') {
-          return schema.required('This field is required');
+          return schema.required(t('FIELD_REQUIRED'));
         }
         return schema;
       }),
@@ -367,7 +366,7 @@ const CommonAddScreen: FC<{
           (data[0] && data[1] === 'monthly') ||
           (data[0] && data[1] === 'yearly')
         ) {
-          return schema.required('This field is required');
+          return schema.required(t('FIELD_REQUIRED'));
         }
         return schema;
       }),
@@ -375,7 +374,7 @@ const CommonAddScreen: FC<{
       .string()
       .when(['isRepeatSelected', 'frequency'], (data, schema) => {
         if (data[0] && data[1] === 'weekly') {
-          return schema.required('This field is required');
+          return schema.required(t('FIELD_REQUIRED'));
         }
         return schema;
       }),
@@ -800,13 +799,13 @@ const CommonAddScreen: FC<{
   });
 
   const days = [
-    {label: 'Sunday', value: 0},
-    {label: 'Monday', value: 1},
-    {label: 'Tuesday', value: 2},
-    {label: 'Wednesday', value: 3},
-    {label: 'Thursday', value: 4},
-    {label: 'Friday', value: 5},
-    {label: 'Saturday', value: 6},
+    {label: t('DAYS.SUNDAY'), value: 0},
+    {label: t('DAYS.MONDAY'), value: 1},
+    {label: t('DAYS.TUESDAY'), value: 2},
+    {label: t('DAYS.WEDNESDAY'), value: 3},
+    {label: t('DAYS.THURSDAY'), value: 4},
+    {label: t('DAYS.FRIDAY'), value: 5},
+    {label: t('DAYS.SATURDAY'), value: 6},
   ];
 
   const isFieldValid = (fieldName: keyof FormValues) => {
@@ -925,8 +924,20 @@ const CommonAddScreen: FC<{
           }
           title={
             screenName == 'Budget'
-              ? `${route?.params?.budget ? 'Edit' : 'Create'} Budget`
-              : screenName
+              ? route?.params?.budget
+                ? t('EDIT_BUDGET')
+                : t('CREATE_BUDGET')
+              : route?.params?.amount
+              ? screenName === 'Expense'
+                ? t('EDIT_EXPENSE')
+                : screenName == 'Income'
+                ? t('EDIT_INCOME')
+                : t('EDIT_TRANSFER')
+              : screenName === 'Expense'
+              ? t('CREATE_EXPENSE')
+              : screenName == 'Income'
+              ? t('CREATE_INCOME')
+              : t('CREATE_TRANSFER')
           }
           leftIconPressBack={() => {
             formik.dirty || formik?.touched?.isDocumentUpdate
@@ -957,8 +968,8 @@ const CommonAddScreen: FC<{
             <CommonText
               content={
                 screenName == 'Budget'
-                  ? 'How much do yo want to spend?'
-                  : 'How much?'
+                  ? t('HOW_MUCH_YOU_WANT_TO_SPEND')
+                  : t('HOW_MUCH')
               }
               color={appColors.lightGrey}
               size={'header'}
@@ -1031,7 +1042,7 @@ const CommonAddScreen: FC<{
                     }}>
                     <CommonDropDown
                       items={fromWalletDropdownData}
-                      placeholder="From"
+                      placeholder={t('FROM')}
                       open={fromOpen}
                       setOpen={setFromOpen}
                       zIndex={4}
@@ -1088,7 +1099,7 @@ const CommonAddScreen: FC<{
                     }}>
                     <CommonDropDown
                       items={toWalletDropdownData}
-                      placeholder="To"
+                      placeholder={t('TO')}
                       open={toOpen}
                       setOpen={setToOpen}
                       zIndex={4}
@@ -1131,7 +1142,7 @@ const CommonAddScreen: FC<{
                   }}>
                   <CommonDropDown
                     items={categoryDropdownData}
-                    placeholder="Category"
+                    placeholder={t('CATEGORY')}
                     onPress={() => {
                       setWalletOpen(false);
                       setFromOpen(false);
@@ -1167,7 +1178,7 @@ const CommonAddScreen: FC<{
                 <View>
                   <CommonInput
                     onPress={dropdownCloseHandler}
-                    placeholder="Notes"
+                    placeholder={t('NOTES')}
                     value={formik.values.notes}
                     error={
                       formik.errors.notes && formik.touched.notes
@@ -1180,7 +1191,7 @@ const CommonAddScreen: FC<{
                   />
                   <CommonInput
                     onPress={dropdownCloseHandler}
-                    placeholder="Description"
+                    placeholder={t('DESCRIPTION')}
                     value={formik.values.description}
                     error={
                       formik.errors.description && formik.touched.description
@@ -1208,7 +1219,8 @@ const CommonAddScreen: FC<{
                           setToOpen(false);
                         }}
                         items={walletDropdownData}
-                        placeholder="Wallet"
+                        placeholder={t('WALLET')}
+                        disabled={route?.params?.wallet?.id ? true : false}
                         open={walletOpen}
                         setOpen={setWalletOpen}
                         zIndex={4}
@@ -1239,7 +1251,7 @@ const CommonAddScreen: FC<{
                   ) : undefined}
                   <CommonInput
                     onPress={dropdownCloseHandler}
-                    placeholder="Date"
+                    placeholder={t('DATE')}
                     value={
                       formik.values.transactionDate !== ''
                         ? moment(formik.values.transactionDate).format(
@@ -1282,7 +1294,7 @@ const CommonAddScreen: FC<{
                       }}>
                       <AttachmentIcon height={25} width={25} />
                       <CommonText
-                        content="Add attachment"
+                        content={t('ADD_ATTACHMENT')}
                         color={appColors.placeholderColor}
                         size={'medium'}
                       />
@@ -1434,14 +1446,18 @@ const CommonAddScreen: FC<{
                         marginTop: 10,
                       }}>
                       <View>
-                        <CommonText size={'medium'} bold content="Repeat" />
                         <CommonText
                           size={'medium'}
-                          content={`Repeat transaction${
+                          bold
+                          content={t('REPEAT')}
+                        />
+                        <CommonText
+                          size={'medium'}
+                          content={
                             formik.values.isRepeatSelected
-                              ? ', set your own time'
-                              : ''
-                          }`}
+                              ? t('REPEAT_TRANSACTION')
+                              : t('REPEAT_TRANSACTION_SELECTED')
+                          }
                           color={appColors.placeholderColor}
                         />
                       </View>
@@ -1477,7 +1493,7 @@ const CommonAddScreen: FC<{
                       }}>
                       <View>
                         <CommonText
-                          content="Frequency"
+                          content={t('FREQUENCY')}
                           bold
                           color={appColors.dark}
                         />
@@ -1511,7 +1527,7 @@ const CommonAddScreen: FC<{
                       </View>
                       <View>
                         <CommonText
-                          content="End After"
+                          content={t('END_AFTER')}
                           bold
                           color={appColors.dark}
                         />
@@ -1565,7 +1581,10 @@ const CommonAddScreen: FC<{
                           alignItems: 'center',
                           justifyContent: 'center',
                         }}>
-                        <CommonText content="Edit" color={appColors.primary} />
+                        <CommonText
+                          content={t('EDIT')}
+                          color={appColors.primary}
+                        />
                       </TouchableOpacity>
                     </View>
                   ) : undefined}
@@ -1581,11 +1600,11 @@ const CommonAddScreen: FC<{
                       alignItems: 'center',
                     }}>
                     <View style={{flex: 0.7, gap: 5}}>
-                      <CommonText bold content="Receive Alert" />
+                      <CommonText bold content={t('RECEIVE_ALERT')} />
                       <CommonText
                         color={appColors.placeholderColor}
                         style={{textAlign: 'justify'}}
-                        content="Receive alert when it reaches some point."
+                        content={t('RECEIVE_ALERT_DESCRIPTION')}
                       />
                     </View>
                     <CommonSwitch
@@ -1648,8 +1667,8 @@ const CommonAddScreen: FC<{
                   }}
                   title={
                     route?.params?.amount || route?.params?.budget
-                      ? 'Update'
-                      : 'Continue'
+                      ? t('UPDATE')
+                      : t('auth:CONTINUE')
                   }
                   buttonStyle={{marginVertical: 20}}
                 />
@@ -1723,23 +1742,23 @@ const CommonAddScreen: FC<{
               maxHeight={150}
               items={[
                 {
-                  label: 'Daily',
+                  label: t('FREQUENCY_LABELS.DAILY'),
                   value: 'daily',
                 },
                 {
-                  label: 'Weekly',
+                  label: t('FREQUENCY_LABELS.WEEKLY'),
                   value: 'weekly',
                 },
                 {
-                  label: 'Monthly',
+                  label: t('FREQUENCY_LABELS.MONTHLY'),
                   value: 'monthly',
                 },
                 {
-                  label: 'Yearly',
+                  label: t('FREQUENCY_LABELS.YEARLY'),
                   value: 'yearly',
                 },
               ]}
-              placeholder="Frequency"
+              placeholder={t('FREQUENCY')}
               open={frequencyOpen}
               setOpen={setFrequencyOpen}
               onPress={() => {
@@ -1777,7 +1796,7 @@ const CommonAddScreen: FC<{
             {formik.values.frequency == 'yearly' && (
               <CommonInput
                 onPress={dropdownCloseHandler}
-                placeholder="Month, Date"
+                placeholder={`${t('MONTH')}, ${t('DATE')}`}
                 value={
                   formik.values.month !== ''
                     ? moment()
@@ -1815,7 +1834,7 @@ const CommonAddScreen: FC<{
                   dropDownStyle={{width: '100%'}}
                   dropDownContainerStyle={{width: '100%'}}
                   items={dates}
-                  placeholder="Date"
+                  placeholder={t('DATE')}
                   open={dateOpen}
                   onPress={() => {
                     setDayOpen(false);
@@ -1859,7 +1878,7 @@ const CommonAddScreen: FC<{
                   dropDownStyle={{width: '100%'}}
                   dropDownContainerStyle={{width: '100%'}}
                   items={days}
-                  placeholder="Day"
+                  placeholder={t('DAY')}
                   open={dayOpen}
                   setOpen={setDayOpen}
                   onPress={() => {
@@ -1891,7 +1910,7 @@ const CommonAddScreen: FC<{
 
           <CommonInput
             onPress={dropdownCloseHandler}
-            placeholder="End After"
+            placeholder={t('END_AFTER')}
             value={
               formik.values.endAfter !== ''
                 ? moment(formik.values.endAfter).format('DD MMM YYYY')
@@ -1927,8 +1946,11 @@ const CommonAddScreen: FC<{
               }
               mode={'date'}
               is24Hour={true}
-              positiveButton={{label: 'OK', textColor: appColors.primary}}
-              negativeButton={{label: 'Cancel', textColor: appColors.primary}}
+              positiveButton={{label: t('OK'), textColor: appColors.primary}}
+              negativeButton={{
+                label: t('CANCEL'),
+                textColor: appColors.primary,
+              }}
               minimumDate={initialDate}
               display="calendar"
               onChange={(event: DateTimePickerEvent, selectedDate?: Date) =>
@@ -1941,8 +1963,11 @@ const CommonAddScreen: FC<{
               value={initialDate}
               mode={'date'}
               is24Hour={true}
-              positiveButton={{label: 'OK', textColor: appColors.primary}}
-              negativeButton={{label: 'Cancel', textColor: appColors.primary}}
+              positiveButton={{label: t('OK'), textColor: appColors.primary}}
+              negativeButton={{
+                label: t('CANCEL'),
+                textColor: appColors.primary,
+              }}
               minimumDate={initialDate}
               display="calendar"
               onChange={(event: DateTimePickerEvent, selectedDate?: Date) => {
@@ -1962,7 +1987,7 @@ const CommonAddScreen: FC<{
             />
           ) : undefined}
           <CommonButton
-            title="Next"
+            title={t('NEXT')}
             onPress={() => {
               formik.setFieldValue('isRepeatSelected', true);
               rbSheetNextHandler();
@@ -1978,8 +2003,8 @@ const CommonAddScreen: FC<{
           value={initialDate}
           mode={'date'}
           is24Hour={true}
-          positiveButton={{label: 'OK', textColor: appColors.primary}}
-          negativeButton={{label: 'Cancel', textColor: appColors.primary}}
+          positiveButton={{label: t('OK'), textColor: appColors.primary}}
+          negativeButton={{label: t('CANCEL'), textColor: appColors.primary}}
           maximumDate={initialDate}
           display="calendar"
           onChange={(event: DateTimePickerEvent, selectedDate?: Date) =>
@@ -2005,13 +2030,13 @@ const CommonAddScreen: FC<{
         }}>
         <View style={{padding: 15, gap: 10}}>
           <CommonText
-            content="Exit from the Page?"
+            content={t('EXIT_CONFIRM_TITLE')}
             bold
             size={'large'}
             style={{textAlign: 'center'}}
           />
           <CommonText
-            content="You have unsaved changes..! Are you sure want to leave this page?"
+            content={t('EXIT_MESSAGE')}
             color={appColors.placeholderColor}
             size={'label'}
             style={{textAlign: 'center', paddingHorizontal: 15}}
@@ -2024,7 +2049,7 @@ const CommonAddScreen: FC<{
             }}>
             <View style={{flex: 0.45}}>
               <CommonButton
-                title="No"
+                title={t('NO')}
                 buttonType="clear"
                 onPress={() => {
                   dirtyRBSheetRef.current?.close();
@@ -2034,7 +2059,7 @@ const CommonAddScreen: FC<{
             </View>
             <View style={{flex: 0.45}}>
               <CommonButton
-                title="Yes"
+                title={t('YES')}
                 onPress={() => {
                   navigation.goBack();
                 }}
@@ -2061,11 +2086,11 @@ const CommonAddScreen: FC<{
           content={
             screenName === 'Budget'
               ? route?.params?.spentPercent
-                ? 'Budget has been successfully updated'
-                : 'Budget has been successfully added'
+                ? t('BUDGET_UPDATED')
+                : t('BUDGET_ADDED')
               : route?.params?.amount
-              ? 'Transaction has been successfully updated'
-              : 'Transaction has been successfully added'
+              ? t('TRANSACTION_UPDATED')
+              : t('TRANSACTION_ADDED')
           }
           size={'label'}
           style={{textAlign: 'center', paddingHorizontal: 20}}
@@ -2086,20 +2111,20 @@ const CommonAddScreen: FC<{
             backgroundColor: appColors.buttonClear,
             padding: 10,
           }}>
-          <CommonText content="Add New Item" />
+          <CommonText content={t('ADD_NEW_ITEM')} />
         </View>
 
         <ScrollView
           contentContainerStyle={{paddingHorizontal: 15, paddingTop: 15}}>
           <CommonInput
             value={formik.values.newDropdownItem}
-            placeholder="Category"
+            placeholder={t('CATEGORY')}
             onChangeText={text => formik.setFieldValue('newDropdownItem', text)}
             onBlur={formik.handleBlur('newDropdownItem')}
             error={
               formik.touched.newDropdownItem &&
               formik.values.newDropdownItem == ''
-                ? 'This field is required'
+                ? t('FIELD_REQUIRED')
                 : undefined
             }
           />
@@ -2113,14 +2138,14 @@ const CommonAddScreen: FC<{
             <CommonButton
               buttonStyle={{width: 80, height: 45}}
               buttonType="clear"
-              title="Cancel"
+              title={t('CANCEL')}
               onPress={() => {
                 setIsAddPopoverOpen(false);
                 formik.setFieldValue('newDropdownItem', '');
               }}
             />
             <CommonButton
-              title="Add"
+              title={t('ADD')}
               loading={isButtonLoader}
               buttonStyle={{width: 80, height: 45}}
               onPress={() => handleAddNewDropdownItem()}
@@ -2142,7 +2167,7 @@ const CommonAddScreen: FC<{
         }}>
         <View style={{padding: 15, gap: 10}}>
           <CommonText
-            content="Delete this Document?"
+            content={t('DELETE_FILE_HEADING')}
             bold
             size={'large'}
             style={{textAlign: 'center'}}
@@ -2156,7 +2181,7 @@ const CommonAddScreen: FC<{
             style={{textAlign: 'center', paddingHorizontal: 15}}
           />
           <CommonText
-            content="Are you sure do you wanna delete this document?"
+            content={t('DELETE_FILE_MESSAGE')}
             color={appColors.placeholderColor}
             size={'label'}
             style={{textAlign: 'center', paddingHorizontal: 15}}
@@ -2169,7 +2194,7 @@ const CommonAddScreen: FC<{
             }}>
             <View style={{flex: 0.45}}>
               <CommonButton
-                title="No"
+                title={t('NO')}
                 buttonType="clear"
                 onPress={() => {
                   deleteRBSheetRef.current?.close();
@@ -2178,7 +2203,7 @@ const CommonAddScreen: FC<{
               />
             </View>
             <View style={{flex: 0.45}}>
-              <CommonButton title="Yes" onPress={deleteDocumentHandler} />
+              <CommonButton title={t('YES')} onPress={deleteDocumentHandler} />
             </View>
           </View>
         </View>

@@ -1,0 +1,29 @@
+{
+    "ACCOUNT": "Compte",
+    "ACCOUNT_BALANCE": "Solde du compte",
+    "NO_ACCOUNT_FOUND": "Aucun compte trouvé",
+    "ADD_NEW_WALLET": "+ Ajouter un nouveau portefeuille",
+    "NO": "Non",
+    "YES": "Oui",
+    "WALLET_BALACE_INVALID": "Entrez un solde de portefeuille valide",
+    "WALLET_BALACE_REQUIRED": "Entrez le solde du portefeuille pour continuer",
+    "FIELD_REQUIRED": "Ce champ est obligatoire",
+    "SELECT_ACCOUNT": "Veuillez sélectionner un compte bancaire",
+    "EDIT_WALLET": "Modifier le portefeuille",
+    "ADD_NEW_WALLET_HEADING": "Ajouter un nouveau portefeuille",
+    "NAME": "Nom",
+    "ACCOUNT_TYPE": "Type de compte",
+    "ACCOUNT_TYPE_LABEL": {
+        "UPI": "UPI",
+        "BANK": "Banque",
+        "CASH": "Espèces"
+    },
+    "NO_CHANGES": "Vous n'avez aucune modification à enregistrer !",
+    "YOURE_SET": "Vous avez terminé !",
+    "REMOVE_WALLET": "Supprimer ce portefeuille ?",
+    "REMOVE_WALLET_DESCRIPTION": "Êtes-vous sûr de vouloir supprimer ce portefeuille ?",
+    "WALLET_REMOVED_SUCCESS": "Le portefeuille a été supprimé avec succès",
+    "SETUP_ACCOUNT": "Configurons votre compte !",
+    "SETUP_ACCOUNT_DESCRIPTION": "Le compte peut être votre banque, votre carte de crédit ou votre portefeuille.",
+    "LETS_GO": "Allons-y"
+}

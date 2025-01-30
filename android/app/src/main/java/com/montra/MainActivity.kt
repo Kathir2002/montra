@@ -8,6 +8,7 @@ import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnable
 import com.facebook.react.defaults.DefaultReactActivityDelegate
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.modules.core.DeviceEventManagerModule
+import org.devio.rn.splashscreen.SplashScreen; 
 
 class MainActivity : ReactActivity() {
     companion object {
@@ -21,6 +22,7 @@ class MainActivity : ReactActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        SplashScreen.show(this,R.style.SplashTheme,true)
         super.onCreate(savedInstanceState)
         handleShortcutIntent(intent)
     }

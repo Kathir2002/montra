@@ -148,8 +148,8 @@ const useNotificationChannels = () => {
             importance: AndroidImportance.HIGH,
             color: getColorForMessageType(message.type),
             visibility: AndroidVisibility.PUBLIC,
-
             // Optional: Add more Android-specific styling
+            smallIcon: 'ic_notification',
             style: message.data?.imageUrl
               ? {
                   type: AndroidStyle.BIGPICTURE,

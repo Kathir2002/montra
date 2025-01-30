@@ -27,9 +27,11 @@ import {encryptDetails} from '@src/lib/functions';
 import AuthService from '@services/authService';
 import {Toast} from '@shared/ToastConfig';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
+import {useTranslation} from 'react-i18next';
 
 const ResetPassword = () => {
   const route: any = useRoute().params;
+  const {t} = useTranslation('auth');
   const [isLoading, setIsLoading] = useState(false);
   const [newPasswordVisible, setNewPasswordVisible] = useState<boolean>(false);
   const [rePasswordVisible, setRePasswordVisible] = useState<boolean>(false);
@@ -65,19 +67,16 @@ const ResetPassword = () => {
   const validationSchema = yup.object().shape({
     newPassword: yup
       .string()
-      .required('This field is required')
-      .min(
-        8,
-        'Use 8 or more characters with a mix of letters, numbers & symbols',
-      )
+      .required(t('requiredMsg'))
+      .min(8, t('validPassord'))
       .matches(
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])/,
-        'Use 8 or more characters with a mix of letters, numbers & symbols',
+        t('validPassord'),
       ),
     rePassword: yup
       .string()
-      .oneOf([yup.ref('newPassword'), undefined], 'Passwords must match')
-      .required('This field is required'),
+      .oneOf([yup.ref('newPassword'), undefined], t('PASSWORD_MUST_MATCH'))
+      .required(t('requiredMsg')),
   });
 
   const formik = useFormik({
@@ -100,7 +99,7 @@ const ResetPassword = () => {
           setIsLoading(false);
           if (res?.success) {
             navigation.navigate('SignIn');
-            Toast({message: 'Password reset successfully', type: 'success'});
+            Toast({message: t('PASSWORD_RESET_SUCCESS'), type: 'success'});
           }
         })
         .catch(err => {
@@ -115,7 +114,7 @@ const ResetPassword = () => {
   return (
     <KeyboardAvoidingView style={{flex: 1, backgroundColor: appColors.light}}>
       <CommonHeader
-        title="Rest Password"
+        title={t('RESET_PASSWORD')}
         leftIconPressBack={() => handleBackPress()}
         leftIcon
       />
@@ -129,7 +128,7 @@ const ResetPassword = () => {
               color: appColors.placeholderColor,
               size: 20,
             }}
-            placeholder="New Password"
+            placeholder={t('NEW_PASSWORD')}
             autoCapitalize="none"
             secureTextEntry={!newPasswordVisible}
             value={formik.values.newPassword}
@@ -160,7 +159,7 @@ const ResetPassword = () => {
               color: appColors.placeholderColor,
               size: 20,
             }}
-            placeholder="Confirm new Password"
+            placeholder={t('CONFIRM_NEW_PASSWORD')}
             autoCapitalize="none"
             secureTextEntry={!rePasswordVisible}
             value={formik.values.rePassword}
@@ -186,7 +185,7 @@ const ResetPassword = () => {
           />
           <CommonButton
             buttonStyle={{marginVertical: 10}}
-            title="Continue"
+            title={t('CONTINUE')}
             onPress={() => {
               formik.handleSubmit();
             }}

@@ -30,6 +30,7 @@ import {config} from '../../../environment';
 import CommonDataService from '@shared/commonDataServices';
 import TransactionService from '@services/transactionService';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
+import {useTranslation} from 'react-i18next';
 
 interface PayloadData {
   transactionType: string;
@@ -38,6 +39,7 @@ interface PayloadData {
 }
 
 const ExportData = () => {
+  const {t} = useTranslation('profile');
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const [dataToExportOpen, setdataToExportOpen] = useState(false);
   const [formatOpen, setFormatOpen] = useState(false);
@@ -50,16 +52,16 @@ const ExportData = () => {
 
   const dropdownData = {
     dataDropdown: [
-      {label: 'All', value: 'All'},
-      {label: 'Expense', value: 'Expense'},
-      {label: 'Income', value: 'Income'},
+      {label: t('EXPORT_DATA_LABEL.TYPE.ALL'), value: 'All'},
+      {label: t('EXPORT_DATA_LABEL.TYPE.EXPENSE'), value: 'Expense'},
+      {label: t('EXPORT_DATA_LABEL.TYPE.INCOME'), value: 'Income'},
     ],
     dateRangeDropdownData: [
-      {label: 'Last 30 days', value: '30days'},
-      {label: 'Last 60 days', value: '60days'},
-      {label: 'Last 6 months', value: '6months'},
-      {label: 'Last 1 year', value: '1year'},
-      {label: 'Lifetime', value: 'lifeTime'},
+      {label: t('EXPORT_DATA_LABEL.DATE_RANGE.30dAYS'), value: '30days'},
+      {label: t('EXPORT_DATA_LABEL.DATE_RANGE.60DAYS'), value: '60days'},
+      {label: t('EXPORT_DATA_LABEL.DATE_RANGE.6MONTHS'), value: '6months'},
+      {label: t('EXPORT_DATA_LABEL.DATE_RANGE.1YEAR'), value: '1year'},
+      {label: t('EXPORT_DATA_LABEL.DATE_RANGE.LIFETIME'), value: 'lifeTime'},
     ],
     formatDropdownData: [
       {label: 'CSV', value: 'CSV'},
@@ -113,7 +115,7 @@ const ExportData = () => {
               useDownloadManager: true,
               mediaScannable: true,
               path: filePath,
-              description: 'Downloading file...',
+              description: t('DOWNLOAD_FILE'),
               mime: generateMimeType(filename),
             },
             timeout: 20000,
@@ -145,7 +147,7 @@ const ExportData = () => {
               setLoading(false);
               setModalVisible(true);
               Toast({
-                message: 'File downloaded successfully',
+                message: t('FILE_DOWNLOAD_SUCCESS'),
                 type: 'success',
               });
               if (Platform.OS === 'android') {
@@ -166,7 +168,7 @@ const ExportData = () => {
             .catch(err => {
               setLoading(false);
               Toast({
-                message: 'Something went wrong, Please try again later!',
+                message: t('SOMETHING_WENT_WRONG'),
                 type: 'error',
               });
               console.log('Error in downloading file:', err?.message);
@@ -200,7 +202,7 @@ const ExportData = () => {
         return false;
       }}>
       <CommonHeader
-        title="Export Data"
+        title={t('EXPORT_DATA')}
         leftIcon
         leftIconPressBack={() => navigation.goBack()}
       />
@@ -212,10 +214,7 @@ const ExportData = () => {
       />
       <View style={{flex: 1, paddingHorizontal: 15}}>
         <View>
-          <CommonText
-            content="What data do your want to export?"
-            size={'label'}
-          />
+          <CommonText content={t('WHAT_WANT_TO_EXPORT')} size={'label'} />
           <CommonDropDown
             onPress={() => {
               setFormatOpen(false);
@@ -230,7 +229,7 @@ const ExportData = () => {
           />
         </View>
         <View>
-          <CommonText content="When date range?" size={'label'} />
+          <CommonText content={t('DATE_RANGE')} size={'label'} />
           <CommonDropDown
             onPress={() => {
               setFormatOpen(false);
@@ -245,10 +244,7 @@ const ExportData = () => {
           />
         </View>
         <View>
-          <CommonText
-            content="What format do you want to export??"
-            size={'label'}
-          />
+          <CommonText content={t('FILE_FORMAT')} size={'label'} />
           <CommonDropDown
             onPress={() => {
               setdataToExportOpen(false);
@@ -289,7 +285,7 @@ const ExportData = () => {
                 color: appColors.light,
                 textAlign: 'center',
               }}
-              content="Export"
+              content={t('EXPORT')}
             />
           </TouchableOpacity>
         </View>
@@ -322,7 +318,7 @@ const ExportData = () => {
                 flexWrap: 'wrap',
                 textAlign: 'center',
               }}
-              content="Check your email, we send you the financial report. In certain cases, it might take a little longer, depending on the time period and the volume of activity."
+              content={t('CHECK_EMAIL')}
             />
           </View>
           <View
@@ -337,7 +333,7 @@ const ExportData = () => {
               onPress={() => {
                 navigation.navigate('BottomTab', {screen: 'Dashboard'});
               }}
-              title="Back to Home"
+              title={t('BACK_TO_HOME')}
             />
           </View>
         </View>
@@ -350,5 +346,3 @@ const ExportData = () => {
 };
 
 export default ExportData;
-
-const styles = StyleSheet.create({});

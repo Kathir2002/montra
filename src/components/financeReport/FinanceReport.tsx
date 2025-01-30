@@ -15,10 +15,8 @@ import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 import {
   NavigationProp,
   ParamListBase,
-  RouteProp,
   useIsFocused,
   useNavigation,
-  useRoute,
 } from '@react-navigation/native';
 import {Icon} from '@rneui/base';
 import LottieView from 'lottie-react-native';
@@ -42,6 +40,7 @@ import AccountService from '@services/setup/accountService';
 import MonthPicker, {EventTypes} from 'react-native-month-year-picker';
 import moment from 'moment';
 import {generateUniqueColors, getCurrencySymbol} from '@src/lib/functions';
+import {useTranslation} from 'react-i18next';
 
 interface PieChartDataInterface {
   name: string;
@@ -49,6 +48,7 @@ interface PieChartDataInterface {
   itemStyle: {color: string};
 }
 const FinanceReport = () => {
+  const {t} = useTranslation('transaction');
   const isFocused = useIsFocused();
   const transactionTypes = ['Expense', 'Income'];
   const rotationValue = useSharedValue(0);
@@ -282,7 +282,7 @@ const FinanceReport = () => {
         backgroundColor: appColors.light,
       }}>
       <CommonHeader
-        title="Financial Report"
+        title={t('FINANCIAL_REPORT')}
         leftIconPressBack={() => navigation.goBack()}
       />
       <FocusAwareStatusBar
@@ -453,7 +453,7 @@ const FinanceReport = () => {
                 }}>
                 <CommonText
                   size={'large'}
-                  content={item}
+                  content={item === 'Expense' ? t('EXPENSE') : t('INCOME')}
                   style={{textAlign: 'center'}}
                   bold
                   color={
@@ -528,7 +528,7 @@ const FinanceReport = () => {
                 />
                 <CommonText
                   style={{textAlign: 'center'}}
-                  content="No Transaction Found!"
+                  content={t('NO_TRANSACTION')}
                 />
               </View>
             }

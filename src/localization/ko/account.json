@@ -1,0 +1,29 @@
+{
+    "ACCOUNT": "계정",
+    "ACCOUNT_BALANCE": "계정 잔액",
+    "NO_ACCOUNT_FOUND": "찾은 계정이 없습니다",
+    "ADD_NEW_WALLET": "+ 새 지갑을 추가하십시오",
+    "NO": "아니요",
+    "YES": "예",
+    "WALLET_BALACE_INVALID": "유효한 지갑 균형을 입력하십시오",
+    "WALLET_BALACE_REQUIRED": "계속하려면 지갑 균형을 입력하십시오",
+    "FIELD_REQUIRED": "이 필드가 필요합니다",
+    "SELECT_ACCOUNT": "은행 계좌를 선택하십시오",
+    "EDIT_WALLET": "지갑 편집",
+    "ADD_NEW_WALLET_HEADING": "새 지갑을 추가하십시오",
+    "NAME": "이름",
+    "ACCOUNT_TYPE": "계정 유형",
+    "ACCOUNT_TYPE_LABEL": {
+        "UPI": "upi",
+        "BANK": "은행",
+        "CASH": "현금"
+    },
+    "NO_CHANGES": "저장할 변경 사항이 없습니다!",
+    "YOURE_SET": "당신은 설정되었습니다!",
+    "REMOVE_WALLET": "이 지갑을 제거 하시겠습니까?",
+    "REMOVE_WALLET_DESCRIPTION": "이 지갑을 제거하고 싶습니까?",
+    "WALLET_REMOVED_SUCCESS": "지갑이 성공적으로 제거되었습니다",
+    "SETUP_ACCOUNT": "계정을 설정합시다!",
+    "SETUP_ACCOUNT_DESCRIPTION": "계정은 은행, 신용 카드 또는 지갑 일 수 있습니다.",
+    "LETS_GO": "갑시다"
+}

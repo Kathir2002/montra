@@ -1,12 +1,9 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   FlatList,
   KeyboardAvoidingView,
   Modal,
   StatusBar,
-  StyleSheet,
-  TouchableOpacity,
-  Vibration,
   View,
 } from 'react-native';
 import {appColors} from '@shared/appColors';
@@ -14,16 +11,15 @@ import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 import {
   NavigationProp,
   ParamListBase,
-  RouteProp,
   useIsFocused,
   useNavigation,
-  useRoute,
 } from '@react-navigation/native';
 import CommonText from '@shared/components/commonText/CommonText';
 import AccountService from '@services/setup/accountService';
 import {Toast} from '@shared/ToastConfig';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
 import CommonSwitch from '@shared/components/commonSwitch/Switch';
+import {useTranslation} from 'react-i18next';
 
 interface NotificationDataI {
   title: string;
@@ -33,6 +29,7 @@ interface NotificationDataI {
 }
 
 const Notification = () => {
+  const {t} = useTranslation('profile');
   const isFocused = useIsFocused();
   const [loading, setLoading] = useState(false);
   const navigation: NavigationProp<ParamListBase> = useNavigation();
@@ -41,20 +38,20 @@ const Notification = () => {
   const [notificationData, setNotificationData] = useState<NotificationDataI[]>(
     [
       {
-        title: 'Expense Alert',
-        subTitle: 'Get notification about you’re expense',
+        title: t('EXPENSE_ALERT'),
+        subTitle: t('EXPENSE_ALERT_SUBTITLE'),
         isEnabled: false,
         for: 'isExpenseAlert',
       },
       {
-        title: 'Budget',
-        subTitle: 'Get notification when you’re budget exceeding the limit',
+        title: t('BUDGET'),
+        subTitle: t('BUDGET_ALERT_SUBTITLE'),
         isEnabled: false,
         for: 'isBudgetAlert',
       },
       {
-        title: 'Tips & Articles',
-        subTitle: 'Small & useful pieces of pratical financial advice',
+        title: t('TIPS&TRICKS'),
+        subTitle: t('TIPS_ALERT_SUBTITLE'),
         isEnabled: false,
         for: 'isTipsAndArticles',
       },
@@ -104,7 +101,7 @@ const Notification = () => {
             return temp;
           });
           Toast({
-            message: 'Notification preferences updated successfully',
+            message: t('NOTIFICATION_PREFERENCES_SUCCESS'),
             type: 'success',
           });
         }
@@ -153,7 +150,7 @@ const Notification = () => {
   return (
     <KeyboardAvoidingView style={{flex: 1, backgroundColor: appColors.light}}>
       <CommonHeader
-        title="Notification"
+        title={'NOTIFICATION'}
         leftIcon
         leftIconPressBack={() => navigation.goBack()}
       />

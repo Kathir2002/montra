@@ -1,5 +1,12 @@
-import signin from './signin.json';
-import signup from './signup.json';
-import forgotPassword from './forgotPassword.json';
-import settings from './settings.json';
-export default {signin, signup, forgotPassword, settings};
+import profile from './profile.json';
+import transaction from './transaction.json';
+import finaceReport from './finaceReport.json';
+import auth from './auth.json';
+import account from './account.json';
+export default {
+  profile,
+  transaction,
+  finaceReport,
+  auth,
+  account,
+};

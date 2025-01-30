@@ -54,7 +54,7 @@ const Signin = () => {
 
   const riveRef = useRef<RiveRef>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const {t, i18n} = useTranslation(['signin']);
+  const {t, i18n} = useTranslation(['auth']);
   const [btnLoader, setBtnLoader] = useState(false);
   const navigation: NavigationProp<ParamListBase> = useNavigation();
 
@@ -221,7 +221,7 @@ const Signin = () => {
               color: appColors.placeholderColor,
               size: 20,
             }}
-            placeholder={t('email')}
+            placeholder={t('EMAIL')}
             autoCapitalize="none"
             onFocus={() => {
               if (passwordVisible) {

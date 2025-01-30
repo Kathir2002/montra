@@ -27,7 +27,7 @@ import {useTranslation} from 'react-i18next';
 import {TouchableOpacity} from 'react-native';
 
 const ForgotPassword = () => {
-  const {t} = useTranslation('forgotPassword');
+  const {t} = useTranslation('auth');
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const [emailModalVisible, setEmailModalVisible] = useState<boolean>(false);
 
@@ -106,7 +106,7 @@ const ForgotPassword = () => {
               color: appColors.placeholderColor,
               size: 20,
             }}
-            placeholder={t('email')}
+            placeholder={t('EMAIL')}
             value={formik.values.email}
             onChangeText={(text: string) => {
               formik.setFieldValue('email', text);
@@ -120,7 +120,7 @@ const ForgotPassword = () => {
           />
           <View style={{}}>
             <CommonButton
-              title={t('continue')}
+              title={t('CONTINUE')}
               onPress={() => formik.handleSubmit()}
             />
           </View>
@@ -203,7 +203,7 @@ const ForgotPassword = () => {
                 color={appColors.dark}
               />
               <CommonText
-                content="Open Email App"
+                content={t('OPEN_EMAIL')}
                 color={appColors.dark}
                 bold
               />

@@ -1,0 +1,29 @@
+{
+    "ACCOUNT": "حساب",
+    "ACCOUNT_BALANCE": "رصيد الحساب",
+    "NO_ACCOUNT_FOUND": "لم يتم العثور على حساب",
+    "ADD_NEW_WALLET": "+ إضافة محفظة جديدة",
+    "NO": "لا",
+    "YES": "نعم",
+    "WALLET_BALACE_INVALID": "أدخل رصيد محفظة صالح",
+    "WALLET_BALACE_REQUIRED": "أدخل توازن المحفظة للمتابعة",
+    "FIELD_REQUIRED": "هذه الخانة مطلوبه",
+    "SELECT_ACCOUNT": "الرجاء تحديد حساب مصرفي",
+    "EDIT_WALLET": "تحرير المحفظة",
+    "ADD_NEW_WALLET_HEADING": "أضف محفظة جديدة",
+    "NAME": "اسم",
+    "ACCOUNT_TYPE": "نوع الحساب",
+    "ACCOUNT_TYPE_LABEL": {
+        "UPI": "UPI",
+        "BANK": "بنك",
+        "CASH": "نقدي"
+    },
+    "NO_CHANGES": "ليس لديك أي تغييرات للحفظ!",
+    "YOURE_SET": "لقد تم تعيينك!",
+    "REMOVE_WALLET": "إزالة هذه المحفظة؟",
+    "REMOVE_WALLET_DESCRIPTION": "هل أنت متأكد هل تريد إزالة هذه المحفظة؟",
+    "WALLET_REMOVED_SUCCESS": "تمت إزالة المحفظة بنجاح",
+    "SETUP_ACCOUNT": "دعنا ننشئ حسابك!",
+    "SETUP_ACCOUNT_DESCRIPTION": "يمكن أن يكون الحساب مصرفيك أو بطاقة الائتمان أو محفظتك.",
+    "LETS_GO": "دعنا نذهب"
+}

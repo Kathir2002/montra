@@ -1,0 +1,29 @@
+{
+    "ACCOUNT": "Account",
+    "ACCOUNT_BALANCE": "Saldo del conto",
+    "NO_ACCOUNT_FOUND": "Nessun account trovato",
+    "ADD_NEW_WALLET": "+ Aggiungi nuovo portafoglio",
+    "NO": "NO",
+    "YES": "SÌ",
+    "WALLET_BALACE_INVALID": "Immettere un saldo valido del portafoglio",
+    "WALLET_BALACE_REQUIRED": "Inserisci l'equilibrio del portafoglio per continuare",
+    "FIELD_REQUIRED": "Questo campo è obbligatorio",
+    "SELECT_ACCOUNT": "Seleziona un conto bancario",
+    "EDIT_WALLET": "Modifica il portafoglio",
+    "ADD_NEW_WALLET_HEADING": "Aggiungi nuovo portafoglio",
+    "NAME": "Nome",
+    "ACCOUNT_TYPE": "Tipo di account",
+    "ACCOUNT_TYPE_LABEL": {
+        "UPI": "UPI",
+        "BANK": "Banca",
+        "CASH": "Contanti"
+    },
+    "NO_CHANGES": "Non hai modifiche da salvare!",
+    "YOURE_SET": "Sei pronto!",
+    "REMOVE_WALLET": "Rimuovere questo portafoglio?",
+    "REMOVE_WALLET_DESCRIPTION": "Sei sicuro di voler rimuovere questo portafoglio?",
+    "WALLET_REMOVED_SUCCESS": "Il portafoglio è stato rimosso con successo",
+    "SETUP_ACCOUNT": "Imposta il tuo account!",
+    "SETUP_ACCOUNT_DESCRIPTION": "Il conto può essere la tua banca, la tua carta di credito o il tuo portafoglio.",
+    "LETS_GO": "Andiamo"
+}

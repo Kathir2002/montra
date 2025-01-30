@@ -1,0 +1,29 @@
+{
+    "ACCOUNT": "खाता",
+    "ACCOUNT_BALANCE": "खाते में शेष",
+    "NO_ACCOUNT_FOUND": "कोई खाता नहीं मिला",
+    "ADD_NEW_WALLET": "+ नया वॉलेट जोड़ें",
+    "NO": "नहीं",
+    "YES": "हाँ",
+    "WALLET_BALACE_INVALID": "एक वैध वॉलेट बैलेंस दर्ज करें",
+    "WALLET_BALACE_REQUIRED": "जारी रखने के लिए वॉलेट बैलेंस दर्ज करें",
+    "FIELD_REQUIRED": "यह फ़ील्ड आवश्यक है",
+    "SELECT_ACCOUNT": "कृपया एक बैंक खाता चुनें",
+    "EDIT_WALLET": "बटुए संपादित करें",
+    "ADD_NEW_WALLET_HEADING": "नया वॉलेट जोड़ें",
+    "NAME": "नाम",
+    "ACCOUNT_TYPE": "खाता प्रकार",
+    "ACCOUNT_TYPE_LABEL": {
+        "UPI": "है मैं",
+        "BANK": "किनारा",
+        "CASH": "नकद"
+    },
+    "NO_CHANGES": "आपके पास बचाने के लिए कोई बदलाव नहीं है!",
+    "YOURE_SET": "तुम स्थिर हो!",
+    "REMOVE_WALLET": "इस बटुए को हटा दें?",
+    "REMOVE_WALLET_DESCRIPTION": "क्या आप सुनिश्चित हैं कि आप इस बटुए को हटाना चाहते हैं?",
+    "WALLET_REMOVED_SUCCESS": "बटुए को सफलतापूर्वक हटा दिया गया है",
+    "SETUP_ACCOUNT": "चलो अपना खाता सेटअप करें!",
+    "SETUP_ACCOUNT_DESCRIPTION": "खाता आपका बैंक, क्रेडिट कार्ड या आपका बटुआ हो सकता है।",
+    "LETS_GO": "चल दर"
+}

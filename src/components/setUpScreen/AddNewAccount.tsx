@@ -5,7 +5,6 @@ import {
   ScrollView,
   StatusBar,
   TouchableOpacity,
-  useWindowDimensions,
   Vibration,
   View,
 } from 'react-native';
@@ -49,6 +48,7 @@ import AccountService from '@services/setup/accountService';
 import DeleteIcon from '@assets/svg/delete.svg';
 import Popover from 'react-native-popover-view/dist/Popover';
 import {getCurrencySymbol} from '@src/lib/functions';
+import {useTranslation} from 'react-i18next';
 
 interface AccountRouteProps {
   provider: {
@@ -67,18 +67,7 @@ const AddNewAccount = () => {
     params: AccountRouteProps;
   }> = useRoute();
 
-  // const route = {
-  //   params: {
-  //     provider: {
-  //       providerName: 'Axis Bank',
-  //       providerCode: 'axisBank',
-  //     },
-  //     balance: '2000',
-  //     name: 'test name',
-  //     accountType: 'Bank',
-  //     _id: 'test',
-  //   },
-  // };
+  const {t} = useTranslation('account');
 
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const [setupModalVisible, setSetupModalVisible] = useState(false);
@@ -96,19 +85,19 @@ const AddNewAccount = () => {
   const userDetails = useSelector((state: RootState) => state.auth.userDetails);
 
   const validationSchema = yup.object().shape({
-    name: yup.string().required('This field is required'),
+    name: yup.string().required(t('FIELD_REQUIRED')),
     accountBalance: yup
       .string()
       .matches(
         /(?:₹|USD|EUR|AUG)?[a-zA-Z]*[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?/,
-        'Enter a valid accountBalance',
+        t('WALLET_BALACE_INVALID'),
       )
-      .required('Enter account balance to continue'),
+      .required(t('WALLET_BALACE_REQUIRED')),
     accountType: yup
       .string()
       .label('accountType')
-      .required('This field is required'),
-    provider: yup.object().required('This field is required'),
+      .required(t('FIELD_REQUIRED')),
+    provider: yup.object().required(t('FIELD_REQUIRED')),
   });
 
   const formik = useFormik({
@@ -247,7 +236,7 @@ const AddNewAccount = () => {
 
   const addNewBankAccount = async () => {
     if (formik.values.provider.providerCode === '') {
-      Toast({message: 'Please select a bank account', type: 'error'});
+      Toast({message: t('SELECT_ACCOUNT'), type: 'error'});
       return;
     }
     setIsLoading(true);
@@ -282,7 +271,7 @@ const AddNewAccount = () => {
   };
   const updateBankAccount = async () => {
     if (formik.values.provider.providerCode === '') {
-      Toast({message: 'Please select a bank account', type: 'error'});
+      Toast({message: t('SELECT_ACCOUNT'), type: 'error'});
       return;
     }
     setIsLoading(true);
@@ -436,7 +425,11 @@ const AddNewAccount = () => {
         }}>
         <CommonHeader
           headerBgc={appColors.primary}
-          title={`${route?.params?.accountType ? 'Edit' : 'Add New'} Wallet`}
+          title={
+            route?.params?.accountType
+              ? t('EDIT_WALLET')
+              : t('ADD_NEW_WALLET_HEADING')
+          }
           leftIconPressBack={() => {
             formik.dirty
               ? dirtyRBSheetRef.current?.open()
@@ -466,7 +459,7 @@ const AddNewAccount = () => {
         <View>
           <View style={{paddingHorizontal: 15}}>
             <CommonText
-              content="Account Balance?"
+              content={`${t('ACCOUNT_BALANCE')}?`}
               color={appColors.lightGrey}
               size={'header'}
             />
@@ -521,7 +514,7 @@ const AddNewAccount = () => {
               }}>
               <View>
                 <CommonInput
-                  placeholder="Name"
+                  placeholder={t('NAME')}
                   value={formik.values.name}
                   error={
                     formik.errors.name && formik.touched.name
@@ -544,11 +537,11 @@ const AddNewAccount = () => {
                   <CommonDropDown
                     maxHeight={150}
                     items={[
-                      {label: 'UPI', value: 'UPI'},
-                      {label: 'Bank', value: 'Bank'},
-                      {label: 'Cash', value: 'Cash'},
+                      {label: t('ACCOUNT_TYPE_LABEL.UPI'), value: 'UPI'},
+                      {label: t('ACCOUNT_TYPE_LABEL.BANK'), value: 'Bank'},
+                      {label: t('ACCOUNT_TYPE_LABEL.CASH'), value: 'Cash'},
                     ]}
-                    placeholder="Account Type"
+                    placeholder={t('ACCOUNT_TYPE')}
                     open={open}
                     setOpen={setOpen}
                     zIndex={4}
@@ -651,12 +644,16 @@ const AddNewAccount = () => {
                         formik.handleSubmit();
                       } else {
                         Toast({
-                          message: "You don't have any changes to save!",
+                          message: t('NO_CHANGES'),
                           type: 'error',
                         });
                       }
                     }}
-                    title={route?.params?.accountType ? 'Update' : 'Continue'}
+                    title={
+                      route?.params?.accountType
+                        ? t('profile:UPDATE')
+                        : t('auth:CONTINUE')
+                    }
                     buttonStyle={{marginVertical: 20}}
                   />
                 </View>
@@ -685,7 +682,11 @@ const AddNewAccount = () => {
               width: 150,
             }}
           />
-          <CommonText content="You are set!" color={appColors.dark} size={24} />
+          <CommonText
+            content={t('YOURE_SET')}
+            color={appColors.dark}
+            size={24}
+          />
         </View>
       </Modal>
       <CommonRBSheet
@@ -776,13 +777,13 @@ const AddNewAccount = () => {
         }}>
         <View style={{padding: 15, gap: 10}}>
           <CommonText
-            content="Exit from the Page?"
+            content={t('transaction:EXIT_CONFIRM_TITLE')}
             bold
             size={'large'}
             style={{textAlign: 'center'}}
           />
           <CommonText
-            content="You have unsaved changes..! Are you sure want to leave this page?"
+            content={t('transaction:EXIT_MESSAGE')}
             color={appColors.placeholderColor}
             size={'label'}
             style={{textAlign: 'center', paddingHorizontal: 15}}
@@ -795,7 +796,7 @@ const AddNewAccount = () => {
             }}>
             <View style={{flex: 0.45}}>
               <CommonButton
-                title="No"
+                title={t('NO')}
                 buttonType="clear"
                 onPress={() => {
                   dirtyRBSheetRef.current?.close();
@@ -804,7 +805,7 @@ const AddNewAccount = () => {
             </View>
             <View style={{flex: 0.45}}>
               <CommonButton
-                title="Yes"
+                title={t('YES')}
                 onPress={() => {
                   navigation.goBack();
                 }}
@@ -830,13 +831,13 @@ const AddNewAccount = () => {
         }}>
         <View style={{padding: 15, gap: 10}}>
           <CommonText
-            content="Remove this wallet?"
+            content={t('REMOVE_WALLET')}
             bold
             size={'large'}
             style={{textAlign: 'center'}}
           />
           <CommonText
-            content="Are you sure do you wanna remove this wallet?"
+            content={t('REMOVE_WALLET_DESCRIPTION')}
             color={appColors.placeholderColor}
             size={'label'}
             style={{textAlign: 'center', paddingHorizontal: 15}}
@@ -849,7 +850,7 @@ const AddNewAccount = () => {
             }}>
             <View style={{flex: 0.45}}>
               <CommonButton
-                title="No"
+                title={t('NO')}
                 buttonType="clear"
                 onPress={() => {
                   deleteRBSheetRef.current?.close();
@@ -857,7 +858,10 @@ const AddNewAccount = () => {
               />
             </View>
             <View style={{flex: 0.45}}>
-              <CommonButton title="Yes" onPress={handleDeleteBankAccount} />
+              <CommonButton
+                title={t('YES')}
+                onPress={handleDeleteBankAccount}
+              />
             </View>
           </View>
         </View>
@@ -877,7 +881,7 @@ const AddNewAccount = () => {
           style={{height: 80, width: 80}}
         />
         <CommonText
-          content="Wallet has been successfully removed"
+          content={t('WALLET_REMOVED_SUCCESS')}
           size={'label'}
           style={{textAlign: 'center', paddingHorizontal: 20}}
         />

@@ -23,7 +23,7 @@ import {RootState} from '@store/store';
 import {useTranslation} from 'react-i18next';
 
 const Settings = () => {
-  const {t} = useTranslation(['settings']);
+  const {t} = useTranslation('profile');
 
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const userDetails = useSelector((state: RootState) => state.auth.userDetails);
@@ -50,7 +50,7 @@ const Settings = () => {
 
   const settingsDataArray = [
     {
-      title: t('currency'),
+      title: t('CURRENCY'),
       onPress: () =>
         navigation.navigate('Currency', {
           selectedCurrency: userDetails?.currencySymbol,
@@ -60,7 +60,7 @@ const Settings = () => {
       ),
     },
     {
-      title: t('language'),
+      title: t('LANGUAGE'),
       onPress: () =>
         navigation.navigate('Language', {
           selectedLanguage: userDetails?.currentLanguage,
@@ -76,27 +76,27 @@ const Settings = () => {
       ),
     },
     {
-      title: t('notification'),
+      title: t('NOTIFICATION'),
       onPress: () => navigation.navigate('Notification'),
       rightContent: () => <RightComponent />,
     },
     {
-      title: t('security'),
+      title: t('SECURITY'),
       onPress: () => navigation.navigate('Security'),
       rightContent: () => <RightComponent />,
     },
     {
-      title: t('changePassword'),
+      title: t('CHANGE_PASSWORD'),
       onPress: () => navigation.navigate('ChangePassword'),
       rightContent: () => <RightComponent />,
     },
     {
-      title: t('about'),
+      title: t('ABOUT'),
       onPress: () => navigation.navigate('About'),
       rightContent: () => <RightComponent />,
     },
     {
-      title: t('help'),
+      title: t('HELP'),
       onPress: () => navigation.navigate('Help'),
       rightContent: () => <RightComponent />,
     },
@@ -133,7 +133,7 @@ const Settings = () => {
   return (
     <KeyboardAvoidingView style={{flex: 1, backgroundColor: appColors.light}}>
       <CommonHeader
-        title={t('settings')}
+        title={t('SETTINGS')}
         leftIcon
         leftIconPressBack={() => navigation.goBack()}
       />

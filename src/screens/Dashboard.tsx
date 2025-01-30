@@ -1,8 +1,7 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useLayoutEffect, useState} from 'react';
 import {
   FlatList,
   KeyboardAvoidingView,
-  Linking,
   Modal,
   Platform,
   Pressable,
@@ -17,7 +16,6 @@ import {
   NavigationProp,
   ParamListBase,
   useIsFocused,
-  useLinkTo,
   useNavigation,
 } from '@react-navigation/native';
 import {Avatar, Icon} from '@rneui/base';
@@ -49,6 +47,7 @@ import {getCurrencySymbol} from '@src/lib/functions';
 import callPermission from '@services/permission';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {navigationStore} from '@services/setup/navigationStore';
+import {useTranslation} from 'react-i18next';
 
 export interface TransactionListInterface {
   _id: string;
@@ -95,6 +94,7 @@ const Dashboard = () => {
   useEffect(() => {
     checkPendingDeepLink();
   }, []);
+  const {t} = useTranslation('transaction');
 
   const checkPendingDeepLink = async () => {
     const pendingUrl = await navigationStore.getPendingDeepLink();
@@ -107,6 +107,7 @@ const Dashboard = () => {
     try {
       // Remove the scheme from the URL
       const path = url.replace(/.*?:\/\//g, '');
+
       const screen = path?.split('montra.netlify.app')[1];
       // Navigate based on the screen path
       switch (screen) {
@@ -116,10 +117,8 @@ const Dashboard = () => {
         case '/help-center':
           navigation.navigate('Help');
           break;
-
-        // Add more cases as needed
         default:
-          Toast({message: `Unknown deep link path: ${screen}`, type: 'error'});
+          console.log(`Unknown deep link path: ${screen}`);
       }
     } catch (error) {
       console.error('Error handling deep link:', error);
@@ -144,7 +143,7 @@ const Dashboard = () => {
       const weekEnd = moment.min(endOfWeek, moment(endDate));
 
       weeks.push({
-        label: `Week ${weeks.length + 1}: ${weekStart.format(
+        label: `${t('WEEK')} ${weeks.length + 1}: ${weekStart.format(
           'MMM D',
         )} - ${weekEnd.format('MMM D')}`,
         value: `start:${weekStart},end:${weekEnd}`,
@@ -380,7 +379,7 @@ const Dashboard = () => {
             <CommonText
               style={{textAlign: 'center'}}
               color={appColors.placeholderColor}
-              content="Account Balance"
+              content={t('ACCOUNT_BALANCE')}
             />
             <CommonText
               bold
@@ -394,7 +393,7 @@ const Dashboard = () => {
           <View>
             <CommonText
               bold
-              content={'You need to add your wallet details'}
+              content={t('ADD_WALLET_DETAILS')}
               color={appColors.dark}
               size={'large'}
               style={{textAlign: 'center'}}
@@ -440,7 +439,7 @@ const Dashboard = () => {
               />
             </View>
             <View>
-              <CommonText content="Income" color={appColors.light} />
+              <CommonText content={t('INCOME')} color={appColors.light} />
               <CommonText
                 content={getCurrencySymbol(
                   accountBalanceData?.totalIncome,
@@ -475,7 +474,7 @@ const Dashboard = () => {
               />
             </View>
             <View>
-              <CommonText content="Expense" color={appColors.light} />
+              <CommonText content={t('EXPENSE')} color={appColors.light} />
               <CommonText
                 content={getCurrencySymbol(
                   accountBalanceData?.totalExpenses,
@@ -496,7 +495,7 @@ const Dashboard = () => {
               alignItems: 'center',
             }}>
             <CommonText
-              content="Spend Frequency"
+              content={t('SPEND_FREQUENCY')}
               color={appColors.dark}
               size={'large'}
               bold
@@ -535,7 +534,7 @@ const Dashboard = () => {
             justifyContent: 'space-between',
             marginTop: 20,
           }}>
-          <CommonText bold size={'large'} content="Recent Transaction" />
+          <CommonText bold size={'large'} content={t('RECENT_TRANSACTION')} />
           <TouchableOpacity
             onPress={() =>
               navigation.navigate('BottomTab', {screen: 'Transaction'})
@@ -547,7 +546,7 @@ const Dashboard = () => {
               paddingVertical: 5,
               borderRadius: 20,
             }}>
-            <CommonText color={appColors.primary} content="See All" />
+            <CommonText color={appColors.primary} content={t('SEE_ALL')} />
           </TouchableOpacity>
         </View>
       </View>
@@ -666,7 +665,7 @@ const Dashboard = () => {
               />
               <CommonText
                 style={{textAlign: 'center'}}
-                content="No Transaction Found!"
+                content={t('TRANSACTION_EMPTY')}
               />
             </View>
           }

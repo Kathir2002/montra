@@ -3,7 +3,6 @@ import {
   BackHandler,
   Linking,
   LogBox,
-  NativeModules,
   Platform,
   StatusBar,
 } from 'react-native';
@@ -24,7 +23,7 @@ LogBox.ignoreLogs([
 ]);
 import CommonDataService from '@shared/commonDataServices';
 import EncryptedStorage from 'react-native-encrypted-storage';
-import SplashScreen from '@components/auth/SplashScreen';
+import SplashScreen from 'react-native-splash-screen';
 import GetStarted from '@components/auth/getStarted/GetStarted';
 import {updateCurrentUser, updateIsLoggedin} from '@store/slice/appSlice';
 import AuthService from '@services/authService';
@@ -70,8 +69,16 @@ const App = () => {
   );
   const netInfo = useNetInfo();
   const dispatch = useDispatch();
-  const {i18n} = useTranslation();
+  const {t, i18n} = useTranslation();
   const modalOpen = useSelector((state: RootState) => state.auth.modalOpen);
+
+  useEffect(() => {
+    if (isloggedin && isLoading) {
+      setTimeout(() => {
+        SplashScreen.hide();
+      }, 500);
+    }
+  }, [isLoading, isloggedin]);
 
   const handleBiometricAuth = async () => {
     try {
@@ -85,16 +92,19 @@ const App = () => {
           if (available) {
             try {
               const {success, error} = await rnBiometrics.simplePrompt({
-                promptMessage: 'Authenticate to continue',
+                promptMessage: t('AUTHENTICATE_TO_CONTINUE'),
               });
 
               if (success) {
-                if (navigationRef?.current?.isReady)
+                if (navigationRef?.current?.isReady) {
                   dispatch(updateIsLoggedin(true));
+                  setIsLoading(false);
+                }
               } else {
+                setIsLoading(false);
                 Alert.alert(
-                  'Authentication failed',
-                  'Biometric authentication failed',
+                  t('BIOMETRIC_AUTHENTICATION_FAILED_TITLE'),
+                  t('BIOMETRIC_AUTHENTICATION_FAILED'),
                   [
                     {text: 'Cancel', onPress: () => BackHandler.exitApp()},
                     {text: 'Unlock', onPress: () => handleBiometricAuth()},
@@ -106,17 +116,14 @@ const App = () => {
             }
           } else {
             Alert.alert(
-              'Biometrics not supported',
-              'This device does not support biometric authentication.',
+              t('BIOMETRIC_NOT_SUPPORTED_TITLE'),
+              t('BIOMETRUC_NOT_SUPPORTED'),
             );
           }
         })
         .catch(error => {
           console.error('Error:', error);
-          Alert.alert(
-            'Error',
-            'An error occurred while checking biometrics availability.',
-          );
+          Alert.alert(t('ERROR'), t('ERROR_OCCURED'));
         });
     } catch (err) {
       console.log(err);
@@ -142,11 +149,13 @@ const App = () => {
           );
           const securityValue = res?.user?.securityMethod;
 
-          if (securityValue === 'PIN' && res?.user?.securityPin) {
+          if (securityValue === 'PIN') {
+            setIsLoading(false);
             if (navigationRef?.current?.isReady)
               setTimeout(() => {
+                SplashScreen.hide();
                 navigationRef?.current?.navigate('PinGerneration');
-              }, 1000);
+              }, 500);
           } else if (securityValue === 'FINGERPRINT') {
             setIsNavigateToLogin(false);
             handleBiometricAuth();
@@ -154,11 +163,10 @@ const App = () => {
         }
       })
       .catch(err => {
+        setIsLoading(false);
         Toast({message: err?.response?.data?.message, type: 'error'});
       })
-      .finally(() => {
-        setIsLoading(false);
-      });
+      .finally(() => {});
   };
 
   //Useeffect to check the login status check function
@@ -188,6 +196,9 @@ const App = () => {
       setIsLoading(false);
       EncryptedStorage.removeItem('login');
       dispatch(updateIsLoggedin(false));
+      setTimeout(() => {
+        SplashScreen.hide();
+      }, 300);
     }
   };
 
@@ -295,11 +306,6 @@ const App = () => {
     };
 
     setupNotificationHandling();
-
-    // // Cleanup
-    // return () => {
-    //   messaging().onMessage(() => {});
-    // };
   }, [createNotificationChannels, displayNotification]);
 
   return (
@@ -307,11 +313,7 @@ const App = () => {
       <StatusBar backgroundColor={undefined} barStyle={'light-content'} />
       {
         <>
-          {isLoading && isGetStartedVisible === null ? (
-            <SplashScreen />
-          ) : isLoading && isGetStartedVisible === false ? (
-            <SplashScreen />
-          ) : !isLoading && isloggedin && !userDetails.isSetupDone ? (
+          {!isLoading && isloggedin && !userDetails.isSetupDone ? (
             <SetUpStack />
           ) : !isLoading && isloggedin ? (
             <AppStack />

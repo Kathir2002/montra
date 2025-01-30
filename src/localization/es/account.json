@@ -1,0 +1,29 @@
+{
+    "ACCOUNT": "Cuenta",
+    "ACCOUNT_BALANCE": "Saldo de la cuenta",
+    "NO_ACCOUNT_FOUND": "No se encontró ninguna cuenta",
+    "ADD_NEW_WALLET": "+ Agregar nueva billetera",
+    "NO": "No",
+    "YES": "Sí",
+    "WALLET_BALACE_INVALID": "Ingrese un saldo de billetera válido",
+    "WALLET_BALACE_REQUIRED": "Ingrese el saldo de la billetera para continuar",
+    "FIELD_REQUIRED": "Este campo es obligatorio",
+    "SELECT_ACCOUNT": "Seleccione una cuenta bancaria",
+    "EDIT_WALLET": "Editar billetera",
+    "ADD_NEW_WALLET_HEADING": "Agregar nueva billetera",
+    "NAME": "Nombre",
+    "ACCOUNT_TYPE": "Tipo de cuenta",
+    "ACCOUNT_TYPE_LABEL": {
+        "UPI": "UPI",
+        "BANK": "Banco",
+        "CASH": "Efectivo"
+    },
+    "NO_CHANGES": "¡No tienes ningún cambio que guardar!",
+    "YOURE_SET": "¡Ya está!",
+    "REMOVE_WALLET": "¿Quieres eliminar esta billetera?",
+    "REMOVE_WALLET_DESCRIPTION": "¿Estás seguro de que quieres eliminar esta billetera?",
+    "WALLET_REMOVED_SUCCESS": "La billetera se ha eliminado correctamente",
+    "SETUP_ACCOUNT": "¡Configuremos tu cuenta!",
+    "SETUP_ACCOUNT_DESCRIPTION": "La cuenta puede ser tu banco, tu tarjeta de crédito o tu billetera.",
+    "LETS_GO": "Vamos"
+}

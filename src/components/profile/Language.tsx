@@ -39,7 +39,7 @@ import {RNRestart} from '@src/lib/restart';
 
 const Language = () => {
   const dispatch = useDispatch();
-  const {t, i18n} = useTranslation();
+  const {t, i18n} = useTranslation('profile');
   const rbSheetRef = useRef<RBSheetRef>(null);
   const userDetails = useSelector((state: RootState) => state.auth.userDetails);
   const [loading, setLoading] = useState(false);
@@ -99,6 +99,7 @@ const Language = () => {
   };
 
   const handleChangeLanguage = async () => {
+    const isReloadAppNecessary = i18n.language === 'ar';
     await i18n
       .changeLanguage(currentLanguage)
       .then(async () => {
@@ -112,13 +113,20 @@ const Language = () => {
         );
         setTimeout(() => {
           setIsSuccessPopoverVisible(false);
-          Platform.OS === 'android'
-            ? RNRestart.restart('')
-            : navigation.goBack();
+          if (i18n.language === 'ar') {
+            Platform.OS === 'android'
+              ? RNRestart.restart('')
+              : navigation.goBack();
+          } else {
+            if (isReloadAppNecessary) {
+              Platform.OS === 'android' && RNRestart.restart('');
+            }
+            navigation.goBack();
+          }
         }, 2000);
       })
       .catch(err => {
-        Toast({message: 'Error in updating user language', type: 'error'});
+        Toast({message: t('ERROR_IN_UPDATE_LANGUAGE'), type: 'error'});
         console.log('Error in updating language', err);
       });
   };
@@ -126,7 +134,7 @@ const Language = () => {
   return (
     <KeyboardAvoidingView style={{flex: 1, backgroundColor: appColors.light}}>
       <CommonHeader
-        title="Language"
+        title={t('LANGUAGE')}
         leftIcon
         leftIconPressBack={() => navigation.goBack()}
       />
@@ -168,13 +176,13 @@ const Language = () => {
         }}>
         <View style={{padding: 15, gap: 10}}>
           <CommonText
-            content="Change language?"
+            content={t('CHANGE_LANGUAGE_CONFIRMATION')}
             bold
             size={'large'}
             style={{textAlign: 'center'}}
           />
           <CommonText
-            content="Are you sure do you wanna change language?"
+            content={t('CHANGE_LANGUAGE_DESCRIPTION')}
             color={appColors.placeholderColor}
             size={'label'}
             style={{textAlign: 'center', paddingHorizontal: 15}}
@@ -187,7 +195,7 @@ const Language = () => {
             }}>
             <View style={{flex: 0.45}}>
               <CommonButton
-                title="No"
+                title={t('NO')}
                 buttonType="clear"
                 onPress={() => {
                   rbSheetRef.current?.close();
@@ -197,7 +205,7 @@ const Language = () => {
             </View>
             <View style={{flex: 0.45}}>
               <CommonButton
-                title="Yes"
+                title={t('YES')}
                 onPress={() => handleChangeLanguage()}
               />
             </View>
@@ -219,7 +227,7 @@ const Language = () => {
           style={{height: 80, width: 80}}
         />
         <CommonText
-          content="User language updated successfully"
+          content={t('LANGUAGE_UPDATED')}
           size={'label'}
           style={{textAlign: 'center', paddingHorizontal: 20}}
         />

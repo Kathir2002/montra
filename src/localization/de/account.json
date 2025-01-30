@@ -1,0 +1,29 @@
+{
+    "ACCOUNT": "Konto",
+    "ACCOUNT_BALANCE": "Kontostand",
+    "NO_ACCOUNT_FOUND": "Kein Konto gefunden",
+    "ADD_NEW_WALLET": "+ Neues Wallet hinzufügen",
+    "NO": "Nein",
+    "YES": "Ja",
+    "WALLET_BALACE_INVALID": "Gültigen Wallet-Saldo eingeben",
+    "WALLET_BALACE_REQUIRED": "Wallet-Saldo eingeben, um fortzufahren",
+    "FIELD_REQUIRED": "Dieses Feld ist erforderlich",
+    "SELECT_ACCOUNT": "Bitte wählen Sie ein Bankkonto aus",
+    "EDIT_WALLET": "Wallet bearbeiten",
+    "ADD_NEW_WALLET_HEADING": "Neues Wallet hinzufügen",
+    "NAME": "Name",
+    "ACCOUNT_TYPE": "Kontotyp",
+    "ACCOUNT_TYPE_LABEL": {
+        "UPI": "UPI",
+        "BANK": "Bank",
+        "CASH": "Bargeld"
+    },
+    "NO_CHANGES": "Sie haben keine Änderungen zu speichern!",
+    "YOURE_SET": "Sie sind fertig!",
+    "REMOVE_WALLET": "Dieses Wallet entfernen?",
+    "REMOVE_WALLET_DESCRIPTION": "Möchten Sie dieses Wallet wirklich entfernen?",
+    "WALLET_REMOVED_SUCCESS": "Wallet wurde erfolgreich entfernt",
+    "SETUP_ACCOUNT": "Lassen Sie uns Ihr Konto einrichten!",
+    "SETUP_ACCOUNT_DESCRIPTION": "Konto kann Ihre Bank, Kreditkarte oder Ihr Wallet sein.",
+    "LETS_GO": "Los geht's"
+}

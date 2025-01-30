@@ -43,6 +43,7 @@ import Popover from 'react-native-popover-view';
 import LottieView from 'lottie-react-native';
 import {useDispatch} from 'react-redux';
 import {updateIsTransactionAdded} from '@store/slice/appSlice';
+import {useTranslation} from 'react-i18next';
 
 interface PropInterface {
   id: string;
@@ -53,6 +54,7 @@ const CommonDetailsScreen = ({
 }: {
   screenName: 'Expense' | 'Income' | 'Transfer';
 }) => {
+  const {t} = useTranslation('transaction');
   const route: RouteProp<{transactionDetails: PropInterface}> = useRoute();
   const dispatch = useDispatch();
   const navigation: NavigationProp<ParamListBase> = useNavigation();
@@ -135,7 +137,7 @@ const CommonDetailsScreen = ({
       <CommonHeader
         leftIcon
         theme="dark"
-        title="Detail Transaction"
+        title={t('DETAIL_TRANSACTION')}
         leftIconPressBack={() => navigation.goBack()}
         headerBgc={
           screenName == 'Income'
@@ -220,12 +222,12 @@ const CommonDetailsScreen = ({
           borderRadius: 20,
         }}>
         <View style={{flex: 0.2, alignItems: 'center'}}>
-          <CommonText content="Type" color={appColors.placeholderColor} />
+          <CommonText content={t('TYPE')} color={appColors.placeholderColor} />
           <CommonText bold content={transactionDetails?.transactionType} />
         </View>
         <View style={{flex: 0.35, alignItems: 'center'}}>
           <CommonText
-            content={`${screenName == 'Transfer' ? 'From' : 'Category'}`}
+            content={`${screenName == 'Transfer' ? t('FROM') : t('CATEGORY')}`}
             color={appColors.placeholderColor}
           />
           <CommonText
@@ -240,7 +242,7 @@ const CommonDetailsScreen = ({
         </View>
         <View style={{flex: 0.35, alignItems: 'center'}}>
           <CommonText
-            content={`${screenName == 'Transfer' ? 'To' : 'Wallet'}`}
+            content={`${screenName == 'Transfer' ? t('TO') : t('WALLET')}`}
             color={appColors.placeholderColor}
           />
           <CommonText
@@ -266,7 +268,7 @@ const CommonDetailsScreen = ({
         <View style={{}}>
           {transactionDetails?.description && (
             <CommonText
-              content={'Description'}
+              content={t('DESCRIPTION')}
               color={appColors.placeholderColor}
             />
           )}
@@ -278,7 +280,7 @@ const CommonDetailsScreen = ({
         {transactionDetails?.document ? (
           <View>
             <CommonText
-              content="Attachment"
+              content={t('ATTACHMENT')}
               color={appColors.placeholderColor}
             />
             {transactionDetails?.document?.fileFormat?.startsWith('image/') ? (
@@ -373,7 +375,7 @@ const CommonDetailsScreen = ({
             width: '100%',
           }}>
           <CommonButton
-            title="Edit"
+            title={t('EDIT')}
             onPress={() =>
               navigation.navigate(`Add${screenName}`, transactionDetails!)
             }
@@ -394,13 +396,13 @@ const CommonDetailsScreen = ({
         }}>
         <View style={{padding: 15, gap: 10}}>
           <CommonText
-            content="Remove this transaction?"
+            content={t('REMOVE_TRANSACTION')}
             bold
             size={'large'}
             style={{textAlign: 'center'}}
           />
           <CommonText
-            content="Are you sure do you wanna remove this transaction?"
+            content={t('REMOVE_CONFIRMATION')}
             color={appColors.placeholderColor}
             size={'label'}
             style={{textAlign: 'center', paddingHorizontal: 15}}
@@ -413,7 +415,7 @@ const CommonDetailsScreen = ({
             }}>
             <View style={{flex: 0.45}}>
               <CommonButton
-                title="No"
+                title={t('NO')}
                 buttonType="clear"
                 onPress={() => {
                   deleteRBSheetRef.current?.close();
@@ -422,7 +424,10 @@ const CommonDetailsScreen = ({
               />
             </View>
             <View style={{flex: 0.45}}>
-              <CommonButton title="Yes" onPress={handleDeleteTransaction} />
+              <CommonButton
+                title={t('YES')}
+                onPress={handleDeleteTransaction}
+              />
             </View>
           </View>
         </View>
@@ -445,7 +450,7 @@ const CommonDetailsScreen = ({
           style={{height: 80, width: 80}}
         />
         <CommonText
-          content="Transaction has been successfully removed"
+          content={t('TRANSACTION_REMOVED_SUCCESS')}
           size={'label'}
           style={{textAlign: 'center', paddingHorizontal: 20}}
         />

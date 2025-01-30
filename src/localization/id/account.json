@@ -1,0 +1,29 @@
+{
+    "ACCOUNT": "Akun",
+    "ACCOUNT_BALANCE": "Saldo akun",
+    "NO_ACCOUNT_FOUND": "Tidak ada akun yang ditemukan",
+    "ADD_NEW_WALLET": "+ Tambahkan Dompet Baru",
+    "NO": "TIDAK",
+    "YES": "Ya",
+    "WALLET_BALACE_INVALID": "Masukkan keseimbangan dompet yang valid",
+    "WALLET_BALACE_REQUIRED": "Masukkan Wallet Balance untuk melanjutkan",
+    "FIELD_REQUIRED": "Bidang ini diperlukan",
+    "SELECT_ACCOUNT": "Pilih rekening bank",
+    "EDIT_WALLET": "Edit dompet",
+    "ADD_NEW_WALLET_HEADING": "Tambahkan dompet baru",
+    "NAME": "Nama",
+    "ACCOUNT_TYPE": "Jenis akun",
+    "ACCOUNT_TYPE_LABEL": {
+        "UPI": "Upi",
+        "BANK": "Bank",
+        "CASH": "Uang tunai"
+    },
+    "NO_CHANGES": "Anda tidak memiliki perubahan untuk disimpan!",
+    "YOURE_SET": "Anda sudah siap!",
+    "REMOVE_WALLET": "Lepaskan dompet ini?",
+    "REMOVE_WALLET_DESCRIPTION": "Apakah Anda yakin ingin menghapus dompet ini?",
+    "WALLET_REMOVED_SUCCESS": "Dompet telah berhasil dilepas",
+    "SETUP_ACCOUNT": "Mari Siapkan Akun Anda!",
+    "SETUP_ACCOUNT_DESCRIPTION": "Akun dapat berupa bank, kartu kredit, atau dompet Anda.",
+    "LETS_GO": "Ayo pergi"
+}

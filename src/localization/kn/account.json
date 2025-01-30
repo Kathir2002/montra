@@ -1,0 +1,29 @@
+{
+    "ACCOUNT": "ಖಾತೆ",
+    "ACCOUNT_BALANCE": "ಖಾತೆ ಬಾಕಿ",
+    "NO_ACCOUNT_FOUND": "ಯಾವುದೇ ಖಾತೆ ಕಂಡುಬಂದಿಲ್ಲ",
+    "ADD_NEW_WALLET": "+ ಹೊಸ ವಾಲೆಟ್ ಸೇರಿಸಿ",
+    "NO": "ಇಲ್ಲ",
+    "YES": "ಹೌದು",
+    "WALLET_BALACE_INVALID": "ಮಾನ್ಯ ವಾಲೆಟ್ ಬ್ಯಾಲೆನ್ಸ್ ಅನ್ನು ನಮೂದಿಸಿ",
+    "WALLET_BALACE_REQUIRED": "ಮುಂದುವರಿಸಲು ವಾಲೆಟ್ ಬ್ಯಾಲೆನ್ಸ್ ನಮೂದಿಸಿ",
+    "FIELD_REQUIRED": "ಈ ಕ್ಷೇತ್ರದ ಅಗತ್ಯವಿದೆ",
+    "SELECT_ACCOUNT": "ದಯವಿಟ್ಟು ಬ್ಯಾಂಕ್ ಖಾತೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+    "EDIT_WALLET": "ವಾಲೆಟ್ ಸಂಪಾದಿಸಿ",
+    "ADD_NEW_WALLET_HEADING": "ಹೊಸ ವಾಲೆಟ್ ಸೇರಿಸಿ",
+    "NAME": "ಹೆಸರು",
+    "ACCOUNT_TYPE": "ಖಾತೆ ಪ್ರಕಾರ",
+    "ACCOUNT_TYPE_LABEL": {
+        "UPI": "ಉಪಯೋಗ",
+        "BANK": "ದಂಗ",
+        "CASH": "ನಗದು"
+    },
+    "NO_CHANGES": "ಉಳಿಸಲು ನಿಮಗೆ ಯಾವುದೇ ಬದಲಾವಣೆಗಳಿಲ್ಲ!",
+    "YOURE_SET": "ನಿಮ್ಮನ್ನು ಹೊಂದಿಸಲಾಗಿದೆ!",
+    "REMOVE_WALLET": "ಈ ಕೈಚೀಲವನ್ನು ತೆಗೆದುಹಾಕುವುದೇ?",
+    "REMOVE_WALLET_DESCRIPTION": "ಈ ಕೈಚೀಲವನ್ನು ತೆಗೆದುಹಾಕಲು ನಿಮಗೆ ಖಚಿತವಾಗಿದೆಯೇ?",
+    "WALLET_REMOVED_SUCCESS": "ವಾಲೆಟ್ ಅನ್ನು ಯಶಸ್ವಿಯಾಗಿ ತೆಗೆದುಹಾಕಲಾಗಿದೆ",
+    "SETUP_ACCOUNT": "ನಿಮ್ಮ ಖಾತೆಯನ್ನು ಹೊಂದಿಸೋಣ!",
+    "SETUP_ACCOUNT_DESCRIPTION": "ಖಾತೆಯು ನಿಮ್ಮ ಬ್ಯಾಂಕ್, ಕ್ರೆಡಿಟ್ ಕಾರ್ಡ್ ಅಥವಾ ನಿಮ್ಮ ಕೈಚೀಲವಾಗಿರಬಹುದು.",
+    "LETS_GO": "ಹೋಗೋಣ"
+}

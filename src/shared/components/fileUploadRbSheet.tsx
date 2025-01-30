@@ -1,9 +1,7 @@
 import {StyleSheet, View} from 'react-native';
 import React, {
-  forwardRef,
   SetStateAction,
   Dispatch,
-  useEffect,
   JSXElementConstructor,
   ReactElement,
   SVGProps,
@@ -23,9 +21,9 @@ import callPermission from '@services/permission';
 import CommonText from './commonText/CommonText';
 import {TouchableOpacity} from 'react-native';
 import {appColors} from '@shared/appColors';
-import {RBSheetRef} from './commonRBSheet/CommonRBSheet';
 import {Toast} from '@shared/ToastConfig';
 import {FormikValues} from 'formik';
+import {useTranslation} from 'react-i18next';
 
 export interface DocumentInterface {
   ext: string;
@@ -56,24 +54,25 @@ const FileUploadRbSheet = ({
   isUploadDocumentVisible = true,
   formik,
 }: PropsInterface) => {
+  const {t} = useTranslation('transaction');
   const uploadStaticData: Props[] = [
     {
-      name: 'Camera',
+      name: t('CAMERA'),
       icon: CameraIcon,
       onPress: () => openCamera(),
     },
     {
-      name: 'Image',
+      name: t('IMAGE'),
       icon: GalleryIcon,
       onPress: () => openGallery(),
     },
   ];
   if (isUploadDocumentVisible) {
     uploadStaticData.push({
-      name: 'Document',
+      name: t('DOCUMENT'),
       icon: DocumentIcon,
       onPress: () => {
-        CommonDataService.pickDocument()
+        CommonDataService.pickDocument(t)
           .then(res => {
             setDocument(res);
             formik && formik?.setFieldTouched('isDocumentUpdate', true);
@@ -123,7 +122,7 @@ const FileUploadRbSheet = ({
             } else {
               closeHandler();
               Toast({
-                message: "File size shouldn't exceed 2 MB",
+                message: t('FILE_SIZE_EXCEED'),
                 type: 'error',
               });
             }
@@ -161,7 +160,7 @@ const FileUploadRbSheet = ({
             }
           } else {
             closeHandler();
-            Toast({message: "File size shouldn't exceed 2 MB", type: 'error'});
+            Toast({message: t('FILE_SIZE_EXCEED'), type: 'error'});
           }
         }
       })

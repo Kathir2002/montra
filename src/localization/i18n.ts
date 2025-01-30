@@ -50,7 +50,8 @@ i18n
   .init({
     compatibilityJSON: 'v3',
     resources,
-    // lng: 'ar',
+    // lng: 'ta',
+    debug: true, // Debug mode for development
     fallbackLng: 'en',
     interpolation: {
       escapeValue: false,

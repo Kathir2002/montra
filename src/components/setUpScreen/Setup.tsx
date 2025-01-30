@@ -9,8 +9,10 @@ import {
   useNavigation,
 } from '@react-navigation/native';
 import LottieView from 'lottie-react-native';
+import {useTranslation} from 'react-i18next';
 
 const Setup = () => {
+  const {t} = useTranslation('account');
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   return (
     <View
@@ -22,11 +24,8 @@ const Setup = () => {
       }}>
       <StatusBar backgroundColor={appColors.light} barStyle={'dark-content'} />
       <View style={{gap: 15}}>
-        <CommonText content="Let's Setup your account!" bold size={24} />
-        <CommonText
-          content="Account can be your bank, credit card or your wallet."
-          size={'header'}
-        />
+        <CommonText content={t('SETUP_ACCOUNT')} bold size={24} />
+        <CommonText content={t('SETUP_ACCOUNT_DESCRIPTION')} size={'header'} />
       </View>
       <View
         style={{
@@ -56,7 +55,7 @@ const Setup = () => {
         />
       </View>
       <CommonButton
-        title="Let's Go"
+        title={t('LETS_GO')}
         onPress={() => navigation.navigate('AddNewAccount')}
       />
     </View>

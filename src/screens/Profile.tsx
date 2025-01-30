@@ -5,7 +5,6 @@ import {
   ScrollView,
   StatusBarProps,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -56,8 +55,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import AccountService from '@services/setup/accountService';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
 import FinanceStory from '@components/financeReport/FinanceStory';
+import {useTranslation} from 'react-i18next';
 
 const Profile = () => {
+  const {t} = useTranslation('profile');
   const [isLoading, setIsLoading] = useState(false);
   const isToggleOpen = useSelector(
     (state: RootState) => state.auth.isFabToggleOpen,
@@ -155,22 +156,22 @@ const Profile = () => {
 
   const profilePageData = [
     {
-      title: 'Account',
+      title: t('ACCOUNT'),
       icon: <AccountIcon width={25} height={25} />,
       onPress: () => navigation.navigate('Account'),
     },
     {
-      title: 'Settings',
+      title: t('SETTINGS'),
       icon: <SettingsIcon width={25} height={25} />,
       onPress: () => navigation.navigate('Settings'),
     },
     {
-      title: 'Export Data',
+      title: t('EXPORT_DATA'),
       icon: <ExportDataIcon width={25} height={25} />,
       onPress: () => navigation.navigate('ExportData'),
     },
     {
-      title: 'Deactivate Account',
+      title: t('DEACTIVATE_ACCOUNT'),
       icon: <DeactivateIcon width={25} height={25} />,
       onPress: () => {
         deactivateRBSheetRef.current?.open();
@@ -178,7 +179,7 @@ const Profile = () => {
       },
     },
     {
-      title: 'Logout',
+      title: t('LOGOUT'),
       icon: <LogoutIcon width={25} height={25} />,
       onPress: () => {
         rbSheetRef.current?.open();
@@ -286,7 +287,10 @@ const Profile = () => {
             flex: 1,
           }}>
           <View style={{gap: 5}}>
-            <CommonText content="Username" color={appColors.placeholderColor} />
+            <CommonText
+              content={t('USER_NAME')}
+              color={appColors.placeholderColor}
+            />
             <CommonText content={userDetails.name} bold size={'header'} />
           </View>
           <TouchableOpacity onPress={() => navigation.navigate('EditProfile')}>
@@ -324,13 +328,13 @@ const Profile = () => {
         }}>
         <View style={{padding: 15, gap: 10}}>
           <CommonText
-            content="Logout?"
+            content={`${t('LOGOUT')}?`}
             bold
             size={'large'}
             style={{textAlign: 'center'}}
           />
           <CommonText
-            content="Are you sure do you wanna logout?"
+            content={t('LOGOUT_CONFIRMATION')}
             color={appColors.placeholderColor}
             size={'label'}
             style={{textAlign: 'center', paddingHorizontal: 15}}
@@ -343,7 +347,7 @@ const Profile = () => {
             }}>
             <View style={{flex: 0.45}}>
               <CommonButton
-                title="No"
+                title={t('NO')}
                 buttonType="clear"
                 onPress={() => {
                   rbSheetRef.current?.close();
@@ -352,7 +356,7 @@ const Profile = () => {
               />
             </View>
             <View style={{flex: 0.45}}>
-              <CommonButton title="Yes" onPress={() => logoutHandler()} />
+              <CommonButton title={t('YES')} onPress={() => logoutHandler()} />
             </View>
           </View>
         </View>
@@ -374,13 +378,13 @@ const Profile = () => {
         }}>
         <View style={{padding: 15, gap: 10}}>
           <CommonText
-            content="Deactivate Account?"
+            content={`${t('DEACTIVATE_ACCOUNT')}?`}
             bold
             size={'large'}
             style={{textAlign: 'center'}}
           />
           <CommonText
-            content="Are you sure you want to deactivate your account? It will be permanently deleted in 14 days?"
+            content={t('ACCOUNT_DEACTIVATION_CONFIRMATION')}
             color={appColors.placeholderColor}
             size={'label'}
             style={{textAlign: 'center', paddingHorizontal: 15}}
@@ -393,7 +397,7 @@ const Profile = () => {
             }}>
             <View style={{flex: 0.45}}>
               <CommonButton
-                title="No"
+                title={t('NO')}
                 buttonType="clear"
                 onPress={() => {
                   deactivateRBSheetRef.current?.close();
@@ -403,7 +407,7 @@ const Profile = () => {
             </View>
             <View style={{flex: 0.45}}>
               <CommonButton
-                title="Yes"
+                title={t('YES')}
                 onPress={() => deactivateAccountHandler()}
               />
             </View>

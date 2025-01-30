@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   View,
+  ScrollView,
 } from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
 import Animated, {FadeIn, FadeOut} from 'react-native-reanimated';
@@ -38,31 +39,26 @@ import {Icon} from '@rneui/base';
 import MonthPicker, {EventTypes} from 'react-native-month-year-picker';
 import LottieView from 'lottie-react-native';
 import {RefreshControl} from 'react-native';
-import AccountService from '@services/setup/accountService';
 import FinanceStory from '@components/financeReport/FinanceStory';
 import {updateIsFabToggleOpen} from '@store/slice/appSlice';
+import {useTranslation} from 'react-i18next';
 
 const Transaction = () => {
   const isFocused = useIsFocused();
   const dispatch = useDispatch();
   const flatListRef = useRef<FlatList>(null);
+  const {t} = useTranslation('transaction');
   const rbSheetRef = useRef<RBSheetRef>(null);
   const CONTENT_OFFSET_THRESHOLD = 100;
   const navigation: NavigationProp<ParamListBase> = useNavigation();
 
-  const transactionTypes = ['Income', 'Expense', 'Transfer'];
+  const transactionTypes = ['Expense', 'Income', 'Transfer'];
   const sortTypes = ['Highest', 'Lowest', 'Newest', 'Oldest'];
-  // const categoryData = [
-  //   'Salary',
-  //   'Interest',
-  //   'Dividend',
-  //   'Rent',
-  //   'Shopping',
-  //   'Transportation',
-  //   'Food',
-  // ];
 
-  const [categoryData, setCategoryData] = useState<string[]>([]);
+  const [categoryData, setCategoryData] = useState<{
+    income: string[];
+    expense: string[];
+  }>({income: [], expense: []});
 
   const isToggleOpen = useSelector(
     (state: RootState) => state.auth.isFabToggleOpen,
@@ -251,10 +247,7 @@ const Transaction = () => {
           paddingHorizontal: 15,
           borderRadius: 10,
         }}>
-        <CommonText
-          content="See your financial report"
-          color={appColors.primary}
-        />
+        <CommonText content={t('FINANCIAL_REPORT')} color={appColors.primary} />
         <ArrowRightIcon height={15} width={15} />
       </TouchableOpacity>
       <FlatList
@@ -291,7 +284,7 @@ const Transaction = () => {
             />
             <CommonText
               style={{textAlign: 'center'}}
-              content="No Transaction Found!"
+              content={t('NO_TRANSACTION')}
             />
           </View>
         }
@@ -325,11 +318,11 @@ const Transaction = () => {
         customStyles={{
           container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
         }}>
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: appColors.light,
-            padding: 15,
+        <ScrollView
+          style={{backgroundColor: appColors.light, padding: 15, flex: 1}}
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingBottom: 40,
           }}>
           <View
             style={{
@@ -337,7 +330,7 @@ const Transaction = () => {
               alignItems: 'center',
               justifyContent: 'space-between',
             }}>
-            <CommonText content="Filter Transaction" bold />
+            <CommonText content={t('FILTER_TRANSACTION')} bold />
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={() => {
@@ -356,11 +349,11 @@ const Transaction = () => {
                 alignItems: 'center',
                 justifyContent: 'center',
               }}>
-              <CommonText content="Reset" color={appColors.primary} />
+              <CommonText content={t('RESET')} color={appColors.primary} />
             </TouchableOpacity>
           </View>
           <View style={{marginVertical: 10}}>
-            <CommonText content="Filter By" bold />
+            <CommonText content={t('FILTER_BY')} bold />
             <View
               style={{
                 flexDirection: 'row',
@@ -389,7 +382,13 @@ const Transaction = () => {
                       borderColor: appColors.formBorderColor,
                     }}>
                     <CommonText
-                      content={item}
+                      content={
+                        item === 'Expense'
+                          ? t('EXPENSE')
+                          : item === 'Income'
+                          ? t('INCOME')
+                          : t('TRANSFER')
+                      }
                       color={
                         filterData.filterBy === item
                           ? appColors.primary
@@ -403,13 +402,14 @@ const Transaction = () => {
           </View>
           {/* Sort By */}
           <View>
-            <CommonText content="Sort By" bold />
+            <CommonText content={t('SORT_BY')} bold />
             <View
               style={{
                 flexDirection: 'row',
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 paddingTop: 10,
+                flexWrap: 'wrap',
               }}>
               {sortTypes.map((item, index) => {
                 return (
@@ -430,9 +430,18 @@ const Transaction = () => {
                           ? appColors.formBorderColor
                           : appColors.light,
                       borderColor: appColors.formBorderColor,
+                      marginBottom: 10,
                     }}>
                     <CommonText
-                      content={item}
+                      content={
+                        item === 'Highest'
+                          ? t('HIGHEST')
+                          : item === 'Lowest'
+                          ? t('LOWEST')
+                          : item === 'Newest'
+                          ? t('NEWEST')
+                          : t('OLDEST')
+                      }
                       color={
                         filterData.sortBy === item
                           ? appColors.primary
@@ -446,7 +455,7 @@ const Transaction = () => {
           </View>
           {/* Category */}
           <View style={{marginVertical: 10}}>
-            <CommonText content="Category" bold />
+            <CommonText content={t('CATEGORY')} bold />
             <View
               style={{
                 flexDirection: 'row',
@@ -454,7 +463,7 @@ const Transaction = () => {
                 alignItems: 'center',
                 paddingTop: 10,
               }}>
-              <CommonText content="Choose Category" />
+              <CommonText content={t('CHOOSE_CATEGORY')} />
               <Popover
                 from={
                   <TouchableOpacity
@@ -466,56 +475,138 @@ const Transaction = () => {
                       gap: 5,
                     }}>
                     <CommonText
-                      content={`${filterData.category.length} Selected`}
+                      content={`${filterData.category.length} ${t('SELECTED')}`}
                       color={appColors.placeholderColor}
                     />
                     <ArrowRightIcon height={13} width={13} />
                   </TouchableOpacity>
                 }>
-                <View>
-                  {categoryData?.map((item, index) => (
-                    <TouchableOpacity
-                      key={index}
-                      accessibilityRole="button"
-                      onPress={() => {
-                        if (!filterData.category.includes(item)) {
-                          setFilterData(prev => ({
-                            ...prev,
-                            category: [...prev.category, item],
-                          }));
-                        } else {
-                          setFilterData(prev => {
-                            let data = {...prev};
-                            data.category.splice(
-                              data.category.indexOf(item),
-                              1,
-                            );
-                            return data;
-                          });
-                        }
-                      }}
-                      activeOpacity={0.7}
-                      style={{
-                        borderWidth: 1,
-                        borderRadius: 30,
-                        paddingVertical: 5,
-                        paddingHorizontal: 10,
-                        backgroundColor: filterData.category.includes(item)
-                          ? appColors.formBorderColor
-                          : appColors.light,
-                        borderColor: appColors.formBorderColor,
-                      }}>
-                      <CommonText
-                        content={item}
-                        color={
-                          filterData.category.includes(item)
-                            ? appColors.primary
-                            : appColors.dark
-                        }
-                      />
-                    </TouchableOpacity>
-                  ))}
-                </View>
+                <ScrollView
+                  style={{
+                    backgroundColor: appColors.light,
+                    minWidth: 150,
+                  }}
+                  nestedScrollEnabled={true}
+                  showsVerticalScrollIndicator={false}>
+                  <CommonText
+                    content="Expense"
+                    style={{
+                      backgroundColor: appColors.buttonClear,
+                      paddingLeft: 5,
+                    }}
+                  />
+                  <View
+                    style={{
+                      borderWidth: 1,
+                      paddingVertical: 5,
+                      paddingHorizontal: 10,
+                      backgroundColor: appColors.light,
+                      borderColor: appColors.formBorderColor,
+                      gap: 5,
+                    }}>
+                    {categoryData?.expense?.map((item, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        accessibilityRole="button"
+                        onPress={() => {
+                          if (!filterData.category.includes(item)) {
+                            setFilterData(prev => ({
+                              ...prev,
+                              category: [...prev.category, item],
+                            }));
+                          } else {
+                            setFilterData(prev => {
+                              let data = {...prev};
+                              data.category.splice(
+                                data.category.indexOf(item),
+                                1,
+                              );
+                              return data;
+                            });
+                          }
+                        }}
+                        activeOpacity={0.7}
+                        style={{
+                          borderWidth: 1,
+                          borderRadius: 30,
+                          paddingVertical: 5,
+                          paddingHorizontal: 10,
+                          backgroundColor: filterData.category.includes(item)
+                            ? appColors.formBorderColor
+                            : appColors.light,
+                          borderColor: appColors.formBorderColor,
+                        }}>
+                        <CommonText
+                          content={item}
+                          color={
+                            filterData.category.includes(item)
+                              ? appColors.primary
+                              : appColors.dark
+                          }
+                        />
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                  <CommonText
+                    content="Income"
+                    style={{
+                      backgroundColor: appColors.buttonClear,
+                      paddingLeft: 5,
+                    }}
+                  />
+                  <View
+                    style={{
+                      borderWidth: 1,
+                      paddingVertical: 5,
+                      paddingHorizontal: 10,
+                      backgroundColor: appColors.light,
+                      borderColor: appColors.formBorderColor,
+                      gap: 5,
+                    }}>
+                    {categoryData?.income?.map((item, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        accessibilityRole="button"
+                        onPress={() => {
+                          if (!filterData.category.includes(item)) {
+                            setFilterData(prev => ({
+                              ...prev,
+                              category: [...prev.category, item],
+                            }));
+                          } else {
+                            setFilterData(prev => {
+                              let data = {...prev};
+                              data.category.splice(
+                                data.category.indexOf(item),
+                                1,
+                              );
+                              return data;
+                            });
+                          }
+                        }}
+                        activeOpacity={0.7}
+                        style={{
+                          borderWidth: 1,
+                          borderRadius: 30,
+                          paddingVertical: 5,
+                          paddingHorizontal: 10,
+                          backgroundColor: filterData.category.includes(item)
+                            ? appColors.formBorderColor
+                            : appColors.light,
+                          borderColor: appColors.formBorderColor,
+                        }}>
+                        <CommonText
+                          content={item}
+                          color={
+                            filterData.category.includes(item)
+                              ? appColors.primary
+                              : appColors.dark
+                          }
+                        />
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </ScrollView>
               </Popover>
             </View>
           </View>
@@ -527,7 +618,7 @@ const Transaction = () => {
               getTransactionList();
             }}
           />
-        </View>
+        </ScrollView>
       </CommonRBSheet>
       <Modal visible={isLoading} transparent animationType="fade">
         <CommonLoader />

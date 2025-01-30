@@ -23,13 +23,14 @@ import AccountService from '@services/setup/accountService';
 import {paymentData, PaymentDataInterface} from '@assets/svg';
 import CommonButton from '@shared/components/commonButton/CommonButton';
 import {getCurrencySymbol} from '@src/lib/functions';
+import {useTranslation} from 'react-i18next';
 
 const Account = () => {
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
   const [walletData, setWalletData] = useState<any>({});
   const isFocused = useIsFocused();
-
+  const {t} = useTranslation('account');
   useEffect(() => {
     if (isFocused) {
       getWalletData();
@@ -105,7 +106,7 @@ const Account = () => {
           style={{flex: 0.3}}>
           <CommonHeader
             leftIconPressBack={() => navigation.goBack()}
-            title="Account"
+            title={t('ACCOUNT')}
             headerBgc="transparent"
           />
           <StatusBar
@@ -115,7 +116,7 @@ const Account = () => {
             }
           />
           <CommonText
-            content="Account Balance"
+            content={t('ACCOUNT_BALANCE')}
             style={{textAlign: 'center'}}
             color={appColors.placeholderColor}
             size={'large'}
@@ -149,7 +150,7 @@ const Account = () => {
                   alignItems: 'center',
                 }}>
                 <CommonText
-                  content="No Account found"
+                  content={t('NO_ACCOUNT_FOUND')}
                   color={appColors.placeholderColor}
                 />
               </View>
@@ -164,7 +165,7 @@ const Account = () => {
             width: '100%',
           }}>
           <CommonButton
-            title="+ Add new wallet"
+            title={t('ADD_NEW_WALLET')}
             onPress={() =>
               navigation.navigate('AddNewBankAccount', {fromAccountPage: true})
             }

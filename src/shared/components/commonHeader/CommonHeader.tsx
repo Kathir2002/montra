@@ -97,7 +97,7 @@ const CommonHeader: FC<CommonHeaderInterface> = ({
       }
       centerContainerStyle={{
         alignItems: leftIcon ? 'flex-start' : 'center',
-        marginLeft: leftIcon ? 40 : 0,
+        // marginLeft: leftIcon ? 40 : 0,
         justifyContent: 'center',
       }}
       rightComponent={customRightHeaderComponent}

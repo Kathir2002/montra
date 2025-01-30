@@ -1,0 +1,29 @@
+{
+    "ACCOUNT": "アカウント",
+    "ACCOUNT_BALANCE": "アカウント残高",
+    "NO_ACCOUNT_FOUND": "アカウントは見つかりません",
+    "ADD_NEW_WALLET": "+新しいウォレットを追加します",
+    "NO": "いいえ",
+    "YES": "はい",
+    "WALLET_BALACE_INVALID": "有効なウォレットバランスを入力します",
+    "WALLET_BALACE_REQUIRED": "ウォレットバランスを入力して続行します",
+    "FIELD_REQUIRED": "この項目は必須です",
+    "SELECT_ACCOUNT": "銀行口座を選択してください",
+    "EDIT_WALLET": "ウォレットを編集します",
+    "ADD_NEW_WALLET_HEADING": "新しいウォレットを追加します",
+    "NAME": "名前",
+    "ACCOUNT_TYPE": "アカウントタイプ",
+    "ACCOUNT_TYPE_LABEL": {
+        "UPI": "upi",
+        "BANK": "銀行",
+        "CASH": "現金"
+    },
+    "NO_CHANGES": "保存する変更はありません！",
+    "YOURE_SET": "あなたは設定されています！",
+    "REMOVE_WALLET": "このウォレットを取り外しますか？",
+    "REMOVE_WALLET_DESCRIPTION": "この財布を取り外したいですか？",
+    "WALLET_REMOVED_SUCCESS": "ウォレットは正常に削除されました",
+    "SETUP_ACCOUNT": "アカウントをセットアップしましょう！",
+    "SETUP_ACCOUNT_DESCRIPTION": "アカウントは、銀行、クレジットカード、または財布にすることができます。",
+    "LETS_GO": "さあ行こう"
+}

@@ -1,0 +1,29 @@
+{
+    "ACCOUNT": "Rekening",
+    "ACCOUNT_BALANCE": "Rekeningsaldo",
+    "NO_ACCOUNT_FOUND": "Geen account gevonden",
+    "ADD_NEW_WALLET": "+ Voeg een nieuwe portemonnee toe",
+    "NO": "Nee",
+    "YES": "Ja",
+    "WALLET_BALACE_INVALID": "Voer een geldige portemonnee -balans in",
+    "WALLET_BALACE_REQUIRED": "Voer de portemonnee -balans in om door te gaan",
+    "FIELD_REQUIRED": "Dit veld is vereist",
+    "SELECT_ACCOUNT": "Selecteer een bankrekening",
+    "EDIT_WALLET": "Bewerk portemonnee",
+    "ADD_NEW_WALLET_HEADING": "Voeg een nieuwe portemonnee toe",
+    "NAME": "Naam",
+    "ACCOUNT_TYPE": "Accounttype",
+    "ACCOUNT_TYPE_LABEL": {
+        "UPI": "UPI",
+        "BANK": "Bank",
+        "CASH": "Contant geld"
+    },
+    "NO_CHANGES": "U hebt geen wijzigingen om op te slaan!",
+    "YOURE_SET": "Je bent klaar!",
+    "REMOVE_WALLET": "Deze portemonnee verwijderen?",
+    "REMOVE_WALLET_DESCRIPTION": "Weet u zeker dat u deze portemonnee wilt verwijderen?",
+    "WALLET_REMOVED_SUCCESS": "Portemonnee is met succes verwijderd",
+    "SETUP_ACCOUNT": "Laten we uw account instellen!",
+    "SETUP_ACCOUNT_DESCRIPTION": "Account kan uw bank, creditcard of uw portemonnee zijn.",
+    "LETS_GO": "Laten we gaan"
+}

@@ -13,6 +13,7 @@ import RentIcon from '@assets/svg/income/salary.svg';
 import TransferIcon from '@assets/svg/transfer.svg';
 import {paymentData, PaymentDataInterface} from '@assets/svg';
 import {getCurrencySymbol} from '@src/lib/functions';
+import {useTranslation} from 'react-i18next';
 
 const TransactionRenderItem = ({
   item,
@@ -23,6 +24,7 @@ const TransactionRenderItem = ({
   navigation: any;
   setChartDropdownOpen?: Dispatch<SetStateAction<boolean>>;
 }) => {
+  const {t} = useTranslation('transaction');
   const getIcon = () => {
     if (item?.transactionType === 'Expense') {
       switch (item?.transactionFor) {
@@ -147,7 +149,7 @@ const TransactionRenderItem = ({
             }}>
             <CommonText
               size={'error'}
-              content={item?.transactionType == 'Income' ? 'In' : 'From'}
+              content={item?.transactionType == 'Income' ? t('IN') : t('FROM')}
               color={appColors.placeholderColor}
             />
             {getPaymentIcon(

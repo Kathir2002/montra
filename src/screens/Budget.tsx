@@ -1,5 +1,6 @@
 import {
   FlatList,
+  I18nManager,
   KeyboardAvoidingView,
   Modal,
   StatusBar,
@@ -31,12 +32,14 @@ import BudgetService from '@services/setup/budgetSerice';
 import {Toast} from '@shared/ToastConfig';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
 import {generateUniqueColors, getCurrencySymbol} from '@src/lib/functions';
+import {useTranslation} from 'react-i18next';
 
 const Budget = () => {
   const dispatch = useDispatch();
   const isToggleOpen = useSelector(
     (state: RootState) => state.auth.isFabToggleOpen,
   );
+  const {t} = useTranslation('transaction');
   const isFocused = useIsFocused();
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const [show, setShow] = useState(false);
@@ -141,7 +144,7 @@ const Budget = () => {
         </View>
 
         <CommonText
-          content={`Remaining ${
+          content={`${t('REMAINING')} ${
             Math.sign(item?.remaining) == -1
               ? getCurrencySymbol(0)
               : getCurrencySymbol(item?.remaining)
@@ -165,15 +168,15 @@ const Budget = () => {
           />
         </View>
         <CommonText
-          content={`${getCurrencySymbol(item?.spent)} of ${getCurrencySymbol(
-            item?.budget,
-          )}`}
+          content={`${getCurrencySymbol(item?.spent)} ${t(
+            'OF',
+          )} ${getCurrencySymbol(item?.budget)}`}
           color={appColors.placeholderColor}
         />
         {item?.spent > item?.budget && (
           <CommonText
             color={appColors.error}
-            content="You’ve exceed the limit!"
+            content={t('LIMIT_EXCEED')}
             size={'error'}
           />
         )}
@@ -220,7 +223,9 @@ const Budget = () => {
             <TouchableOpacity
               hitSlop={{bottom: 20, top: 20, left: 20, right: 20}}
               onPress={() => handlePreviousButton()}
-              style={{transform: [{rotate: '180deg'}]}}>
+              style={{
+                transform: [{rotate: I18nManager.isRTL ? '0deg' : '180deg'}],
+              }}>
               <Arrow stroke={appColors.light} height={35} width={35} />
             </TouchableOpacity>
             <View style={{flexDirection: 'row', alignItems: 'center', gap: 10}}>
@@ -240,7 +245,10 @@ const Budget = () => {
             </View>
             <TouchableOpacity
               hitSlop={{bottom: 20, top: 20, left: 20, right: 20}}
-              onPress={() => handleNextButton()}>
+              onPress={() => handleNextButton()}
+              style={{
+                transform: [{rotate: I18nManager.isRTL ? '180deg' : '0deg'}],
+              }}>
               <Arrow stroke={appColors.light} height={35} width={35} />
             </TouchableOpacity>
           </View>
@@ -299,7 +307,7 @@ const Budget = () => {
                 }}>
                 <CommonText
                   style={{textAlign: 'center', paddingHorizontal: 30}}
-                  content="You don’t have a budget. Let’s make one so you in control."
+                  content={t('NO_BUDGET_FOUND')}
                 />
               </View>
             }

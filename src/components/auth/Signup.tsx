@@ -31,7 +31,7 @@ import CommonLoader from '@shared/components/commonLoader/CommonLoader';
 
 const SignUp = () => {
   const navigation: NavigationProp<ParamListBase> = useNavigation();
-  const {t} = useTranslation(['signup']);
+  const {t} = useTranslation('auth');
   const [isLoading, setIsLoading] = useState(false);
 
   const validationSchema = yup.object().shape({
@@ -148,7 +148,7 @@ const SignUp = () => {
               size: 20,
             }}
             autoCapitalize="none"
-            placeholder={t('email')}
+            placeholder={t('EMAIL')}
             value={formik.values.email}
             onChangeText={(text: string) => {
               formik.setFieldValue('email', text);
@@ -233,7 +233,7 @@ const SignUp = () => {
           </View>
           <View style={{gap: 15, marginVertical: 15}}>
             <CommonButton
-              title="Sign Up"
+              title={t('signup')}
               onPress={() => {
                 if (formik.errors.terms) {
                   Toast({message: formik.errors.terms, type: 'error'});

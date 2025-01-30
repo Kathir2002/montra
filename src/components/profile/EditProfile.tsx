@@ -41,7 +41,7 @@ import EditIcon from '@assets/svg/change-profile.svg';
 
 const EditProfile = () => {
   const dispatch = useDispatch();
-  const {t} = useTranslation('');
+  const {t} = useTranslation('profile');
   const dirtyRBSheetRef = useRef<RBSheetRef>(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigation: NavigationProp<ParamListBase> = useNavigation();
@@ -53,14 +53,14 @@ const EditProfile = () => {
     name: yup
       .string()
       .label('name')
-      .required(t('requiredMsg'))
-      .matches(/^[a-zA-Z ]+$/, t('signup:validName')),
+      .required(t('auth:requiredMsg'))
+      .matches(/^[a-zA-Z ]+$/, t('auth:validName')),
     email: yup.string().email().required(),
     phoneNumber: yup
       .string()
-      .matches(/^[0-9]+$/, 'Phone number must contain only digits')
-      .min(10, 'Phone number must be at least 10 digits')
-      .max(10, 'Phone number must not exceed 10 digits'),
+      .matches(/^[0-9]+$/, t('INVALID_PHONE_NO'))
+      .min(10, t('PHONE_NO_MIN'))
+      .max(10, t('PHONE_NO_MAX')),
   });
 
   const formik = useFormik({
@@ -76,7 +76,7 @@ const EditProfile = () => {
     validateOnBlur: true,
     onSubmit: () => {
       if (!formik.dirty && !image?.url) {
-        Toast({type: 'error', message: 'No changes made!'});
+        Toast({type: 'error', message: t('NO_CHANGES')});
       } else {
         updateUserDetails();
       }
@@ -144,7 +144,7 @@ const EditProfile = () => {
   return (
     <KeyboardAvoidingView style={{flex: 1, backgroundColor: appColors.light}}>
       <CommonHeader
-        title="Edit Profile"
+        title={t('EDIT_PROFILE')}
         leftIconPressBack={() => {
           formik.dirty || image
             ? dirtyRBSheetRef.current?.open()
@@ -226,7 +226,7 @@ const EditProfile = () => {
                 justifyContent: 'center',
               }}>
               <CommonText
-                content="Username"
+                content={t('USER_NAME')}
                 color={appColors.placeholderColor}
               />
               <CommonInput
@@ -255,7 +255,10 @@ const EditProfile = () => {
             </View>
           </View>
           <View style={{marginVertical: 15}}>
-            <CommonText content="Email" color={appColors.placeholderColor} />
+            <CommonText
+              content={t('auth:EMAIL')}
+              color={appColors.placeholderColor}
+            />
             <CommonInput
               leftIcon={{
                 name: 'email',
@@ -276,7 +279,7 @@ const EditProfile = () => {
           </View>
           <View style={{marginVertical: 15}}>
             <CommonText
-              content="Phone Number"
+              content={t('PHONE_NO')}
               color={appColors.placeholderColor}
             />
             <CommonInput
@@ -309,7 +312,7 @@ const EditProfile = () => {
         </View>
         <View style={{flex: 0.1}}>
           <CommonButton
-            title="Update Profile"
+            title={t('UPDATE_PROFILE')}
             onPress={() => {
               formik.handleSubmit();
             }}
@@ -358,13 +361,13 @@ const EditProfile = () => {
         }}>
         <View style={{padding: 15, gap: 10}}>
           <CommonText
-            content="Exit from the Page?"
+            content={t('transaction:EXIT_CONFIRM_TITLE')}
             bold
             size={'large'}
             style={{textAlign: 'center'}}
           />
           <CommonText
-            content="You have unsaved changes..! Are you sure want to leave this page?"
+            content={t('transaction:EXIT_MESSAGE')}
             color={appColors.placeholderColor}
             size={'label'}
             style={{textAlign: 'center', paddingHorizontal: 15}}
@@ -377,7 +380,7 @@ const EditProfile = () => {
             }}>
             <View style={{flex: 0.45}}>
               <CommonButton
-                title="No"
+                title={t('NO')}
                 buttonType="clear"
                 onPress={() => {
                   dirtyRBSheetRef.current?.close();
@@ -387,7 +390,7 @@ const EditProfile = () => {
             </View>
             <View style={{flex: 0.45}}>
               <CommonButton
-                title="Yes"
+                title={t('YES')}
                 onPress={() => {
                   dirtyRBSheetRef.current?.close();
                   setRbSheetOpen(false);

@@ -1,6 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import {
+  BackHandler,
   FlatList,
+  I18nManager,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -31,6 +33,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
+import {useTranslation} from 'react-i18next';
 
 interface ItemType {
   id: number | string;
@@ -52,6 +55,7 @@ const PinGerneration = () => {
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const [isPinSetupDone, setIsPinSetupDone] = useState(false);
   const isFocused = useIsFocused();
+  const {t, i18n} = useTranslation('auth');
 
   useEffect(() => {
     AsyncStorage.getItem('securityPin').then(value => {
@@ -62,6 +66,20 @@ const PinGerneration = () => {
       }
     });
   }, [isFocused]);
+
+  // useEffect to handle the native back button
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      handleBackPress,
+    );
+    return () => backHandler.remove();
+  }, []);
+
+  const handleBackPress = () => {
+    BackHandler.exitApp();
+    return true;
+  };
 
   const userAddPinHandler = async () => {
     setLoading(true);
@@ -75,13 +93,13 @@ const PinGerneration = () => {
             navigation.navigate('Setup');
           }
           Toast({
-            message: 'Security pin generated sucessfully',
+            message: t('SECURITY_PIN_GENERATED'),
             type: 'success',
           });
         })
         .catch(() => {
           setLoading(false);
-          Toast({message: 'Something went wrong', type: 'error'});
+          Toast({message: t('SOMETHING_WENT_WRONG'), type: 'error'});
         });
     } else {
       if (pinValue.length === maxPinLength) {
@@ -95,16 +113,19 @@ const PinGerneration = () => {
             } else {
               triggerShakeAnimation();
               setPinValue('');
-              Toast({message: 'Invalid user pin', type: 'error'});
+              Toast({
+                message: t('WRONG_PIN'),
+                type: 'error',
+              });
             }
           })
           .catch(() => {
             setLoading(false);
-            Toast({message: 'Something went wrong', type: 'error'});
+            Toast({message: t('SOMETHING_WENT_WRONG'), type: 'error'});
           });
       } else {
         triggerShakeAnimation();
-        Toast({message: 'Please Enter PIN', type: 'error'});
+        Toast({message: t('PIN_REQUIRED'), type: 'error'});
       }
     }
   };
@@ -148,7 +169,14 @@ const PinGerneration = () => {
     },
     {
       id: 'delete',
-      value: <DeleteTextIcon width={40} height={40} stroke={appColors.light} />,
+      value: (
+        <View
+          style={{
+            transform: [{rotate: I18nManager.isRTL ? '180deg' : '0deg'}],
+          }}>
+          <DeleteTextIcon width={40} height={40} stroke={appColors.light} />
+        </View>
+      ),
     },
     {
       id: 0,
@@ -156,7 +184,14 @@ const PinGerneration = () => {
     },
     {
       id: 'submit',
-      value: <ArrowIcon width={40} height={40} stroke={appColors.light} />,
+      value: (
+        <View
+          style={{
+            transform: [{rotate: I18nManager.isRTL ? '180deg' : '0deg'}],
+          }}>
+          <ArrowIcon width={40} height={40} stroke={appColors.light} />
+        </View>
+      ),
     },
   ];
 
@@ -174,7 +209,7 @@ const PinGerneration = () => {
         if (pinValue?.length === maxPinLength) {
           setIsRetype(true);
         } else {
-          Toast({message: 'Please enter the pin', type: 'error'});
+          Toast({message: t('PIN_REQUIRED'), type: 'error'});
         }
       } else if (retypePinValue?.length === maxPinLength) {
         if (retypePinValue === pinValue) {
@@ -182,10 +217,10 @@ const PinGerneration = () => {
         } else {
           triggerShakeAnimation();
           setRetypePinValue('');
-          Toast({message: "Pin doesn't match", type: 'error'});
+          Toast({message: t('PIN_DOESNT_MATCH'), type: 'error'});
         }
       } else {
-        Toast({message: 'Please enter the pin', type: 'error'});
+        Toast({message: t('PIN_REQUIRED'), type: 'error'});
       }
     } else {
       isRetype
@@ -251,9 +286,9 @@ const PinGerneration = () => {
           content={
             !isPinSetupDone
               ? isRetype
-                ? 'Ok. Re type your PIN again.'
-                : 'Let’s  setup your PIN'
-              : 'Enter Pin'
+                ? t('RETYPE_PIN')
+                : t('SETUP_YOUR_PIN')
+              : t('ENTER_PIN')
           }
           size={'large'}
         />

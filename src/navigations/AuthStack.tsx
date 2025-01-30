@@ -8,8 +8,8 @@ import GetStarted from '@components/auth/getStarted/GetStarted';
 import EmailVerification from '@components/auth/EmailVerification';
 import ResetPassword from '@components/auth/ResetPassword';
 import PinGerneration from '@components/setUpScreen/PinGerneration';
-import SplashScreen from '@components/auth/SplashScreen';
 import {forSlideFromLeftAnimation} from '@src/lib/functions';
+import Help from '@components/profile/Help';
 
 const AuthStack = ({
   isGetStartedVisible,
@@ -28,13 +28,7 @@ const AuthStack = ({
 
   return (
     <AuthStack.Navigator
-      initialRouteName={
-        isNavigateToLogin
-          ? 'SignIn'
-          : isNavigateToLogin === null
-          ? 'PinGerneration'
-          : 'EmptyScreen'
-      }
+      initialRouteName={isNavigateToLogin ? 'SignIn' : 'PinGerneration'}
       screenOptions={{
         headerShown: false,
         cardStyleInterpolator: forSlideFromLeftAnimation,
@@ -48,7 +42,7 @@ const AuthStack = ({
       />
       <AuthStack.Screen name="ResetPassword" component={ResetPassword} />
       <AuthStack.Screen name="PinGerneration" component={PinGerneration} />
-      <AuthStack.Screen name="EmptyScreen" component={SplashScreen} />
+      <AuthStack.Screen name="Help" component={Help} />
     </AuthStack.Navigator>
   );
 };

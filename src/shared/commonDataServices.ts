@@ -1,3 +1,4 @@
+import {TFunction} from 'i18next';
 import {Platform} from 'react-native';
 import DocumentPicker, {
   DocumentPickerResponse,
@@ -25,7 +26,7 @@ class commonDataService {
     }
   }
 
-  async pickDocument(): Promise<any> {
+  async pickDocument(t: TFunction<'transaction', undefined>): Promise<any> {
     return new Promise(async (resolve, reject) => {
       try {
         const result: DocumentPickerResponse[] = await DocumentPicker.pick({
@@ -68,9 +69,7 @@ class commonDataService {
                   Platform.OS == 'android' &&
                   fileUri.includes('externalstorage')
                 ) {
-                  return reject(
-                    "Picking files from the root directory isn't supported. Please choose a different folder.",
-                  );
+                  return reject(t('PICKING_FILE_FROM_ROOT_DIR'));
                 } else {
                   let final = {
                     ext: result[0]?.type.split('.'),
@@ -83,32 +82,30 @@ class commonDataService {
                   resolve(final);
                 }
               } else {
-                return reject("File size shouldn't exceed 2 MB");
+                return reject(t('FILE_SIZE_EXCEED'));
               }
             } else {
               // Handle the case where the selected file has an invalid MIME type
-              return reject(
-                'Unsupported file format. Please upload a JPG, PNG, DOC, DOCX, XLSX, or PDF file.',
-              );
+              return reject(t('UNSUPPORTED_FILE_FORMATS'));
             }
           } else {
             // Handle the case where the selected file has an invalid MIME type
             return {
-              msg: 'Unsupported file format. Please upload a JPG, PNG, DOC, DOCX, XLSX, or PDF file.',
+              msg: t('UNSUPPORTED_FILE_FORMATS'),
             };
           }
         } else {
           // Handle the case where the result object is missing
-          reject('Something went wrong. Please try selecting a file again.');
+          reject(t('SOMETHING_WENT_WRONG'));
         }
       } catch (err: any) {
         if (DocumentPicker.isCancel(err)) {
           // User cancelled the document picker
-          reject('Operation cancelled by user');
+          reject(t('USER_CANCELED'));
         } else {
           // Handle other errors
           console.error('Error picking document:', err);
-          reject('Something went wrong. Please try selecting a file again.');
+          reject(t('SOMETHING_WENT_WRONG'));
         }
       }
     });

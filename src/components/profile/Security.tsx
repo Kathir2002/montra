@@ -16,7 +16,6 @@ import {
   NavigationProp,
   ParamListBase,
   useNavigation,
-  useRoute,
 } from '@react-navigation/native';
 import TickIcon from '@assets/svg/tick.svg';
 import CommonText from '@shared/components/commonText/CommonText';
@@ -44,7 +43,7 @@ import FlashMessage from 'react-native-flash-message';
 
 const Security = () => {
   const dispatch = useDispatch();
-  const {t} = useTranslation();
+  const {t} = useTranslation('profile');
   const rbSheetRef = useRef<RBSheetRef>(null);
   const [pin, setPin] = useState(new Array(6).fill(null));
 
@@ -55,8 +54,8 @@ const Security = () => {
   const [loading, setLoading] = useState(false);
   const [isSuccessPopoverVisible, setIsSuccessPopoverVisible] = useState(false);
   const securityData = [
-    {label: t('Pin'), value: 'PIN'},
-    {label: t('FingerPrint'), value: 'FINGERPRINT'},
+    {label: t('PIN'), value: 'PIN'},
+    {label: t('FINGERPRINT'), value: 'FINGERPRINT'},
   ];
   const [rbSheetOpen, setRbSheetOpen] = useState(false);
   const navigation: NavigationProp<ParamListBase> = useNavigation();
@@ -112,15 +111,14 @@ const Security = () => {
         if (available) {
           try {
             const {success, error} = await rnBiometrics.simplePrompt({
-              promptMessage: 'Activate Biometric',
+              promptMessage: t('ACTIVATE_BIOMETRIC'),
             });
 
             if (success) {
               updateUserSecurityMethod();
             } else {
               Toast({
-                message:
-                  'Authentication:Biometric operation canceled by the user',
+                message: t('BIOMETRIC_FAILED'),
                 type: 'error',
               });
             }
@@ -129,7 +127,7 @@ const Security = () => {
           }
         } else {
           Toast({
-            message: 'This device does not support biometric authentication.',
+            message: t('BIOMETRUC_NOT_SUPPORTED'),
             type: 'error',
           });
         }
@@ -171,7 +169,7 @@ const Security = () => {
     if (pin.length === 6 && !pin.includes(null)) {
       await AsyncStorage.setItem('securityPin', JSON.stringify(pin?.join('')))
         .then(() => {
-          Toast({message: 'PIN changed successfuly', type: 'success'});
+          Toast({message: t('PIN_CHANGED_SUCCESS'), type: 'success'});
           Vibration.vibrate(100);
           navigation.goBack();
         })
@@ -179,14 +177,14 @@ const Security = () => {
           console.log('Error in updating user PIN', err);
         });
     } else {
-      Toast({message: 'Please enter a 6-digit PIN.', type: 'error'});
+      Toast({message: t('ENTER_PIN'), type: 'error'});
     }
   };
 
   return (
     <KeyboardAvoidingView style={{flex: 1, backgroundColor: appColors.light}}>
       <CommonHeader
-        title="Security"
+        title={t('SECURITY')}
         leftIcon
         leftIconPressBack={() => navigation.goBack()}
       />
@@ -216,14 +214,14 @@ const Security = () => {
       </View>
       <View style={{paddingHorizontal: 15, marginTop: 150}}>
         <CommonText
-          content="Change Pin"
+          content={t('CHANGE_PIN')}
           size={'large'}
           bold
           style={{marginBottom: 5}}
         />
         <OTPInput otp={pin} setOtp={setPin} isFromSettings={true} />
         <CommonButton
-          title="Update"
+          title={t('UPDATE')}
           onPress={updateSecurityPin}
           buttonStyle={{marginTop: 25}}
         />
@@ -246,13 +244,13 @@ const Security = () => {
         }}>
         <View style={{padding: 15, gap: 10}}>
           <CommonText
-            content="Change security method?"
+            content={t('CHANGE_SECURITY_METHOD')}
             bold
             size={'large'}
             style={{textAlign: 'center'}}
           />
           <CommonText
-            content="Are you sure do you wanna change Security method?"
+            content={t('CHANGE_SECURITY_METHOD_DESCRIPION')}
             color={appColors.placeholderColor}
             size={'label'}
             style={{textAlign: 'center', paddingHorizontal: 15}}
@@ -265,7 +263,7 @@ const Security = () => {
             }}>
             <View style={{flex: 0.45}}>
               <CommonButton
-                title="No"
+                title={t('NO')}
                 buttonType="clear"
                 onPress={() => {
                   dispatch(updateIsModalOpen(false));
@@ -276,7 +274,7 @@ const Security = () => {
             </View>
             <View style={{flex: 0.45}}>
               <CommonButton
-                title="Yes"
+                title={t('YES')}
                 onPress={() => {
                   securityType == 'FINGERPRINT'
                     ? handleBiometricAuth()
@@ -312,7 +310,7 @@ const Security = () => {
           style={{height: 80, width: 80}}
         />
         <CommonText
-          content="User Security Method updated successfully"
+          content={t('SECURITY_METHOD_UPDATED')}
           size={'label'}
           style={{textAlign: 'center', paddingHorizontal: 20}}
         />

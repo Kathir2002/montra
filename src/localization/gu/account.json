@@ -1,0 +1,29 @@
+{
+    "ACCOUNT": "હિસાબ",
+    "ACCOUNT_BALANCE": "હિસાબ સિલક",
+    "NO_ACCOUNT_FOUND": "કોઈ એકાઉન્ટ મળ્યું નથી",
+    "ADD_NEW_WALLET": "+ નવું વ let લેટ ઉમેરો",
+    "NO": "કોઈ",
+    "YES": "હા",
+    "WALLET_BALACE_INVALID": "માન્ય વ let લેટ બેલેન્સ દાખલ કરો",
+    "WALLET_BALACE_REQUIRED": "ચાલુ રાખવા માટે વ let લેટ બેલેન્સ દાખલ કરો",
+    "FIELD_REQUIRED": "આ ક્ષેત્ર જરૂરી છે",
+    "SELECT_ACCOUNT": "કૃપા કરીને કોઈ બેંક ખાતું પસંદ કરો",
+    "EDIT_WALLET": "પાકીટ સંપાદિત કરો",
+    "ADD_NEW_WALLET_HEADING": "નવું વ let લેટ ઉમેરો",
+    "NAME": "નામ",
+    "ACCOUNT_TYPE": "હિસાબ પ્રકાર",
+    "ACCOUNT_TYPE_LABEL": {
+        "UPI": "ઉન્મત્ત",
+        "BANK": "બેંક",
+        "CASH": "રોકડ"
+    },
+    "NO_CHANGES": "તમારી પાસે બચાવવા માટે કોઈ ફેરફાર નથી!",
+    "YOURE_SET": "તમે સેટ કરેલા છે!",
+    "REMOVE_WALLET": "આ વ let લેટ દૂર કરો?",
+    "REMOVE_WALLET_DESCRIPTION": "શું તમને ખાતરી છે કે શું તમે આ વ let લેટને દૂર કરવા માંગો છો?",
+    "WALLET_REMOVED_SUCCESS": "વ let લેટ સફળતાપૂર્વક દૂર કરવામાં આવ્યું છે",
+    "SETUP_ACCOUNT": "ચાલો તમારું એકાઉન્ટ સેટ કરીએ!",
+    "SETUP_ACCOUNT_DESCRIPTION": "એકાઉન્ટ તમારી બેંક, ક્રેડિટ કાર્ડ અથવા તમારું વ let લેટ હોઈ શકે છે.",
+    "LETS_GO": "ચાલો જાઓ"
+}

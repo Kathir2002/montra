@@ -1,0 +1,29 @@
+{
+    "ACCOUNT": "Account",
+    "ACCOUNT_BALANCE": "Account Balance",
+    "NO_ACCOUNT_FOUND": "No Account found",
+    "ADD_NEW_WALLET": "+ Add new wallet",
+    "NO": "No",
+    "YES": "Yes",
+    "WALLET_BALACE_INVALID": "Enter a valid wallet balance",
+    "WALLET_BALACE_REQUIRED": "Enter wallet balance to continue",
+    "FIELD_REQUIRED": "This field is required",
+    "SELECT_ACCOUNT": "Please select a bank account",
+    "EDIT_WALLET": "Edit Wallet",
+    "ADD_NEW_WALLET_HEADING": "Add New Wallet",
+    "NAME": "Name",
+    "ACCOUNT_TYPE": "Account Type",
+    "ACCOUNT_TYPE_LABEL": {
+        "UPI": "UPI",
+        "BANK": "Bank",
+        "CASH": "Cash"
+    },
+    "NO_CHANGES": "You don't have any changes to save!",
+    "YOURE_SET": "You are set!",
+    "REMOVE_WALLET": "Remove this wallet?",
+    "REMOVE_WALLET_DESCRIPTION": "Are you sure do you wanna remove this wallet?",
+    "WALLET_REMOVED_SUCCESS": "Wallet has been successfully removed",
+    "SETUP_ACCOUNT": "Let's Setup your account!",
+    "SETUP_ACCOUNT_DESCRIPTION": "Account can be your bank, credit card or your wallet.",
+    "LETS_GO": "Let's Go"
+}

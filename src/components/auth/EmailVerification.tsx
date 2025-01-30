@@ -1,17 +1,11 @@
 import {
   KeyboardAvoidingView,
   Linking,
-  NativeSyntheticEvent,
   ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TextInputKeyPressEventData,
-  TextInputProps,
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {appColors} from '@shared/appColors';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 import {
@@ -23,18 +17,18 @@ import {
 } from '@react-navigation/native';
 import BackgroundTimer from 'react-native-background-timer';
 import CommonText from '@shared/components/commonText/CommonText';
-import {appFonts} from '@shared/appFonts';
 import CommonButton from '@shared/components/commonButton/CommonButton';
 import LottieView from 'lottie-react-native';
 import {Toast} from '@shared/ToastConfig';
 import AuthService from '@services/authService';
 import OTPInput from './OTPInput';
+import {useTranslation} from 'react-i18next';
 
 const EmailVerification = () => {
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const [otp, setOtp] = useState(new Array(6).fill(null));
   const [remainingTime, setRemainingTime] = useState<number>(300);
-
+  const {t} = useTranslation('auth');
   const route: RouteProp<{
     params: {
       email: string;
@@ -92,7 +86,7 @@ const EmailVerification = () => {
       }}>
       <CommonHeader
         leftIcon={true}
-        title="Email Verification"
+        title={t('EMAIL_VERIFICATION')}
         leftIconPressBack={() => navigation.goBack()}
       />
       <ScrollView contentContainerStyle={{flex: 1}}>
@@ -120,7 +114,7 @@ const EmailVerification = () => {
             size={20}
           />
           <CommonText
-            content="Verification Code"
+            content={t('VERIFICATION_CDOE')}
             bold
             color={appColors.dark}
             size={20}
@@ -136,7 +130,7 @@ const EmailVerification = () => {
             content={undefined}
             size={'large'}
             style={{marginVertical: 10}}>
-            We send verification code to your email{' '}
+            {t('SEND_VERIFICATION_CODE')}{' '}
             <CommonText
               content={undefined}
               onPress={() => Linking.openURL('https://gmail.app.goo.gl')}
@@ -150,7 +144,7 @@ const EmailVerification = () => {
             <TouchableOpacity activeOpacity={0.5} onPress={() => {}}>
               <CommonText
                 onPress={() => resendOtpHandler()}
-                content="I didn’t received the code? Send again"
+                content={t('RECEIVED_CODE')}
                 style={{textDecorationLine: 'underline'}}
                 color={appColors.primary}
                 size={'large'}
@@ -159,7 +153,7 @@ const EmailVerification = () => {
           )}
           <CommonButton
             disabled={remainingTime === 0}
-            title="Verify"
+            title={t('VERIFY')}
             onPress={() => {
               if (otp.length === 6 && !otp.includes(null)) {
                 AuthService.verifyOtp({
@@ -178,7 +172,7 @@ const EmailVerification = () => {
                     });
                   });
               } else {
-                Toast({message: 'Please enter otp', type: 'error'});
+                Toast({message: t('ENTER_OTP'), type: 'error'});
               }
             }}
             buttonStyle={{marginTop: 35}}

@@ -1,0 +1,29 @@
+{
+    "ACCOUNT": "帐户",
+    "ACCOUNT_BALANCE": "帐户余额",
+    "NO_ACCOUNT_FOUND": "找不到帐户",
+    "ADD_NEW_WALLET": "+添加新钱包",
+    "NO": "不",
+    "YES": "是的",
+    "WALLET_BALACE_INVALID": "输入有效的钱包平衡",
+    "WALLET_BALACE_REQUIRED": "输入钱包平衡继续",
+    "FIELD_REQUIRED": "此字段是必需的",
+    "SELECT_ACCOUNT": "请选择一个银行帐户",
+    "EDIT_WALLET": "编辑钱包",
+    "ADD_NEW_WALLET_HEADING": "添加新钱包",
+    "NAME": "姓名",
+    "ACCOUNT_TYPE": "帐户类型",
+    "ACCOUNT_TYPE_LABEL": {
+        "UPI": "UPI",
+        "BANK": "银行",
+        "CASH": "现金"
+    },
+    "NO_CHANGES": "您没有任何更改要保存！",
+    "YOURE_SET": "您已经设置了！",
+    "REMOVE_WALLET": "卸下这个钱包？",
+    "REMOVE_WALLET_DESCRIPTION": "您确定要删除这个钱包吗？",
+    "WALLET_REMOVED_SUCCESS": "钱包已成功删除",
+    "SETUP_ACCOUNT": "让我们设置您的帐户！",
+    "SETUP_ACCOUNT_DESCRIPTION": "帐户可以是您的银行，信用卡或钱包。",
+    "LETS_GO": "我们走吧"
+}

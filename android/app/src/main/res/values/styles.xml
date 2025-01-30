@@ -6,6 +6,15 @@
         <item name="android:forceDarkAllowed">false</item>
         <item name="android:editTextBackground">@drawable/rn_edit_text_material</item>
         <item name="colorAccent">#0074FC</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <!-- add the above line -->
+    </style>
+
+    <style name="SplashTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:statusBarColor">#FFFFFF</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:background">@drawable/ic_splash</item>
+        <item name="colorPrimaryDark">#FFFFFF</item>
     </style>
 
 </resources>

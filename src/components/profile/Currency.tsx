@@ -34,8 +34,10 @@ import CommonLoader from '@shared/components/commonLoader/CommonLoader';
 import {useDispatch, useSelector} from 'react-redux';
 import {updateCurrentUser} from '@store/slice/appSlice';
 import {RootState} from '@store/store';
+import {useTranslation} from 'react-i18next';
 
 const Currency = () => {
+  const {t} = useTranslation('profile');
   const rbSheetRef = useRef<RBSheetRef>(null);
   const [isLimit, setIsLimit] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
@@ -150,7 +152,7 @@ const Currency = () => {
   return (
     <KeyboardAvoidingView style={{flex: 1, backgroundColor: appColors.light}}>
       <CommonHeader
-        title="Currency"
+        title={t('CURRENCY')}
         leftIcon
         leftIconPressBack={() => navigation.goBack()}
       />
@@ -206,13 +208,13 @@ const Currency = () => {
         }}>
         <View style={{padding: 15, gap: 10}}>
           <CommonText
-            content="Change currency?"
+            content={t('CHANGE_CURRENCY_CONFIRMATION')}
             bold
             size={'large'}
             style={{textAlign: 'center'}}
           />
           <CommonText
-            content="Are you sure do you wanna change currency?"
+            content={t('CHANGE_CURRENCY_DESCRIPTION')}
             color={appColors.placeholderColor}
             size={'label'}
             style={{textAlign: 'center', paddingHorizontal: 15}}
@@ -225,7 +227,7 @@ const Currency = () => {
             }}>
             <View style={{flex: 0.45}}>
               <CommonButton
-                title="No"
+                title={t('NO')}
                 buttonType="clear"
                 onPress={() => {
                   rbSheetRef.current?.close();
@@ -235,7 +237,7 @@ const Currency = () => {
             </View>
             <View style={{flex: 0.45}}>
               <CommonButton
-                title="Yes"
+                title={t('YES')}
                 onPress={() => handleChangeCurrency()}
               />
             </View>
@@ -257,7 +259,7 @@ const Currency = () => {
           style={{height: 80, width: 80}}
         />
         <CommonText
-          content="Currency symbol updated successfully"
+          content={t('CURRENCY_SYMBOL_UPDATED')}
           size={'label'}
           style={{textAlign: 'center', paddingHorizontal: 20}}
         />

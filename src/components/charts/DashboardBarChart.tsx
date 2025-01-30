@@ -101,11 +101,13 @@ import {appColors} from '@shared/appColors';
 import CommonText from '@shared/components/commonText/CommonText';
 import {getCurrencySymbol} from '@src/lib/functions';
 import React from 'react';
+import {useTranslation} from 'react-i18next';
 import {Text, View} from 'react-native';
 import {BarChart} from 'react-native-gifted-charts';
 
 const DashBoardBarChart = (props: {chartData: number[]}) => {
   const {chartData} = props;
+  const {t} = useTranslation('transaction');
   const barDataTemplate = [
     {
       label: 'Mon',
@@ -224,7 +226,10 @@ const DashBoardBarChart = (props: {chartData: number[]}) => {
                       backgroundColor: appColors.expenseBg,
                     }}
                   />
-                  <CommonText content="Expense" color={appColors.expenseBg} />
+                  <CommonText
+                    content={t('EXPENSE')}
+                    color={appColors.expenseBg}
+                  />
                 </View>
                 <CommonText
                   content={getCurrencySymbol(item?.value, false)}
@@ -312,7 +317,10 @@ const DashBoardBarChart = (props: {chartData: number[]}) => {
                     backgroundColor: appColors.expenseBg,
                   }}
                 />
-                <CommonText content="Expense" color={appColors.expenseBg} />
+                <CommonText
+                  content={t('EXPENSE')}
+                  color={appColors.expenseBg}
+                />
               </View>
               <CommonText
                 content={getCurrencySymbol(item?.value, false)}

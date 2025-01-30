@@ -1,6 +1,5 @@
 import {
   Image,
-  Keyboard,
   Linking,
   Modal,
   ScrollView,
@@ -24,7 +23,6 @@ import CommonButton from '@shared/components/commonButton/CommonButton';
 import CommonText from '@shared/components/commonText/CommonText';
 import CommonInput from '@shared/components/commonInput/CommonInput';
 import AuthService from '@services/authService';
-import CommonDataService from '@shared/commonDataServices';
 import {useFormik} from 'formik';
 import {Toast} from '@shared/ToastConfig';
 import {KeyboardAvoidingView} from 'react-native';
@@ -48,27 +46,24 @@ const ChangePassword = () => {
     newPassword: false,
     confirmPassword: false,
   });
-  const {t} = useTranslation('forgotPassword');
+  const {t} = useTranslation('auth');
   const dispatch = useDispatch();
 
   const userDetails = useSelector((state: RootState) => state.auth.userDetails);
   const validationSchema = yup.object().shape({
-    currentPassword: yup.string().required('This field is required'),
+    currentPassword: yup.string().required(t('requiredMsg')),
     newPassword: yup
       .string()
-      .required('This field is required')
-      .min(
-        8,
-        'Use 8 or more characters with a mix of letters, numbers & symbols',
-      )
+      .required(t('requiredMsg'))
+      .min(8, t('validPassord'))
       .matches(
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])/,
-        'Use 8 or more characters with a mix of letters, numbers & symbols',
+        t('validPassord'),
       ),
     rePassword: yup
       .string()
-      .oneOf([yup.ref('newPassword'), undefined], 'Passwords must match')
-      .required('This field is required'),
+      .oneOf([yup.ref('newPassword'), undefined], t('PASSWORD_MUST_MATCH'))
+      .required(t('requiredMsg')),
   });
 
   const formik = useFormik({
@@ -158,7 +153,7 @@ const ChangePassword = () => {
   return (
     <KeyboardAvoidingView style={{flex: 1, backgroundColor: appColors.light}}>
       <CommonHeader
-        title="Change Password"
+        title={t('CHANGE_PASSWORD')}
         leftIconPressBack={() => navigation.goBack()}
       />
       <StatusBar
@@ -173,7 +168,7 @@ const ChangePassword = () => {
           paddingHorizontal: 15,
           paddingBottom: 15,
         }}>
-        <CommonText content="Enter your current password and choose a new password to update your account security." />
+        <CommonText content={t('CHANGE_PASSWORD_DESCRIPTION')} />
         <View style={{marginTop: 15}}>
           <CommonInput
             secureTextEntry={!eyeIconVisible?.oldPassword}
@@ -208,7 +203,7 @@ const ChangePassword = () => {
             onChangeText={text => {
               formik.setFieldValue('currentPassword', text);
             }}
-            placeholder="Current Password"
+            placeholder={t('CURRENT_PASSWORD')}
             error={
               formik?.errors?.currentPassword && formik.touched.currentPassword
                 ? formik?.errors?.currentPassword
@@ -250,7 +245,7 @@ const ChangePassword = () => {
             onChangeText={text => {
               formik.setFieldValue('newPassword', text);
             }}
-            placeholder="New Password"
+            placeholder={t('NEW_PASSWORD')}
             error={
               formik?.errors?.newPassword && formik.touched.newPassword
                 ? formik?.errors?.newPassword
@@ -292,7 +287,7 @@ const ChangePassword = () => {
             onChangeText={text => {
               formik.setFieldValue('rePassword', text);
             }}
-            placeholder="Confirm New Password"
+            placeholder={t('CONFIRM_NEW_PASSWORD')}
             error={
               formik?.errors?.rePassword && formik.touched.rePassword
                 ? formik?.errors?.rePassword
@@ -302,7 +297,7 @@ const ChangePassword = () => {
         </View>
         <View style={{flex: 1, justifyContent: 'center'}}>
           <CommonText
-            content="Can't remember your current password?"
+            content={t('CANT_REMEMBER_PASSWORD')}
             size={'medium'}
             color={appColors.error}
           />
@@ -330,13 +325,13 @@ const ChangePassword = () => {
               color={appColors.dark}
             />
             <CommonText
-              content="Send Instructions"
+              content={t('SEND_INSTRUCTIONS')}
               color={appColors.dark}
               bold
             />
           </TouchableOpacity>
           <CommonButton
-            title="Update Password"
+            title={t('UPDATE_PASSWORD')}
             onPress={() => {
               formik.handleSubmit();
             }}
@@ -419,7 +414,7 @@ const ChangePassword = () => {
                 color={appColors.dark}
               />
               <CommonText
-                content="Open Email App"
+                content={t('OPEN_EMAIL')}
                 color={appColors.dark}
                 bold
               />

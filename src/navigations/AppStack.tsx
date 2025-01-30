@@ -19,7 +19,13 @@ import Help from '@components/profile/Help';
 import Currency from '@components/profile/Currency';
 import ExportData from '@components/profile/ExportData';
 import Security from '@components/profile/Security';
-import {NativeEventEmitter, NativeModules, Platform, View} from 'react-native';
+import {
+  Linking,
+  NativeEventEmitter,
+  NativeModules,
+  Platform,
+  View,
+} from 'react-native';
 import {forSlideFromLeftAnimation} from '@src/lib/functions';
 import EditProfile from '@components/profile/EditProfile';
 import ChangePassword from '@components/profile/ChangePassword';
@@ -28,6 +34,7 @@ import {
   ParamListBase,
   useNavigation,
 } from '@react-navigation/native';
+import {navigationStore} from '@services/setup/navigationStore';
 
 const AppStack = () => {
   const AppStack = createStackNavigator();
