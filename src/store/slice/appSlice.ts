@@ -16,12 +16,14 @@ interface IntialStateInterface {
     currentLanguage?: string;
     securityMethod?: SecurityType;
     phoneNumber?: string;
+    activeContactRequestCount: number;
+    isAdmin: boolean;
   };
 }
 
 const initialState: IntialStateInterface = {
   isLoggedIn: false,
-  userDetails: {},
+  userDetails: {activeContactRequestCount: 0, isAdmin: false},
   isFabToggleOpen: false,
   isTransactionAdded: false,
   modalOpen: false,

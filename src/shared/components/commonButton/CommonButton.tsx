@@ -9,7 +9,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import React, {FC, useEffect, useState} from 'react';
-import {Button} from '@rneui/base';
+import {Button, IconNode} from '@rneui/base';
 import {appColors} from '@shared/appColors';
 
 interface CommonButtonInterface {
@@ -20,6 +20,8 @@ interface CommonButtonInterface {
   titleStyle?: StyleProp<TextStyle>;
   buttonType?: 'solid' | 'clear' | 'outline';
   loading?: boolean;
+  iconContainerStyle?: StyleProp<ViewStyle>;
+  icon?: IconNode;
 }
 
 const CommonButton: FC<CommonButtonInterface> = ({
@@ -30,6 +32,8 @@ const CommonButton: FC<CommonButtonInterface> = ({
   titleStyle,
   buttonType,
   loading,
+  iconContainerStyle,
+  icon,
 }) => {
   const {height, width} = useWindowDimensions();
   const [resolutionRatio, setResolutionRatio] = useState(1);
@@ -60,6 +64,8 @@ const CommonButton: FC<CommonButtonInterface> = ({
       ]}
       type={buttonType}
       loading={loading}
+      icon={icon}
+      iconContainerStyle={iconContainerStyle}
     />
   );
 };

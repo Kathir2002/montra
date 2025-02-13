@@ -21,6 +21,7 @@ import CommonText from '@shared/components/commonText/CommonText';
 import {useSelector} from 'react-redux';
 import {RootState} from '@store/store';
 import {useTranslation} from 'react-i18next';
+import {Toast} from '@shared/ToastConfig';
 
 const Settings = () => {
   const {t} = useTranslation('profile');

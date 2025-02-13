@@ -49,6 +49,7 @@ import DeleteIcon from '@assets/svg/delete.svg';
 import Popover from 'react-native-popover-view/dist/Popover';
 import {getCurrencySymbol} from '@src/lib/functions';
 import {useTranslation} from 'react-i18next';
+import CommonConfirmation from '@shared/components/CommonConfirmation';
 
 interface AccountRouteProps {
   provider: {
@@ -759,7 +760,15 @@ const AddNewAccount = () => {
       <Modal visible={isLoading} transparent={true} animationType="fade">
         <CommonLoader />
       </Modal>
-      <CommonRBSheet
+      <CommonConfirmation
+        titleText={t('transaction:EXIT_CONFIRM_TITLE')}
+        subText={t('transaction:EXIT_MESSAGE')}
+        handleCancelBtn={() => {
+          dirtyRBSheetRef.current?.close();
+        }}
+        handleOkBtn={() => {
+          navigation.goBack();
+        }}
         onClose={() => {
           StatusBar.setBackgroundColor(appColors.primary);
         }}
@@ -767,54 +776,22 @@ const AddNewAccount = () => {
           StatusBar.setBackgroundColor(appColors.transparentBackground)
         }
         ref={dirtyRBSheetRef}
-        height={200}
+        height={220}
         closeOnPressBack={false}
         closeOnPressMask={false}
         draggable={true}
         dragNotClose={true}
         customStyles={{
           container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
-        }}>
-        <View style={{padding: 15, gap: 10}}>
-          <CommonText
-            content={t('transaction:EXIT_CONFIRM_TITLE')}
-            bold
-            size={'large'}
-            style={{textAlign: 'center'}}
-          />
-          <CommonText
-            content={t('transaction:EXIT_MESSAGE')}
-            color={appColors.placeholderColor}
-            size={'label'}
-            style={{textAlign: 'center', paddingHorizontal: 15}}
-          />
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}>
-            <View style={{flex: 0.45}}>
-              <CommonButton
-                title={t('NO')}
-                buttonType="clear"
-                onPress={() => {
-                  dirtyRBSheetRef.current?.close();
-                }}
-              />
-            </View>
-            <View style={{flex: 0.45}}>
-              <CommonButton
-                title={t('YES')}
-                onPress={() => {
-                  navigation.goBack();
-                }}
-              />
-            </View>
-          </View>
-        </View>
-      </CommonRBSheet>
-      <CommonRBSheet
+        }}
+      />
+      <CommonConfirmation
+        titleText={t('REMOVE_WALLET')}
+        subText={t('REMOVE_WALLET_DESCRIPTION')}
+        handleCancelBtn={() => {
+          deleteRBSheetRef.current?.close();
+        }}
+        handleOkBtn={() => handleDeleteBankAccount()}
         onOpen={() => {
           StatusBar.setBackgroundColor(appColors.transparentBackground);
         }}
@@ -828,44 +805,8 @@ const AddNewAccount = () => {
         draggable={true}
         customStyles={{
           container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
-        }}>
-        <View style={{padding: 15, gap: 10}}>
-          <CommonText
-            content={t('REMOVE_WALLET')}
-            bold
-            size={'large'}
-            style={{textAlign: 'center'}}
-          />
-          <CommonText
-            content={t('REMOVE_WALLET_DESCRIPTION')}
-            color={appColors.placeholderColor}
-            size={'label'}
-            style={{textAlign: 'center', paddingHorizontal: 15}}
-          />
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}>
-            <View style={{flex: 0.45}}>
-              <CommonButton
-                title={t('NO')}
-                buttonType="clear"
-                onPress={() => {
-                  deleteRBSheetRef.current?.close();
-                }}
-              />
-            </View>
-            <View style={{flex: 0.45}}>
-              <CommonButton
-                title={t('YES')}
-                onPress={handleDeleteBankAccount}
-              />
-            </View>
-          </View>
-        </View>
-      </CommonRBSheet>
+        }}
+      />
       <Popover
         isVisible={isSuccessPopoverVisible}
         popoverStyle={{

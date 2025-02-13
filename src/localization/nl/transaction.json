@@ -106,5 +106,10 @@
     "ADD_NEW_ITEM": "Voeg nieuw item toe",
     "ADD": "Toevoegen",
     "DELETE_FILE_HEADING": "Dit document verwijderen?",
-    "DELETE_FILE_MESSAGE": "Weet u zeker dat u dit document wilt verwijderen?"
+    "DELETE_FILE_MESSAGE": "Weet u zeker dat u dit document wilt verwijderen?",
+    "BUDGET_DETAILS": "Budgetgegevens",
+    "SPENT": "Doorgebracht",
+    "BUDGET": "Begroting",
+    "REMOVE_BUDGET": "Dit budget verwijderen?",
+    "REMOVE_BUDGET_DESCRIPTION": "Weet u zeker dat u dit budget wilt verwijderen?"
 }

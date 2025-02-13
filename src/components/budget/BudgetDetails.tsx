@@ -35,8 +35,11 @@ import BudgetService from '@services/setup/budgetSerice';
 import {Toast} from '@shared/ToastConfig';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
 import {getCurrencySymbol} from '@src/lib/functions';
+import {useTranslation} from 'react-i18next';
+import CommonConfirmation from '@shared/components/CommonConfirmation';
 
 const BudgetDetails = () => {
+  const {t} = useTranslation('transaction');
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const route: RouteProp<{
     params: {
@@ -102,7 +105,7 @@ const BudgetDetails = () => {
       }}>
       <CommonHeader
         leftIconPressBack={() => navigation.goBack()}
-        title="Detail Budget"
+        title={t('BUDGET_DETAILS')}
         customRightHeaderComponent={
           <TouchableOpacity
             activeOpacity={0.7}
@@ -152,7 +155,7 @@ const BudgetDetails = () => {
             justifyContent: 'center',
             marginBottom: 15,
           }}>
-          <CommonText content="Remainging" bold size={'header'} />
+          <CommonText content={t('REMAINING')} bold size={'header'} />
           <CommonText
             content={
               Math.sign(route?.params?.remaining) == -1
@@ -189,7 +192,7 @@ const BudgetDetails = () => {
             <CommonText
               color={appColors.placeholderColor}
               size={'large'}
-              content="Spent"
+              content={t('SPENT')}
             />
             <CommonText
               size={'label'}
@@ -201,7 +204,7 @@ const BudgetDetails = () => {
             <CommonText
               color={appColors.placeholderColor}
               size={'large'}
-              content="Budget"
+              content={t('BUDGET')}
             />
             <CommonText
               size={'label'}
@@ -218,7 +221,7 @@ const BudgetDetails = () => {
             width: '100%',
           }}>
           <CommonButton
-            title="Edit"
+            title={t('EDIT')}
             onPress={() => navigation.navigate(`AddBudget`, route.params)}
           />
         </View>
@@ -235,17 +238,21 @@ const BudgetDetails = () => {
               width: 250,
             }}>
             <WarningIcon height={25} width={25} color={appColors?.light} />
-            <CommonText
-              content="You’ve exceed the limit"
-              color={appColors.light}
-            />
+            <CommonText content={t('LIMIT_EXCEED')} color={appColors.light} />
           </View>
         )}
       </View>
       <Modal visible={isLoading} transparent animationType="fade">
         <CommonLoader />
       </Modal>
-      <CommonRBSheet
+      <CommonConfirmation
+        titleText={t('REMOVE_BUDGET')}
+        subText={t('REMOVE_BUDGET_DESCRIPTION')}
+        handleCancelBtn={() => {
+          deleteRBSheetRef.current?.close();
+          setRbSheetOpen(false);
+        }}
+        handleOkBtn={() => handleDeleteBudget()}
         onClose={() => {
           setRbSheetOpen(false);
         }}
@@ -256,42 +263,9 @@ const BudgetDetails = () => {
         draggable={true}
         customStyles={{
           container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
-        }}>
-        <View style={{padding: 15, gap: 10}}>
-          <CommonText
-            content="Remove this budget?"
-            bold
-            size={'large'}
-            style={{textAlign: 'center'}}
-          />
-          <CommonText
-            content="Are you sure do you wanna remove this budget?"
-            color={appColors.placeholderColor}
-            size={'label'}
-            style={{textAlign: 'center', paddingHorizontal: 15}}
-          />
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}>
-            <View style={{flex: 0.45}}>
-              <CommonButton
-                title="No"
-                buttonType="clear"
-                onPress={() => {
-                  deleteRBSheetRef.current?.close();
-                  setRbSheetOpen(false);
-                }}
-              />
-            </View>
-            <View style={{flex: 0.45}}>
-              <CommonButton title="Yes" onPress={handleDeleteBudget} />
-            </View>
-          </View>
-        </View>
-      </CommonRBSheet>
+        }}
+      />
+
       <Popover
         isVisible={isSuccessPopoverVisible}
         popoverStyle={{

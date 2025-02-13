@@ -134,7 +134,9 @@ const ChangePassword = () => {
               }
             });
             dispatch(updateIsLoggedin(false));
-            dispatch(updateCurrentUser({}));
+            dispatch(
+              updateCurrentUser({activeContactRequestCount: 0, isAdmin: false}),
+            );
             setIsLoading(false);
             navigation.navigate('SignIn');
           }

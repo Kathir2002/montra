@@ -70,6 +70,7 @@ import {updateIsTransactionAdded} from '@store/slice/appSlice';
 import {useDispatch} from 'react-redux';
 import {Mode} from 'react-native-popover-view/dist/Types';
 import {useTranslation} from 'react-i18next';
+import CommonConfirmation from '@shared/components/CommonConfirmation';
 interface FormValues {
   newDropdownItem: string;
   description: string;
@@ -1490,8 +1491,9 @@ const CommonAddScreen: FC<{
                         flexDirection: 'row',
                         justifyContent: 'space-between',
                         alignItems: 'center',
+                        flex: 1,
                       }}>
-                      <View>
+                      <View style={{flex: 0.4}}>
                         <CommonText
                           content={t('FREQUENCY')}
                           bold
@@ -1525,7 +1527,7 @@ const CommonAddScreen: FC<{
                           ) : undefined}
                         </CommonText>
                       </View>
-                      <View>
+                      <View style={{flex: 0.4}}>
                         <CommonText
                           content={t('END_AFTER')}
                           bold
@@ -1580,6 +1582,7 @@ const CommonAddScreen: FC<{
                           paddingHorizontal: 10,
                           alignItems: 'center',
                           justifyContent: 'center',
+                          flex: 0.2,
                         }}>
                         <CommonText
                           content={t('EDIT')}
@@ -2012,7 +2015,16 @@ const CommonAddScreen: FC<{
           }
         />
       ) : undefined}
-      <CommonRBSheet
+      <CommonConfirmation
+        titleText={t('EXIT_CONFIRM_TITLE')}
+        subText={t('EXIT_MESSAGE')}
+        handleCancelBtn={() => {
+          dirtyRBSheetRef.current?.close();
+          setRbSheetOpen(false);
+        }}
+        handleOkBtn={() => {
+          navigation.goBack();
+        }}
         onClose={() => {
           setRbSheetOpen(false);
         }}
@@ -2020,54 +2032,15 @@ const CommonAddScreen: FC<{
           setRbSheetOpen(true);
         }}
         ref={dirtyRBSheetRef}
-        height={200}
+        height={220}
         closeOnPressBack={false}
         closeOnPressMask={false}
         draggable={true}
         dragNotClose={true}
         customStyles={{
           container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
-        }}>
-        <View style={{padding: 15, gap: 10}}>
-          <CommonText
-            content={t('EXIT_CONFIRM_TITLE')}
-            bold
-            size={'large'}
-            style={{textAlign: 'center'}}
-          />
-          <CommonText
-            content={t('EXIT_MESSAGE')}
-            color={appColors.placeholderColor}
-            size={'label'}
-            style={{textAlign: 'center', paddingHorizontal: 15}}
-          />
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}>
-            <View style={{flex: 0.45}}>
-              <CommonButton
-                title={t('NO')}
-                buttonType="clear"
-                onPress={() => {
-                  dirtyRBSheetRef.current?.close();
-                  setRbSheetOpen(false);
-                }}
-              />
-            </View>
-            <View style={{flex: 0.45}}>
-              <CommonButton
-                title={t('YES')}
-                onPress={() => {
-                  navigation.goBack();
-                }}
-              />
-            </View>
-          </View>
-        </View>
-      </CommonRBSheet>
+        }}
+      />
       <Popover
         isVisible={isSuccessPopoverVisible}
         popoverStyle={{

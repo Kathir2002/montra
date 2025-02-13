@@ -106,5 +106,10 @@
     "ADD_NEW_ITEM": "添加新项目",
     "ADD": "添加",
     "DELETE_FILE_HEADING": "删除此文档？",
-    "DELETE_FILE_MESSAGE": "您确定要删除此文档吗？"
+    "DELETE_FILE_MESSAGE": "您确定要删除此文档吗？",
+    "BUDGET_DETAILS": "预算细节",
+    "SPENT": "花费",
+    "BUDGET": "预算",
+    "REMOVE_BUDGET": "删除此预算？",
+    "REMOVE_BUDGET_DESCRIPTION": "您确定要删除此预算吗？"
 }

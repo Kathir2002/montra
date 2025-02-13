@@ -26,6 +26,8 @@ axiosInstance.interceptors.response.use(
   },
   async function (error) {
     if (error) {
+      console.log(error);
+
       if (error?.response?.status == 401) {
         return promise.reject({code: 401});
       }

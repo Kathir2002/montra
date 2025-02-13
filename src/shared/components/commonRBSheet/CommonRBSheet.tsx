@@ -19,7 +19,7 @@ export interface RBSheetRef {
   close: () => void;
 }
 
-interface RBSheetProps {
+export interface RBSheetProps {
   testID?: string;
   height?: number;
   openDuration?: number;

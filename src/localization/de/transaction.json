@@ -106,5 +106,10 @@
     "ADD_NEW_ITEM": "Neues Element hinzufügen",
     "ADD": "Hinzufügen",
     "DELETE_FILE_HEADING": "Dieses Dokument löschen?",
-    "DELETE_FILE_MESSAGE": "Möchten Sie dieses Dokument wirklich löschen?"
+    "DELETE_FILE_MESSAGE": "Möchten Sie dieses Dokument wirklich löschen?",
+    "BUDGET_DETAILS": "Budgetdetails",
+    "SPENT": "Ausgegeben",
+    "BUDGET": "Budget",
+    "REMOVE_BUDGET": "Dieses Budget entfernen?",
+    "REMOVE_BUDGET_DESCRIPTION": "Sind Sie sicher, dass Sie dieses Budget entfernen möchten?"
 }

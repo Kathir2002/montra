@@ -22,7 +22,6 @@ interface Props extends TextProps {
   color?: string;
   style?: TextStyle | TextStyle[] | StyleProp<TextStyle>;
   numberOfLines?: number;
-  ellipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
 }
 //common text component function
 const CommonText: FC<Props> = ({
@@ -31,8 +30,6 @@ const CommonText: FC<Props> = ({
   size,
   color,
   style,
-  ellipsizeMode,
-  numberOfLines,
   ...props
 }) => {
   const error = 12;
@@ -66,8 +63,7 @@ const CommonText: FC<Props> = ({
         },
         style,
       ]}
-      {...props}
-      ellipsizeMode={ellipsizeMode}>
+      {...props}>
       {content}
       {props.children}
     </Text>

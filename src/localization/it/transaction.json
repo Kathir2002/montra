@@ -106,5 +106,10 @@
     "ADD_NEW_ITEM": "Aggiungi nuovo articolo",
     "ADD": "Aggiungere",
     "DELETE_FILE_HEADING": "Elimina questo documento?",
-    "DELETE_FILE_MESSAGE": "Sei sicuro di voler eliminare questo documento?"
+    "DELETE_FILE_MESSAGE": "Sei sicuro di voler eliminare questo documento?",
+    "BUDGET_DETAILS": "Dettagli di budget",
+    "SPENT": "Speso",
+    "BUDGET": "Budget",
+    "REMOVE_BUDGET": "Rimuovere questo budget?",
+    "REMOVE_BUDGET_DESCRIPTION": "Sei sicuro di voler rimuovere questo budget?"
 }

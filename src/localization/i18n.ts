@@ -51,7 +51,7 @@ i18n
     compatibilityJSON: 'v3',
     resources,
     // lng: 'ta',
-    debug: true, // Debug mode for development
+    debug: false, // Debug mode for development
     fallbackLng: 'en',
     interpolation: {
       escapeValue: false,

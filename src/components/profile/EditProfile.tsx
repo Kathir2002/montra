@@ -38,6 +38,7 @@ import {Toast} from '@shared/ToastConfig';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
 import {updateCurrentUser} from '@store/slice/appSlice';
 import EditIcon from '@assets/svg/change-profile.svg';
+import CommonConfirmation from '@shared/components/CommonConfirmation';
 
 const EditProfile = () => {
   const dispatch = useDispatch();
@@ -343,7 +344,18 @@ const EditProfile = () => {
       <Modal visible={isLoading} transparent={true} animationType="fade">
         <CommonLoader />
       </Modal>
-      <CommonRBSheet
+      <CommonConfirmation
+        titleText={t('transaction:EXIT_CONFIRM_TITLE')}
+        subText={t('transaction:EXIT_MESSAGE')}
+        handleCancelBtn={() => {
+          dirtyRBSheetRef.current?.close();
+          setRbSheetOpen(false);
+        }}
+        handleOkBtn={() => {
+          dirtyRBSheetRef.current?.close();
+          setRbSheetOpen(false);
+          navigation.goBack();
+        }}
         onClose={() => {
           setRbSheetOpen(false);
         }}
@@ -351,56 +363,15 @@ const EditProfile = () => {
           setRbSheetOpen(true);
         }}
         ref={dirtyRBSheetRef}
-        height={200}
+        height={220}
         closeOnPressBack={false}
         closeOnPressMask={false}
         draggable={true}
         dragNotClose={true}
         customStyles={{
           container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
-        }}>
-        <View style={{padding: 15, gap: 10}}>
-          <CommonText
-            content={t('transaction:EXIT_CONFIRM_TITLE')}
-            bold
-            size={'large'}
-            style={{textAlign: 'center'}}
-          />
-          <CommonText
-            content={t('transaction:EXIT_MESSAGE')}
-            color={appColors.placeholderColor}
-            size={'label'}
-            style={{textAlign: 'center', paddingHorizontal: 15}}
-          />
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}>
-            <View style={{flex: 0.45}}>
-              <CommonButton
-                title={t('NO')}
-                buttonType="clear"
-                onPress={() => {
-                  dirtyRBSheetRef.current?.close();
-                  setRbSheetOpen(false);
-                }}
-              />
-            </View>
-            <View style={{flex: 0.45}}>
-              <CommonButton
-                title={t('YES')}
-                onPress={() => {
-                  dirtyRBSheetRef.current?.close();
-                  setRbSheetOpen(false);
-                  navigation.goBack();
-                }}
-              />
-            </View>
-          </View>
-        </View>
-      </CommonRBSheet>
+        }}
+      />
     </KeyboardAvoidingView>
   );
 };

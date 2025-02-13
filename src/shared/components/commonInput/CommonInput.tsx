@@ -39,6 +39,9 @@ interface CommonInputInterface {
   onPress?: ((e: NativeSyntheticEvent<NativeTouchEvent>) => void) | undefined;
   labelVisible?: boolean;
   leftIcon?: IconNode;
+  numberOfLines?: number;
+  multiline?: boolean;
+  isTextArea?: boolean;
 }
 
 const CommonInput: FC<CommonInputInterface> = ({
@@ -63,6 +66,9 @@ const CommonInput: FC<CommonInputInterface> = ({
   containerStyle,
   labelVisible = true,
   leftIcon,
+  numberOfLines = 1,
+  multiline = false,
+  isTextArea = false,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const animatedIsFocused = useRef(new Animated.Value(0)).current;
@@ -96,7 +102,7 @@ const CommonInput: FC<CommonInputInterface> = ({
     }),
     top: animatedIsFocused.interpolate({
       inputRange: [0, 1],
-      outputRange: [32, -8],
+      outputRange: isTextArea ? [80, -8] : [32, -8],
     }),
     fontSize: animatedIsFocused.interpolate({
       inputRange: [0, 1],
@@ -118,6 +124,7 @@ const CommonInput: FC<CommonInputInterface> = ({
       ) : undefined}
       <Input
         onPress={onPress}
+        numberOfLines={numberOfLines}
         maxLength={maxLength}
         value={value}
         onChangeText={onChangeText}
@@ -125,7 +132,11 @@ const CommonInput: FC<CommonInputInterface> = ({
         keyboardType={keyboardType}
         leftIcon={leftIcon}
         rightIcon={rightIcon}
+        style={{
+          textAlignVertical: isTextArea ? 'top' : undefined, // Ensures text starts from the top
+        }}
         secureTextEntry={secureTextEntry}
+        multiline={multiline}
         errorMessage={error ? error : undefined}
         autoCapitalize={autoCapitalize}
         placeholderTextColor={appColors.placeholderColor}

@@ -40,6 +40,7 @@ import ReactNativeBiometrics from 'react-native-biometrics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import OTPInput from '@components/auth/OTPInput';
 import FlashMessage from 'react-native-flash-message';
+import CommonConfirmation from '@shared/components/CommonConfirmation';
 
 const Security = () => {
   const dispatch = useDispatch();
@@ -226,7 +227,19 @@ const Security = () => {
           buttonStyle={{marginTop: 25}}
         />
       </View>
-      <CommonRBSheet
+      <CommonConfirmation
+        titleText={t('CHANGE_SECURITY_METHOD')}
+        subText={t('CHANGE_SECURITY_METHOD_DESCRIPION')}
+        handleCancelBtn={() => {
+          dispatch(updateIsModalOpen(false));
+          rbSheetRef.current?.close();
+          setRbSheetOpen(false);
+        }}
+        handleOkBtn={() => {
+          securityType == 'FINGERPRINT'
+            ? handleBiometricAuth()
+            : updateUserSecurityMethod();
+        }}
         onClose={() => {
           setRbSheetOpen(false);
           dispatch(updateIsModalOpen(false));
@@ -242,48 +255,6 @@ const Security = () => {
         customStyles={{
           container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
         }}>
-        <View style={{padding: 15, gap: 10}}>
-          <CommonText
-            content={t('CHANGE_SECURITY_METHOD')}
-            bold
-            size={'large'}
-            style={{textAlign: 'center'}}
-          />
-          <CommonText
-            content={t('CHANGE_SECURITY_METHOD_DESCRIPION')}
-            color={appColors.placeholderColor}
-            size={'label'}
-            style={{textAlign: 'center', paddingHorizontal: 15}}
-          />
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}>
-            <View style={{flex: 0.45}}>
-              <CommonButton
-                title={t('NO')}
-                buttonType="clear"
-                onPress={() => {
-                  dispatch(updateIsModalOpen(false));
-                  rbSheetRef.current?.close();
-                  setRbSheetOpen(false);
-                }}
-              />
-            </View>
-            <View style={{flex: 0.45}}>
-              <CommonButton
-                title={t('YES')}
-                onPress={() => {
-                  securityType == 'FINGERPRINT'
-                    ? handleBiometricAuth()
-                    : updateUserSecurityMethod();
-                }}
-              />
-            </View>
-          </View>
-        </View>
         <FlashMessage
           duration={2000}
           position={'bottom'}
@@ -294,7 +265,7 @@ const Security = () => {
             paddingVertical: Platform.OS == 'ios' ? -25 : null,
           }}
         />
-      </CommonRBSheet>
+      </CommonConfirmation>
       <Popover
         isVisible={isSuccessPopoverVisible}
         popoverStyle={{

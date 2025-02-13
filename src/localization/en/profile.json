@@ -77,5 +77,6 @@
   "UPDATE": "Update",
   "CHANGE_SECURITY_METHOD": "Change security method?",
   "CHANGE_SECURITY_METHOD_DESCRIPION": "Are you sure do you wanna change Security method?",
-  "SECURITY_METHOD_UPDATED": "User Security Method updated successfully"
+  "SECURITY_METHOD_UPDATED": "User Security Method updated successfully",
+  "UNLOCK": "Unlock"
 }

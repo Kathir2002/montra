@@ -106,5 +106,10 @@
     "ADD_NEW_ITEM": "Tambahkan item baru",
     "ADD": "Menambahkan",
     "DELETE_FILE_HEADING": "Hapus dokumen ini?",
-    "DELETE_FILE_MESSAGE": "Apakah Anda yakin ingin menghapus dokumen ini?"
+    "DELETE_FILE_MESSAGE": "Apakah Anda yakin ingin menghapus dokumen ini?",
+    "BUDGET_DETAILS": "Detail Anggaran",
+    "SPENT": "Dihabiskan",
+    "BUDGET": "Anggaran",
+    "REMOVE_BUDGET": "Menghapus anggaran ini?",
+    "REMOVE_BUDGET_DESCRIPTION": "Apakah Anda yakin ingin menghapus anggaran ini?"
 }

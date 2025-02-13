@@ -106,5 +106,10 @@
     "ADD_NEW_ITEM": "新しいアイテムを追加します",
     "ADD": "追加",
     "DELETE_FILE_HEADING": "このドキュメントを削除しますか？",
-    "DELETE_FILE_MESSAGE": "このドキュメントを削除したいですか？"
+    "DELETE_FILE_MESSAGE": "このドキュメントを削除したいですか？",
+    "BUDGET_DETAILS": "予算の詳細",
+    "SPENT": "過ごした",
+    "BUDGET": "予算",
+    "REMOVE_BUDGET": "この予算を削除しますか？",
+    "REMOVE_BUDGET_DESCRIPTION": "この予算を削除したいですか？"
 }

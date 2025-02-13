@@ -129,6 +129,8 @@ const Signin = () => {
               currentLanguage: i18n.language,
               securityMethod: res?.user?.securityMethod,
               phoneNumber: res?.user?.phoneNumber,
+              activeContactRequestCount: res?.user?.activeContactRequestCount,
+              isAdmin: res?.user?.isAdmin,
             }),
           );
           await AsyncStorage.getItem('securityPin').then(value => {

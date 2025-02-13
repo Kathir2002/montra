@@ -44,6 +44,7 @@ import LottieView from 'lottie-react-native';
 import {useDispatch} from 'react-redux';
 import {updateIsTransactionAdded} from '@store/slice/appSlice';
 import {useTranslation} from 'react-i18next';
+import CommonConfirmation from '@shared/components/CommonConfirmation';
 
 interface PropInterface {
   id: string;
@@ -382,7 +383,14 @@ const CommonDetailsScreen = ({
           />
         </View>
       </View>
-      <CommonRBSheet
+      <CommonConfirmation
+        titleText={t('REMOVE_TRANSACTION')}
+        subText={t('REMOVE_CONFIRMATION')}
+        handleCancelBtn={() => {
+          deleteRBSheetRef.current?.close();
+          setRbSheetOpen(false);
+        }}
+        handleOkBtn={() => handleDeleteTransaction()}
         onClose={() => {
           setRbSheetOpen(false);
         }}
@@ -393,45 +401,8 @@ const CommonDetailsScreen = ({
         draggable={true}
         customStyles={{
           container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
-        }}>
-        <View style={{padding: 15, gap: 10}}>
-          <CommonText
-            content={t('REMOVE_TRANSACTION')}
-            bold
-            size={'large'}
-            style={{textAlign: 'center'}}
-          />
-          <CommonText
-            content={t('REMOVE_CONFIRMATION')}
-            color={appColors.placeholderColor}
-            size={'label'}
-            style={{textAlign: 'center', paddingHorizontal: 15}}
-          />
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}>
-            <View style={{flex: 0.45}}>
-              <CommonButton
-                title={t('NO')}
-                buttonType="clear"
-                onPress={() => {
-                  deleteRBSheetRef.current?.close();
-                  setRbSheetOpen(false);
-                }}
-              />
-            </View>
-            <View style={{flex: 0.45}}>
-              <CommonButton
-                title={t('YES')}
-                onPress={handleDeleteTransaction}
-              />
-            </View>
-          </View>
-        </View>
-      </CommonRBSheet>
+        }}
+      />
       <Modal visible={isLoading} transparent animationType="fade">
         <CommonLoader />
       </Modal>

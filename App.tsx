@@ -69,7 +69,7 @@ const App = () => {
   );
   const netInfo = useNetInfo();
   const dispatch = useDispatch();
-  const {t, i18n} = useTranslation();
+  const {t, i18n} = useTranslation('profile');
   const modalOpen = useSelector((state: RootState) => state.auth.modalOpen);
 
   useEffect(() => {
@@ -101,13 +101,19 @@ const App = () => {
                   setIsLoading(false);
                 }
               } else {
-                setIsLoading(false);
+                // setIsLoading(false);
                 Alert.alert(
                   t('BIOMETRIC_AUTHENTICATION_FAILED_TITLE'),
                   t('BIOMETRIC_AUTHENTICATION_FAILED'),
                   [
-                    {text: 'Cancel', onPress: () => BackHandler.exitApp()},
-                    {text: 'Unlock', onPress: () => handleBiometricAuth()},
+                    {
+                      text: t('transaction:CANCEL'),
+                      onPress: () => BackHandler.exitApp(),
+                    },
+                    {
+                      text: t('profile:UNLOCK'),
+                      onPress: () => handleBiometricAuth(),
+                    },
                   ],
                 );
               }
@@ -145,6 +151,8 @@ const App = () => {
               phoneNumber: res?.user?.phoneNumber,
               securityMethod: res?.user?.securityMethod,
               currentLanguage: i18n.language,
+              activeContactRequestCount: res?.user?.activeContactRequestCount,
+              isAdmin: res?.user?.isAdmin,
             }),
           );
           const securityValue = res?.user?.securityMethod;
@@ -204,20 +212,6 @@ const App = () => {
 
   const {createNotificationChannels, displayNotification} =
     useNotificationChannels();
-
-  const handleNotificationPress = async (remoteMessage: any) => {
-    if (remoteMessage?.data?.screen) {
-      dispatch(updateIsLoggedin(true));
-      setTimeout(() => {
-        navigationRef.current.navigate(
-          remoteMessage?.data?.screen,
-          remoteMessage?.data?.params && {
-            id: remoteMessage?.data?.params,
-          },
-        );
-      }, 1000);
-    }
-  };
 
   useEffect(() => {
     const setupNotificationHandling = async () => {
@@ -307,6 +301,20 @@ const App = () => {
 
     setupNotificationHandling();
   }, [createNotificationChannels, displayNotification]);
+
+  const handleNotificationPress = async (remoteMessage: any) => {
+    if (remoteMessage?.data?.screen) {
+      dispatch(updateIsLoggedin(true));
+      setTimeout(() => {
+        navigationRef.current.navigate(
+          remoteMessage?.data?.screen,
+          remoteMessage?.data?.params && {
+            id: remoteMessage?.data?.params,
+          },
+        );
+      }, 1000);
+    }
+  };
 
   return (
     <>

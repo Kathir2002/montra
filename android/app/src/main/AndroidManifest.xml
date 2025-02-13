@@ -9,6 +9,7 @@
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
   <!-- To reduce the apk size - android:extractNativeLibs="true" -->
+  <!-- it needs to be removed android:usesCleartextTraffic="true" -->
   <application
     android:name=".MainApplication"
     android:label="@string/app_name"
@@ -17,6 +18,8 @@
     android:allowBackup="false"
     android:theme="@style/AppTheme"
     android:extractNativeLibs="true"
+    android:usesCleartextTraffic="true"
+
   >
     <!-- android:usesCleartextTraffic="true" -->
     <!-- for push notification popup-->

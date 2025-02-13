@@ -35,6 +35,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {updateCurrentUser} from '@store/slice/appSlice';
 import {RootState} from '@store/store';
 import {useTranslation} from 'react-i18next';
+import CommonConfirmation from '@shared/components/CommonConfirmation';
 
 const Currency = () => {
   const {t} = useTranslation('profile');
@@ -191,7 +192,14 @@ const Currency = () => {
         onEndReachedThreshold={0.01}
         keyExtractor={(_, index) => index.toString()}
       />
-      <CommonRBSheet
+      <CommonConfirmation
+        titleText={t('CHANGE_CURRENCY_CONFIRMATION')}
+        subText={t('CHANGE_CURRENCY_DESCRIPTION')}
+        handleCancelBtn={() => {
+          rbSheetRef.current?.close();
+          setRbSheetOpen(false);
+        }}
+        handleOkBtn={() => handleChangeCurrency()}
         onClose={() => {
           setRbSheetOpen(false);
         }}
@@ -205,45 +213,8 @@ const Currency = () => {
         draggable={true}
         customStyles={{
           container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
-        }}>
-        <View style={{padding: 15, gap: 10}}>
-          <CommonText
-            content={t('CHANGE_CURRENCY_CONFIRMATION')}
-            bold
-            size={'large'}
-            style={{textAlign: 'center'}}
-          />
-          <CommonText
-            content={t('CHANGE_CURRENCY_DESCRIPTION')}
-            color={appColors.placeholderColor}
-            size={'label'}
-            style={{textAlign: 'center', paddingHorizontal: 15}}
-          />
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}>
-            <View style={{flex: 0.45}}>
-              <CommonButton
-                title={t('NO')}
-                buttonType="clear"
-                onPress={() => {
-                  rbSheetRef.current?.close();
-                  setRbSheetOpen(false);
-                }}
-              />
-            </View>
-            <View style={{flex: 0.45}}>
-              <CommonButton
-                title={t('YES')}
-                onPress={() => handleChangeCurrency()}
-              />
-            </View>
-          </View>
-        </View>
-      </CommonRBSheet>
+        }}
+      />
       <Popover
         isVisible={isSuccessPopoverVisible}
         popoverStyle={{

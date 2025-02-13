@@ -106,5 +106,10 @@
     "ADD_NEW_ITEM": "Add New Item",
     "ADD": "Add",
     "DELETE_FILE_HEADING": "Delete this Document?",
-    "DELETE_FILE_MESSAGE": "Are you sure do you wanna delete this document?"
+    "DELETE_FILE_MESSAGE": "Are you sure do you wanna delete this document?",
+    "BUDGET_DETAILS": "Budget Details",
+    "SPENT": "Spent",
+    "BUDGET": "Budget",
+    "REMOVE_BUDGET": "Remove this budget?",
+    "REMOVE_BUDGET_DESCRIPTION": "Are you sure do you wanna remove this budget?"
 }

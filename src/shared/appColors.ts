@@ -16,4 +16,15 @@ export const appColors = {
   lightDark: '#414141',
   warningColor: '#faad14',
   dashedBorderColor: '#E3E5E5',
+  status: {
+    new: '#3498db',
+    progress: '#f1c40f',
+    resolved: '#2ecc71',
+  },
+  borderColor: '#cccccc',
+  priority: {
+    low: '#2ecc71',
+    medium: '#f1c40f',
+    high: '#e74c3c',
+  },
 };

@@ -45,6 +45,7 @@ class accountService {
       'api/account/get-notification-preferences',
     );
   }
+
   getWeeklyTransactions(data: any) {
     return HttpRoutingService.postMethod(
       'api/account/get-weekly-transactions',
@@ -80,6 +81,7 @@ class accountService {
       });
     }
   }
+
   async deactivateAccount(data?: any) {
     return HttpRoutingService.deleteMethod(
       'api/account/deactivate-account',

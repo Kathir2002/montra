@@ -106,5 +106,10 @@
     "ADD_NEW_ITEM": "أضف عنصرًا جديدًا",
     "ADD": "يضيف",
     "DELETE_FILE_HEADING": "حذف هذه الوثيقة؟",
-    "DELETE_FILE_MESSAGE": "هل أنت متأكد هل تريد حذف هذا المستند؟"
+    "DELETE_FILE_MESSAGE": "هل أنت متأكد هل تريد حذف هذا المستند؟",
+    "BUDGET_DETAILS": "تفاصيل الميزانية",
+    "SPENT": "أنفقت",
+    "BUDGET": "ميزانية",
+    "REMOVE_BUDGET": "إزالة هذه الميزانية؟",
+    "REMOVE_BUDGET_DESCRIPTION": "هل أنت متأكد هل تريد إزالة هذه الميزانية؟"
 }

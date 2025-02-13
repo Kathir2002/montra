@@ -85,7 +85,8 @@ const LoginWithGoogle = (props: LoginWithGoogleProps) => {
                   console.error('Failed to create shortcuts:', error);
                 }
               }
-              CommonDataService.setToken(res?.token);
+              await CommonDataService.setToken(res?.token);
+
               dispatch(
                 updateCurrentUser({
                   email: res?.user?.email,
@@ -97,6 +98,9 @@ const LoginWithGoogle = (props: LoginWithGoogleProps) => {
                   currentLanguage: i18n.language,
                   securityMethod: res?.user?.securityMethod,
                   phoneNumber: res?.user?.phoneNumber,
+                  activeContactRequestCount:
+                    res?.user?.activeContactRequestCount,
+                  isAdmin: res?.user?.isAdmin,
                 }),
               );
               setIsLoading(false);

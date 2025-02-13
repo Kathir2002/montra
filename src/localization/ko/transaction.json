@@ -106,5 +106,10 @@
     "ADD_NEW_ITEM": "새 항목을 추가하십시오",
     "ADD": "추가하다",
     "DELETE_FILE_HEADING": "이 문서를 삭제 하시겠습니까?",
-    "DELETE_FILE_MESSAGE": "이 문서를 삭제하고 싶습니까?"
+    "DELETE_FILE_MESSAGE": "이 문서를 삭제하고 싶습니까?",
+    "BUDGET_DETAILS": "예산 세부 사항",
+    "SPENT": "지출",
+    "BUDGET": "예산",
+    "REMOVE_BUDGET": "이 예산을 제거 하시겠습니까?",
+    "REMOVE_BUDGET_DESCRIPTION": "이 예산을 제거하고 싶습니까?"
 }

@@ -1,9 +1,5 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {
-  createStackNavigator,
-  StackCardInterpolatedStyle,
-  StackCardInterpolationProps,
-} from '@react-navigation/stack';
+import React, {useEffect} from 'react';
+import {createStackNavigator} from '@react-navigation/stack';
 import BottomTabNavigator from './BottomTabNavigator';
 import CommonAddScreen from '@components/transactions/CommonAddScreen';
 import AddNewAccount from '@components/setUpScreen/AddNewAccount';
@@ -19,13 +15,7 @@ import Help from '@components/profile/Help';
 import Currency from '@components/profile/Currency';
 import ExportData from '@components/profile/ExportData';
 import Security from '@components/profile/Security';
-import {
-  Linking,
-  NativeEventEmitter,
-  NativeModules,
-  Platform,
-  View,
-} from 'react-native';
+import {NativeEventEmitter, NativeModules, Platform, View} from 'react-native';
 import {forSlideFromLeftAnimation} from '@src/lib/functions';
 import EditProfile from '@components/profile/EditProfile';
 import ChangePassword from '@components/profile/ChangePassword';
@@ -34,7 +24,9 @@ import {
   ParamListBase,
   useNavigation,
 } from '@react-navigation/native';
-import {navigationStore} from '@services/setup/navigationStore';
+import HelpRequest_Details from '@components/profile/HelpRequest_Details';
+import HelpRequest_List from '@components/profile/HelpRequest_List';
+import ChatView from '@components/profile/ChatView';
 
 const AppStack = () => {
   const AppStack = createStackNavigator();
@@ -128,6 +120,12 @@ const AppStack = () => {
         <AppStack.Screen name="Security" component={Security} />
         <AppStack.Screen name="EditProfile" component={EditProfile} />
         <AppStack.Screen name="ChangePassword" component={ChangePassword} />
+        <AppStack.Screen name="HelpRequest_List" component={HelpRequest_List} />
+        <AppStack.Screen
+          name="HelpRequest_Details"
+          component={HelpRequest_Details}
+        />
+        <AppStack.Screen name="ChatView" component={ChatView} />
       </AppStack.Navigator>
     </View>
   );

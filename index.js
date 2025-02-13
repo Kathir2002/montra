@@ -50,8 +50,11 @@ const AppWrapper = () => {
               },
               Security: {
                 path: "profile/settings/security"
+              },
+              Dashboard: {
+                path: "dashboard"
               }
-            },
+            }
           },
           async getInitialURL() {
             // Handle app launch with deep link

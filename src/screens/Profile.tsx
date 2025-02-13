@@ -38,11 +38,8 @@ import SettingsIcon from '@assets/svg/settings.svg';
 import LogoutIcon from '@assets/svg/logout.svg';
 import DeactivateIcon from '@assets/svg/deactivate.svg';
 import ExportDataIcon from '@assets/svg/export.svg';
-import CommonButton from '@shared/components/commonButton/CommonButton';
 import messaging from '@react-native-firebase/messaging';
-import CommonRBSheet, {
-  RBSheetRef,
-} from '@shared/components/commonRBSheet/CommonRBSheet';
+import {RBSheetRef} from '@shared/components/commonRBSheet/CommonRBSheet';
 import {
   DEV_ANDROID_CLIENTID,
   DEV_IOS_CLIENTID,
@@ -56,6 +53,7 @@ import AccountService from '@services/setup/accountService';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
 import FinanceStory from '@components/financeReport/FinanceStory';
 import {useTranslation} from 'react-i18next';
+import CommonConfirmation from '@shared/components/CommonConfirmation';
 
 const Profile = () => {
   const {t} = useTranslation('profile');
@@ -107,7 +105,7 @@ const Profile = () => {
       }
     });
     dispatch(updateIsLoggedin(false));
-    dispatch(updateCurrentUser({}));
+    dispatch(updateCurrentUser({activeContactRequestCount: 0, isAdmin: false}));
     setIsLoading(false);
     navigation.navigate('SignIn');
   };
@@ -311,7 +309,14 @@ const Profile = () => {
           return <RenderItem index={index} item={item} key={index} />;
         })}
       </View>
-      <CommonRBSheet
+      <CommonConfirmation
+        titleText={`${t('LOGOUT')}?`}
+        subText={t('LOGOUT_CONFIRMATION')}
+        handleCancelBtn={() => {
+          rbSheetRef.current?.close();
+          setRbSheetOpen(false);
+        }}
+        handleOkBtn={() => logoutHandler()}
         onClose={() => {
           setRbSheetOpen(false);
         }}
@@ -325,43 +330,16 @@ const Profile = () => {
         draggable={true}
         customStyles={{
           container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
-        }}>
-        <View style={{padding: 15, gap: 10}}>
-          <CommonText
-            content={`${t('LOGOUT')}?`}
-            bold
-            size={'large'}
-            style={{textAlign: 'center'}}
-          />
-          <CommonText
-            content={t('LOGOUT_CONFIRMATION')}
-            color={appColors.placeholderColor}
-            size={'label'}
-            style={{textAlign: 'center', paddingHorizontal: 15}}
-          />
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}>
-            <View style={{flex: 0.45}}>
-              <CommonButton
-                title={t('NO')}
-                buttonType="clear"
-                onPress={() => {
-                  rbSheetRef.current?.close();
-                  setRbSheetOpen(false);
-                }}
-              />
-            </View>
-            <View style={{flex: 0.45}}>
-              <CommonButton title={t('YES')} onPress={() => logoutHandler()} />
-            </View>
-          </View>
-        </View>
-      </CommonRBSheet>
-      <CommonRBSheet
+        }}
+      />
+      <CommonConfirmation
+        titleText={`${t('DEACTIVATE_ACCOUNT')}?`}
+        subText={t('ACCOUNT_DEACTIVATION_CONFIRMATION')}
+        handleCancelBtn={() => {
+          deactivateRBSheetRef.current?.close();
+          setRbSheetOpen(false);
+        }}
+        handleOkBtn={() => deactivateAccountHandler()}
         onClose={() => {
           setRbSheetOpen(false);
         }}
@@ -375,45 +353,8 @@ const Profile = () => {
         draggable={true}
         customStyles={{
           container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
-        }}>
-        <View style={{padding: 15, gap: 10}}>
-          <CommonText
-            content={`${t('DEACTIVATE_ACCOUNT')}?`}
-            bold
-            size={'large'}
-            style={{textAlign: 'center'}}
-          />
-          <CommonText
-            content={t('ACCOUNT_DEACTIVATION_CONFIRMATION')}
-            color={appColors.placeholderColor}
-            size={'label'}
-            style={{textAlign: 'center', paddingHorizontal: 15}}
-          />
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}>
-            <View style={{flex: 0.45}}>
-              <CommonButton
-                title={t('NO')}
-                buttonType="clear"
-                onPress={() => {
-                  deactivateRBSheetRef.current?.close();
-                  setRbSheetOpen(false);
-                }}
-              />
-            </View>
-            <View style={{flex: 0.45}}>
-              <CommonButton
-                title={t('YES')}
-                onPress={() => deactivateAccountHandler()}
-              />
-            </View>
-          </View>
-        </View>
-      </CommonRBSheet>
+        }}
+      />
       {isToggleOpen ? (
         <Animated.View
           onStartShouldSetResponder={() => {
