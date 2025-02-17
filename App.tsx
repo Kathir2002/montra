@@ -37,6 +37,7 @@ import {
   useNotificationChannels,
 } from '@src/hooks/useNotificationChannels';
 import {navigationStore} from '@services/setup/navigationStore';
+import {SocketProvider} from '@src/hooks/useSocket';
 
 const App = () => {
   useEffect(() => {
@@ -324,7 +325,12 @@ const App = () => {
           {!isLoading && isloggedin && !userDetails.isSetupDone ? (
             <SetUpStack />
           ) : !isLoading && isloggedin ? (
-            <AppStack />
+            <SocketProvider
+              serverUrl="http://172.17.0.111:3000"
+              userId={userDetails?.id!}
+              username={userDetails?.name}>
+              <AppStack />
+            </SocketProvider>
           ) : !isLoading && !isloggedin ? (
             <>
               <AuthStack

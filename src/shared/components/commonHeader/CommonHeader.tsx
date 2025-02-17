@@ -3,11 +3,10 @@ import {
   StyleProp,
   StyleSheet,
   TouchableOpacity,
-  useWindowDimensions,
   View,
   ViewStyle,
 } from 'react-native';
-import React, {FC, useEffect, useState} from 'react';
+import React, {FC} from 'react';
 import {Header} from '@rneui/base';
 import {appColors} from '@shared/appColors';
 import CommonText from '../commonText/CommonText';
@@ -36,14 +35,6 @@ const CommonHeader: FC<CommonHeaderInterface> = ({
   customRightHeaderComponent,
   headerContainerStyle,
 }) => {
-  const {height, width} = useWindowDimensions();
-  const [resolutionRatio, setResolutionRatio] = useState(1);
-  let orgHeight = 841.0909090909091;
-  let orgWidth = 392.72727272727275;
-  useEffect(() => {
-    const ratio = (height * width) / (orgWidth * orgHeight);
-    setResolutionRatio(ratio);
-  }, [height, width]);
   return (
     <Header
       containerStyle={[
@@ -70,8 +61,8 @@ const CommonHeader: FC<CommonHeaderInterface> = ({
                 transform: [{rotate: I18nManager.isRTL ? '180deg' : '0deg'}],
               }}>
               <BackArrowIcon
-                height={25 * resolutionRatio}
-                width={25 * resolutionRatio}
+                height={25}
+                width={25}
                 color={theme == 'dark' ? appColors.light : appColors.dark}
               />
             </View>

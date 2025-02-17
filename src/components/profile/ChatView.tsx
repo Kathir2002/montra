@@ -13,9 +13,17 @@ import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
 import CommonText from '@shared/components/commonText/CommonText';
 import {Toast} from '@shared/ToastConfig';
+import {useSocket} from '@src/hooks/useSocket';
 import {getDateLabel} from '@src/lib/functions';
 import {RootState} from '@store/store';
-import React, {useState, useRef, useCallback, FC, useEffect} from 'react';
+import React, {
+  useState,
+  useRef,
+  useCallback,
+  FC,
+  useEffect,
+  ReactNode,
+} from 'react';
 import {
   View,
   TextInput,
@@ -32,9 +40,19 @@ import {
   Text,
   Vibration,
 } from 'react-native';
+import ReAnimated, {
+  FadeIn,
+  FadeOut,
+  useSharedValue,
+  useAnimatedStyle,
+  withSequence,
+  withTiming,
+  withRepeat,
+  Easing,
+} from 'react-native-reanimated';
 import {useSelector} from 'react-redux';
 
-interface Message {
+export interface Message {
   id: string;
   text: string;
   isOwn: boolean;
@@ -43,6 +61,9 @@ interface Message {
   senderId: string;
   senderName: string;
   _id?: string;
+  Component?: Element;
+
+  status?: 'sent' | 'delivered' | 'read';
 }
 
 interface IFlatListData extends Message {
@@ -52,6 +73,7 @@ interface IFlatListData extends Message {
 interface ReplyPreviewProps {
   replyTo: Message | null;
   onCancel: () => void;
+  isOwn: boolean;
 }
 
 interface MessageBubbleProps {
@@ -59,35 +81,49 @@ interface MessageBubbleProps {
   isOwn: boolean;
   onSwipeToReply: (message: Message) => void;
   onReplyPress: (replyTo: Message) => void;
+  highLightMessageIndex: number;
+  index: number;
 }
 
-const ReplyPreview: FC<ReplyPreviewProps> = ({replyTo, onCancel}) => {
+const ReplyPreview: FC<ReplyPreviewProps> = ({replyTo, onCancel, isOwn}) => {
   if (!replyTo) return null;
 
   return (
     <View style={styles.replyPreview}>
-      <View style={styles.replyContent}>
-        <CommonText
-          content="Replying to"
-          color={appColors.primary}
-          size="error"
-          style={styles.replyLabel}
+      <View style={styles.replyContainer}>
+        <View
+          style={[styles.replyBar, {backgroundColor: isOwn ? 'blue' : 'green'}]}
         />
-        <CommonText
-          numberOfLines={1}
-          color={appColors.transparentBackground}
-          size="medium"
-          content={replyTo.text}
-        />
+        <View style={styles.replyContent}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}>
+            <CommonText
+              color={isOwn ? 'blue' : 'green'}
+              size="error"
+              // numberOfLines={1}
+              ellipsizeMode="clip"
+              content={isOwn ? 'You' : replyTo.senderName}
+            />
+            <TouchableOpacity onPress={onCancel} activeOpacity={0.7}>
+              <Icon
+                type="antdesign"
+                name="close"
+                color={isOwn ? 'blue' : 'green'}
+                size={18}
+              />
+            </TouchableOpacity>
+          </View>
+          <CommonText
+            color="#7C7C7C"
+            numberOfLines={1}
+            content={replyTo.text}
+          />
+        </View>
       </View>
-      <TouchableOpacity onPress={onCancel}>
-        <Icon
-          name="close"
-          type="antdesign"
-          color={appColors.transparentBackground}
-          size={20}
-        />
-      </TouchableOpacity>
     </View>
   );
 };
@@ -97,6 +133,8 @@ const MessageBubble: FC<MessageBubbleProps> = ({
   isOwn,
   onSwipeToReply,
   onReplyPress,
+  highLightMessageIndex,
+  index,
 }) => {
   const pan = useRef(new Animated.Value(0)).current;
   const bubbleRef = useRef<View>(null);
@@ -121,7 +159,18 @@ const MessageBubble: FC<MessageBubbleProps> = ({
   });
 
   return (
-    <View style={styles.messageWrapper} ref={bubbleRef}>
+    <ReAnimated.View
+      entering={highLightMessageIndex === index ? FadeIn : undefined}
+      exiting={highLightMessageIndex === index ? FadeOut : undefined}
+      style={[
+        styles.messageWrapper,
+        {
+          backgroundColor:
+            highLightMessageIndex === index ? 'rgba(0,0,0,0.1)' : undefined,
+          borderRadius: highLightMessageIndex === index ? 5 : 0,
+        },
+      ]}
+      ref={bubbleRef}>
       <Animated.View
         {...panResponder.panHandlers}
         style={[
@@ -141,10 +190,15 @@ const MessageBubble: FC<MessageBubbleProps> = ({
             <TouchableOpacity
               style={styles.replyContainer}
               onPress={() => onReplyPress(message.replyTo!)}>
-              <View style={styles.replyBar} />
+              <View
+                style={[
+                  styles.replyBar,
+                  {backgroundColor: isOwn ? 'blue' : 'green'},
+                ]}
+              />
               <View style={styles.replyContent}>
                 <CommonText
-                  color="#25D366"
+                  color={isOwn ? 'blue' : 'green'}
                   size="error"
                   numberOfLines={1}
                   ellipsizeMode="clip"
@@ -161,7 +215,7 @@ const MessageBubble: FC<MessageBubbleProps> = ({
           <CommonText
             size="large"
             color={appColors.dark}
-            content={message.text}
+            content={message?.text}
           />
           <View style={styles.timestampContainer}>
             <CommonText
@@ -172,10 +226,24 @@ const MessageBubble: FC<MessageBubbleProps> = ({
                 minute: '2-digit',
               })}
             />
+            {isOwn ? (
+              <Icon
+                name={
+                  message?.status === 'sent'
+                    ? 'checkmark-outline'
+                    : 'checkmark-done-outline'
+                }
+                type="ionicon"
+                color={
+                  message?.status === 'read' ? appColors.transferBg : '#7C7C7C'
+                }
+                size={15}
+              />
+            ) : undefined}
           </View>
         </View>
       </Animated.View>
-    </View>
+    </ReAnimated.View>
   );
 };
 
@@ -192,6 +260,43 @@ const DateSeparator: FC<{date: Date}> = ({date}) => (
   </View>
 );
 
+const TypingAnimation = () => {
+  console.log('INSIDE');
+
+  const dot1 = useSharedValue(0.3);
+  const dot2 = useSharedValue(0.3);
+  const dot3 = useSharedValue(0.3);
+
+  useEffect(() => {
+    const animateDot = (dot: any, delay: number) => {
+      dot.value = withRepeat(
+        withSequence(
+          withTiming(1, {duration: 300, easing: Easing.ease}),
+          withTiming(0.3, {duration: 300, easing: Easing.ease}),
+        ),
+        -1,
+        false,
+      );
+    };
+
+    animateDot(dot1, 0);
+    setTimeout(() => animateDot(dot2, 150), 150);
+    setTimeout(() => animateDot(dot3, 300), 300);
+  }, []);
+
+  const animatedStyle1 = useAnimatedStyle(() => ({opacity: dot1.value}));
+  const animatedStyle2 = useAnimatedStyle(() => ({opacity: dot2.value}));
+  const animatedStyle3 = useAnimatedStyle(() => ({opacity: dot3.value}));
+
+  return (
+    <View style={styles.dotContainer}>
+      <ReAnimated.View style={[styles.dot, animatedStyle1]} />
+      <ReAnimated.View style={[styles.dot, animatedStyle2]} />
+      <ReAnimated.View style={[styles.dot, animatedStyle3]} />
+    </View>
+  );
+};
+
 const ChatView: FC = () => {
   const isFocused = useIsFocused();
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
@@ -202,10 +307,32 @@ const ChatView: FC = () => {
   const [replyTo, setReplyTo] = useState<Message | null>(null);
   const flatListRef = useRef<FlatList<IFlatListData>>(null);
   const userDetails = useSelector((state: RootState) => state.auth.userDetails);
-
+  const [flatListData, setFlatListData] = useState<IFlatListData[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
+  const [highLightMessageIndex, setHighLightMessageIndex] = useState<
+    number | null
+  >(null);
   const route = useRoute<RouteProp<{params: {id: string}}, 'params'>>();
   // FlatList viewability config
   const viewabilityConfig = useRef({itemVisiblePercentThreshold: 50}).current;
+  const {sendTypingStatus, socket} = useSocket();
+
+  useEffect(() => {
+    if (highLightMessageIndex) {
+      setTimeout(() => {
+        setHighLightMessageIndex(null);
+      }, 1000);
+    }
+  }, [highLightMessageIndex]);
+
+  // To get the user is typing or not
+  useEffect(() => {
+    socket?.emit('room:join', {roomId: route?.params?.id});
+    socket?.on('user:typing', data => {
+      setIsTyping(data?.isTyping);
+      return () => socket?.emit('room:leave', {roomId: route?.params?.id});
+    });
+  }, [socket]);
 
   // UseRef to avoid unnecessary re-renders
   const onViewableItemsChanged = useRef(
@@ -216,9 +343,9 @@ const ChatView: FC = () => {
   ).current;
 
   const markAsRead = (visibleItems: string[]) => {
-    setMessages(prevMessages =>
+    setFlatListData(prevMessages =>
       prevMessages.map(msg =>
-        visibleItems.includes(msg.id) ? {...msg, isRead: true} : msg,
+        visibleItems.includes(msg.id) ? {...msg, status: 'read'} : msg,
       ),
     );
   };
@@ -234,11 +361,11 @@ const ChatView: FC = () => {
           isOwn: chat.senderId === userDetails?.id,
         }));
         setMessages(data);
+        data?.length > 0 ? groupMessagesByDate(data) : setIsLoading(false);
       }
     } catch (err: any) {
-      Toast({message: err?.message, type: 'error'});
-    } finally {
       setIsLoading(false);
+      Toast({message: err?.message, type: 'error'});
     }
   };
 
@@ -248,34 +375,50 @@ const ChatView: FC = () => {
     }
   }, [isFocused]);
 
-  const groupMessagesByDate = useCallback(() => {
-    const groups: IFlatListData[] = [];
-    let currentDate: string | null = null;
+  const groupMessagesByDate = useCallback(
+    (data: Message[]) => {
+      const groups: IFlatListData[] = [];
 
-    messages.forEach(message => {
-      const messageDate = new Date(message.timestamp).toDateString();
+      // Sort messages by timestamp in descending order (newest first)
+      const sortedData = [...data].sort(
+        (a, b) =>
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+      );
 
-      if (messageDate !== currentDate) {
-        currentDate = messageDate;
+      sortedData.forEach((message, index) => {
+        const messageDate = new Date(message.timestamp).toDateString();
+
+        // Add the message first
         groups.push({
-          type: 'date',
-          id: messageDate,
-          timestamp: message.timestamp,
+          type: 'message',
+          ...message,
         } as IFlatListData);
-      }
 
-      groups.push({
-        type: 'message',
-        ...message,
-      } as IFlatListData);
-    });
+        // If this is the last message of a date group, add the date divider
+        const nextMessage = sortedData[index + 1];
+        const nextMessageDate = nextMessage
+          ? new Date(nextMessage.timestamp).toDateString()
+          : null;
 
-    return groups;
-  }, [messages]);
+        if (messageDate !== nextMessageDate) {
+          groups.push({
+            type: 'date',
+            id: messageDate,
+            timestamp: message.timestamp,
+          } as IFlatListData);
+        }
+      });
+
+      setFlatListData(groups);
+      setIsLoading(false);
+    },
+    [isTyping],
+  );
 
   const scrollToMessage = useCallback(
     (message: Message) => {
-      const index = messages.findIndex(msg => msg.id === message._id);
+      const index = flatListData.findIndex(msg => msg.id === message._id);
+      setHighLightMessageIndex(index);
       if (index !== -1) {
         flatListRef.current?.scrollToIndex({
           index,
@@ -308,12 +451,20 @@ const ChatView: FC = () => {
     const keyboardDidShowListener = Keyboard.addListener(
       'keyboardDidShow',
       () => {
-        flatListRef.current?.scrollToEnd({animated: true});
+        sendTypingStatus(true, route?.params?.id);
+        flatListRef.current?.scrollToIndex({index: 0, animated: true});
+      },
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        sendTypingStatus(false, route?.params?.id);
       },
     );
 
     return () => {
       keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
     };
   }, []);
 
@@ -334,11 +485,12 @@ const ChatView: FC = () => {
           isOwn: chat.senderId === userDetails?.id,
         }));
         setMessages(data);
+        data?.length > 0 ? groupMessagesByDate(data) : setIsLoading(false);
         setNewMessage('');
         setReplyTo(null);
 
         setTimeout(() => {
-          flatListRef.current?.scrollToEnd({animated: true});
+          flatListRef.current?.scrollToIndex({index: 0, animated: true});
         }, 100);
       }
     } catch (err: any) {
@@ -348,17 +500,23 @@ const ChatView: FC = () => {
     }
   };
 
-  const renderMessage = ({item}: ListRenderItemInfo<IFlatListData>) => {
+  const renderMessage = ({item, index}: ListRenderItemInfo<IFlatListData>) => {
+    // console.log(isTyping && flatListData?.length - 1 === index);
+    if (isTyping && flatListData?.length - 1 === index) {
+      return <TypingAnimation />;
+    }
     if (item.type === 'date') {
       return <DateSeparator date={item.timestamp} />;
     }
 
     return (
       <MessageBubble
+        highLightMessageIndex={highLightMessageIndex!}
         message={item}
         isOwn={item.isOwn}
         onSwipeToReply={setReplyTo}
         onReplyPress={scrollToMessage}
+        index={index}
       />
     );
   };
@@ -378,18 +536,23 @@ const ChatView: FC = () => {
       />
       <FlatList
         ref={flatListRef}
-        data={groupMessagesByDate()}
+        onStartReached={() => {}}
+        data={flatListData}
         renderItem={renderMessage}
         keyExtractor={(item, index) => index.toString()}
         contentContainerStyle={styles.messagesList}
-        onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
+        inverted
         onScrollToIndexFailed={onScrollToIndexFailed}
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={viewabilityConfig}
       />
 
       <View style={styles.inputSection}>
-        <ReplyPreview replyTo={replyTo} onCancel={() => setReplyTo(null)} />
+        <ReplyPreview
+          replyTo={replyTo}
+          onCancel={() => setReplyTo(null)}
+          isOwn={replyTo?.isOwn!}
+        />
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
@@ -465,11 +628,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0ff',
   },
   tail: {
-    // width: 12,
-    // height: 12,
     position: 'absolute',
     top: -12,
-    // zIndex: 1,
     width: 0,
     height: 0,
     borderLeftWidth: 25, // Base width
@@ -489,10 +649,15 @@ const styles = StyleSheet.create({
 
   timestampContainer: {
     alignSelf: 'flex-end',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 5,
   },
   replyContainer: {
-    marginBottom: 8,
-    padding: 8,
+    marginBottom: 2,
+    paddingVertical: 8,
+    paddingHorizontal: 5,
     backgroundColor: 'rgba(0, 0, 0, 0.05)',
     borderRadius: 8,
     flexDirection: 'row',
@@ -508,18 +673,18 @@ const styles = StyleSheet.create({
   },
   inputSection: {
     backgroundColor: appColors.light,
-    borderTopWidth: 1,
-    borderTopColor: '#E8E8E8',
   },
   inputContainer: {
     flexDirection: 'row',
-    padding: 15,
+    paddingHorizontal: 15,
+    paddingBottom: 15,
     alignItems: 'center',
   },
   input: {
     flex: 1,
     backgroundColor: '#F0F0F0',
     borderRadius: 20,
+    borderTopLeftRadius: 0,
     paddingLeft: 15,
     paddingRight: 45,
     paddingVertical: 8,
@@ -532,14 +697,17 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     position: 'absolute',
     right: 22,
+    top: 4,
   },
   replyPreview: {
-    flexDirection: 'row',
-    padding: 8,
-    backgroundColor: appColors.formBorderColor,
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
-    alignItems: 'center',
+    backgroundColor: '#f0f0ff',
+    padding: 5,
+    paddingVertical: 5,
+    minWidth: '45%',
+    maxWidth: '80%',
+    marginLeft: 15,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
   },
   replyLabel: {
     marginBottom: 2,
@@ -550,8 +718,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 8,
   },
-
-  //demo
 
   replyName: {
     fontSize: 14,
@@ -582,6 +748,18 @@ const styles = StyleSheet.create({
   },
   dateText: {
     marginHorizontal: 16,
+  },
+  dotContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 40,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    backgroundColor: 'gray',
+    borderRadius: 4,
+    marginHorizontal: 3,
   },
 });
 

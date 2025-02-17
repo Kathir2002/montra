@@ -25,7 +25,6 @@ import {
   TextProps,
   Image,
   Easing,
-  useWindowDimensions,
 } from 'react-native';
 import ListEmpty from './ListEmpty';
 
@@ -741,15 +740,6 @@ const DropdownPicker: FC<DropdownInterface<ValueType>> = ({
     setIsFocused(false);
   };
 
-  const {height, width} = useWindowDimensions();
-  const [resolutionRatio, setResolutionRatio] = useState(1);
-  let orgHeight = 841.0909090909091;
-  let orgWidth = 392.72727272727275;
-  useEffect(() => {
-    const ratio = (height * width) / (orgWidth * orgHeight);
-    setResolutionRatio(ratio);
-  }, [height, width]);
-
   const animatedIsFocused = useRef(new Animated.Value(0)).current;
   const animatedheight = useRef(new Animated.Value(0)).current;
   const animatedRotationValue = useRef(new Animated.Value(0)).current;
@@ -767,7 +757,7 @@ const DropdownPicker: FC<DropdownInterface<ValueType>> = ({
     }),
     fontSize: animatedIsFocused.interpolate({
       inputRange: [0, 1],
-      outputRange: [14 * resolutionRatio, 14 * resolutionRatio],
+      outputRange: [14, 14],
     }),
     color: animatedIsFocused.interpolate({
       inputRange: [0, 1],

@@ -2,13 +2,10 @@ import {
   GestureResponderEvent,
   StyleProp,
   StyleSheet,
-  Text,
   TextStyle,
-  useWindowDimensions,
-  View,
   ViewStyle,
 } from 'react-native';
-import React, {FC, useEffect, useState} from 'react';
+import React, {FC} from 'react';
 import {Button, IconNode} from '@rneui/base';
 import {appColors} from '@shared/appColors';
 
@@ -35,15 +32,6 @@ const CommonButton: FC<CommonButtonInterface> = ({
   iconContainerStyle,
   icon,
 }) => {
-  const {height, width} = useWindowDimensions();
-  const [resolutionRatio, setResolutionRatio] = useState(1);
-  let orgHeight = 841.0909090909091;
-  let orgWidth = 392.72727272727275;
-  useEffect(() => {
-    const ratio = (height * width) / (orgWidth * orgHeight);
-    setResolutionRatio(ratio);
-  }, [height, width]);
-
   return (
     <Button
       title={title}
@@ -56,7 +44,7 @@ const CommonButton: FC<CommonButtonInterface> = ({
       ]}
       disabled={disabled}
       titleStyle={[
-        {fontSize: 16 * resolutionRatio},
+        {fontSize: 16},
         buttonType == 'clear'
           ? commonButtonStyle.clearTitleStyle
           : commonButtonStyle.titleStyle,
