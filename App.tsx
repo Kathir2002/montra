@@ -326,7 +326,7 @@ const App = () => {
             <SetUpStack />
           ) : !isLoading && isloggedin ? (
             <SocketProvider
-              serverUrl="http://172.17.0.111:3000"
+              serverUrl="http://192.168.35.105:3000"
               userId={userDetails?.id!}
               username={userDetails?.name}>
               <AppStack />

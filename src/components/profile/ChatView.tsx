@@ -16,14 +16,8 @@ import {Toast} from '@shared/ToastConfig';
 import {useSocket} from '@src/hooks/useSocket';
 import {getDateLabel} from '@src/lib/functions';
 import {RootState} from '@store/store';
-import React, {
-  useState,
-  useRef,
-  useCallback,
-  FC,
-  useEffect,
-  ReactNode,
-} from 'react';
+import LottieView from 'lottie-react-native';
+import React, {useState, useRef, useCallback, FC, useEffect} from 'react';
 import {
   View,
   TextInput,
@@ -37,19 +31,9 @@ import {
   ListRenderItemInfo,
   StatusBar,
   Modal,
-  Text,
   Vibration,
 } from 'react-native';
-import ReAnimated, {
-  FadeIn,
-  FadeOut,
-  useSharedValue,
-  useAnimatedStyle,
-  withSequence,
-  withTiming,
-  withRepeat,
-  Easing,
-} from 'react-native-reanimated';
+import ReAnimated, {FadeIn, FadeOut} from 'react-native-reanimated';
 import {useSelector} from 'react-redux';
 
 export interface Message {
@@ -61,13 +45,12 @@ export interface Message {
   senderId: string;
   senderName: string;
   _id?: string;
-  Component?: Element;
 
   status?: 'sent' | 'delivered' | 'read';
 }
 
 interface IFlatListData extends Message {
-  type: 'date' | 'message';
+  type: 'date' | 'message' | 'typing';
 }
 
 interface ReplyPreviewProps {
@@ -261,38 +244,33 @@ const DateSeparator: FC<{date: Date}> = ({date}) => (
 );
 
 const TypingAnimation = () => {
-  console.log('INSIDE');
-
-  const dot1 = useSharedValue(0.3);
-  const dot2 = useSharedValue(0.3);
-  const dot3 = useSharedValue(0.3);
-
-  useEffect(() => {
-    const animateDot = (dot: any, delay: number) => {
-      dot.value = withRepeat(
-        withSequence(
-          withTiming(1, {duration: 300, easing: Easing.ease}),
-          withTiming(0.3, {duration: 300, easing: Easing.ease}),
-        ),
-        -1,
-        false,
-      );
-    };
-
-    animateDot(dot1, 0);
-    setTimeout(() => animateDot(dot2, 150), 150);
-    setTimeout(() => animateDot(dot3, 300), 300);
-  }, []);
-
-  const animatedStyle1 = useAnimatedStyle(() => ({opacity: dot1.value}));
-  const animatedStyle2 = useAnimatedStyle(() => ({opacity: dot2.value}));
-  const animatedStyle3 = useAnimatedStyle(() => ({opacity: dot3.value}));
-
   return (
-    <View style={styles.dotContainer}>
-      <ReAnimated.View style={[styles.dot, animatedStyle1]} />
-      <ReAnimated.View style={[styles.dot, animatedStyle2]} />
-      <ReAnimated.View style={[styles.dot, animatedStyle3]} />
+    <View style={styles.messageWrapper}>
+      <View
+        style={[
+          styles.bubbleContainer,
+          styles.otherMessageContainer,
+          {minWidth: '10%'},
+        ]}>
+        <View style={[styles.tail, styles.otherTail]} />
+        <View
+          style={[
+            styles.bubble,
+            styles.otherBubble,
+            {minWidth: '10%', padding: 0},
+          ]}>
+          <LottieView
+            style={{
+              height: 25,
+              width: 35,
+              alignSelf: 'center',
+            }}
+            source={require('@assets/lottie/typing.json')}
+            autoPlay
+            loop
+          />
+        </View>
+      </View>
     </View>
   );
 };
@@ -315,7 +293,8 @@ const ChatView: FC = () => {
   const route = useRoute<RouteProp<{params: {id: string}}, 'params'>>();
   // FlatList viewability config
   const viewabilityConfig = useRef({itemVisiblePercentThreshold: 50}).current;
-  const {sendTypingStatus, socket} = useSocket();
+  const {sendTypingStatus, socket, newMessages, joinRoom, leaveRoom} =
+    useSocket();
 
   useEffect(() => {
     if (highLightMessageIndex) {
@@ -327,12 +306,52 @@ const ChatView: FC = () => {
 
   // To get the user is typing or not
   useEffect(() => {
-    socket?.emit('room:join', {roomId: route?.params?.id});
-    socket?.on('user:typing', data => {
+    if (!socket) return;
+
+    joinRoom(route?.params?.id);
+
+    const handleTyping = (data: {isTyping: boolean}) => {
       setIsTyping(data?.isTyping);
-      return () => socket?.emit('room:leave', {roomId: route?.params?.id});
-    });
-  }, [socket]);
+      setFlatListData(prev => {
+        // Remove existing typing indicator
+        const filteredData = prev.filter(item => item.type !== 'typing');
+
+        // If user is typing, add new typing indicator at the start
+        return data?.isTyping
+          ? [
+              {
+                type: 'typing',
+                id: 'typing-indicator', // Use a fixed ID to prevent multiple duplicates
+                isOwn: false,
+                text: '',
+                senderId: '',
+                timestamp: new Date(),
+                status: 'sent',
+                senderName: '',
+              },
+              ...filteredData,
+            ]
+          : filteredData; // Otherwise, just return filtered data
+      });
+    };
+
+    socket.on('user:typing', handleTyping);
+
+    return () => {
+      socket.off('user:typing', handleTyping); // Cleanup the listener
+      leaveRoom(route?.params?.id);
+    };
+  }, [socket, route?.params?.id]); // Ensure effect runs only when `socket` or `roomId` changes
+
+  useEffect(() => {
+    // joinRoom(userDetails?.id!);
+    if (newMessages) {
+      setFlatListData(prev => [newMessages, ...prev]);
+    }
+    return () => {
+      // leaveRoom(userDetails?.id!);
+    };
+  }, [newMessage]);
 
   // UseRef to avoid unnecessary re-renders
   const onViewableItemsChanged = useRef(
@@ -472,6 +491,7 @@ const ChatView: FC = () => {
     if (!newMessage.trim()) return;
 
     setBtnLoading(true);
+    sendTypingStatus(false, route?.params?.id);
     try {
       const res: any = await ContactService.addReply({
         message: newMessage.trim(),
@@ -501,14 +521,13 @@ const ChatView: FC = () => {
   };
 
   const renderMessage = ({item, index}: ListRenderItemInfo<IFlatListData>) => {
-    // console.log(isTyping && flatListData?.length - 1 === index);
-    if (isTyping && flatListData?.length - 1 === index) {
-      return <TypingAnimation />;
-    }
     if (item.type === 'date') {
       return <DateSeparator date={item.timestamp} />;
     }
 
+    if (item?.type === 'typing') {
+      return <TypingAnimation />;
+    }
     return (
       <MessageBubble
         highLightMessageIndex={highLightMessageIndex!}
