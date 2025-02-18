@@ -1,97 +1,97 @@
 [
-    {
-        "label": "عربي",
-        "value": "arabic",
-        "code": "ar"
-    },
-    {
-        "label": "Deutsch",
-        "value": "german",
-        "code": "de"
-    },
-    {
-        "label": "English",
-        "value": "english",
-        "code": "en"
-    },
-    {
-        "label": "Española",
-        "value": "spanish",
-        "code": "es"
-    },
-    {
-        "label": "française",
-        "value": "french",
-        "code": "fr"
-    },
-    {
-        "label": "ગુજરાતી",
-        "value": "gujarati",
-        "code": "gu"
-    },
-    {
-        "label": "हिन्दी",
-        "value": "hindi",
-        "code": "hi"
-    },
-    {
-        "label": "Indonesia",
-        "value": "indonesian",
-        "code": "id"
-    },
-    {
-        "label": "Italiana",
-        "value": "italian",
-        "code": "it"
-    },
-    {
-        "label": "日本語",
-        "value": "japanese",
-        "code": "ja"
-    },
-    {
-        "label": "Português",
-        "value": "Portuguese",
-        "code": "pt"
-    },
-    {
-        "label": "ಕನ್ನಡ",
-        "value": "kannada",
-        "code": "kn"
-    },
-    {
-        "label": "한국인",
-        "value": "korean",
-        "code": "ko"
-    },
-    {
-        "label": "മലയാളം",
-        "value": "malayalam",
-        "code": "ml"
-    },
-    {
-        "label": "Nederlands",
-        "value": "dutch",
-        "code": "nl"
-    },
-    {
-        "label": "Русский",
-        "value": "russian",
-        "code": "ru"
-    },
-    {
-        "label": "தமிழ்",
-        "value": "tamil",
-        "code": "ta"
-    },
-    {
-        "label": "తెలుగు",
-        "value": "telugu",
-        "code": "te"
-    },
-    {
-        "label": "中国人",
-        "value": "chinese",
-        "code": "zh"
-    }
+  {
+    "label": "عربي",
+    "value": "Arabic",
+    "code": "ar"
+  },
+  {
+    "label": "Deutsch",
+    "value": "German",
+    "code": "de"
+  },
+  {
+    "label": "English",
+    "value": "English",
+    "code": "en"
+  },
+  {
+    "label": "Española",
+    "value": "Spanish",
+    "code": "es"
+  },
+  {
+    "label": "française",
+    "value": "french",
+    "code": "fr"
+  },
+  {
+    "label": "ગુજરાતી",
+    "value": "Gujarati",
+    "code": "gu"
+  },
+  {
+    "label": "हिन्दी",
+    "value": "Hindi",
+    "code": "hi"
+  },
+  {
+    "label": "Indonesia",
+    "value": "Indonesian",
+    "code": "id"
+  },
+  {
+    "label": "Italiana",
+    "value": "Italian",
+    "code": "it"
+  },
+  {
+    "label": "日本語",
+    "value": "Japanese",
+    "code": "ja"
+  },
+  {
+    "label": "Português",
+    "value": "Portuguese",
+    "code": "pt"
+  },
+  {
+    "label": "ಕನ್ನಡ",
+    "value": "Kannada",
+    "code": "kn"
+  },
+  {
+    "label": "한국인",
+    "value": "korean",
+    "code": "ko"
+  },
+  {
+    "label": "മലയാളം",
+    "value": "Malayalam",
+    "code": "ml"
+  },
+  {
+    "label": "Nederlands",
+    "value": "Dutch",
+    "code": "nl"
+  },
+  {
+    "label": "Русский",
+    "value": "Russian",
+    "code": "ru"
+  },
+  {
+    "label": "தமிழ்",
+    "value": "Tamil",
+    "code": "ta"
+  },
+  {
+    "label": "తెలుగు",
+    "value": "Telugu",
+    "code": "te"
+  },
+  {
+    "label": "中国人",
+    "value": "Chinese",
+    "code": "zh"
+  }
 ]

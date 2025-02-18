@@ -53,6 +53,7 @@ import {
   GestureDetector,
   GestureHandlerRootView,
 } from 'react-native-gesture-handler';
+import {Pressable} from 'react-native';
 
 export interface Message {
   id: string;
@@ -159,39 +160,35 @@ const MessageBubble: FC<MessageBubbleProps> = ({
       }).start();
     },
   });
-  const longPress = Gesture.LongPress()
-    .minDuration(1000)
-    .onStart(event => {
-      setShowMenu(prev => !prev);
-      Vibration.vibrate(60);
-      console.log('Long Press Ended:', event.state);
-    })
-    .runOnJS(true);
 
   return (
-    <ReAnimated.View
-      entering={highLightMessageIndex === index ? FadeIn : undefined}
-      exiting={highLightMessageIndex === index ? FadeOut : undefined}
-      style={[
-        styles.messageWrapper,
-        {
-          backgroundColor:
-            highLightMessageIndex === index ? 'rgba(0,0,0,0.1)' : undefined,
-          borderRadius: highLightMessageIndex === index ? 5 : 0,
-        },
-      ]}
-      ref={bubbleRef}>
-      <Animated.View
-        {...panResponder.panHandlers}
+    <Pressable
+      style={{width: '100%'}}
+      onLongPress={() => {
+        Vibration.vibrate(70);
+      }}>
+      <ReAnimated.View
+        entering={highLightMessageIndex === index ? FadeIn : undefined}
+        exiting={highLightMessageIndex === index ? FadeOut : undefined}
         style={[
-          styles.bubbleContainer,
-          isOwn ? styles.ownMessageContainer : styles.otherMessageContainer,
-          {transform: [{translateX: pan}]},
-        ]}>
-        <View
-          style={[styles.tail, isOwn ? styles.ownTail : styles.otherTail]}
-        />
-        <GestureDetector gesture={longPress}>
+          styles.messageWrapper,
+          {
+            backgroundColor:
+              highLightMessageIndex === index ? 'rgba(0,0,0,0.1)' : undefined,
+            borderRadius: highLightMessageIndex === index ? 5 : 0,
+          },
+        ]}
+        ref={bubbleRef}>
+        <Animated.View
+          {...panResponder.panHandlers}
+          style={[
+            styles.bubbleContainer,
+            isOwn ? styles.ownMessageContainer : styles.otherMessageContainer,
+            {transform: [{translateX: pan}]},
+          ]}>
+          <View
+            style={[styles.tail, isOwn ? styles.ownTail : styles.otherTail]}
+          />
           <View
             style={[
               styles.bubble,
@@ -256,9 +253,9 @@ const MessageBubble: FC<MessageBubbleProps> = ({
               ) : undefined}
             </View>
           </View>
-        </GestureDetector>
-      </Animated.View>
-    </ReAnimated.View>
+        </Animated.View>
+      </ReAnimated.View>
+    </Pressable>
   );
 };
 
@@ -342,7 +339,7 @@ const ChatView: FC = () => {
   useEffect(() => {
     if (!socket) return;
 
-    joinRoom(route.params.id);
+    joinRoom(route?.params?.id);
     const handleTyping = (data: {isTyping: boolean}) => {
       setIsTyping(data?.isTyping);
       setFlatListData(prev => {
@@ -376,24 +373,19 @@ const ChatView: FC = () => {
     };
   }, [socket, route?.params?.id]); // Ensure effect runs only when `socket` or `roomId` changes
 
-  // useEffect(() => {
-  //   joinRoom(userDetails?.id!);
-  //   const handleSendMessage = () => {
-  //     if (newMessages) {
-  //       console.log(newMessages, userDetails?.name);
+  useEffect(() => {
+    joinRoom(userDetails?.id!);
+    const handleReceiveMessage = (message: IFlatListData) => {
+      console.log(message, userDetails?.name);
 
-  //       setFlatListData(prev => [newMessages, ...prev]);
-  //       setBtnLoading(false);
-  //     }
-
-  //   }
-  //   return () => {
-  //     leaveRoom(userDetails?.id!);
-  //     socket?.off("message:send")
-  //   };
-  // }, [socket]);
-
-  // const sendMessage
+      setFlatListData(prev => [{...message, type: 'message'}, ...prev]);
+    };
+    socket?.on('message:receive', handleReceiveMessage);
+    return () => {
+      leaveRoom(userDetails?.id!);
+      socket?.off('message:receive', handleReceiveMessage);
+    };
+  }, [socket]);
 
   // UseRef to avoid unnecessary re-renders
   const onViewableItemsChanged = useRef(
@@ -583,6 +575,42 @@ const ChatView: FC = () => {
     );
   };
 
+  const sendMessage = () => {
+    if (!newMessage.trim()) return;
+    setBtnLoading(true);
+    sendTypingStatus(false, route?.params?.id);
+    socket?.emit('message:send', {
+      message: newMessage.trim(),
+      request_id: route.params.id,
+      replyTo: replyTo || undefined,
+      senderId: userDetails?.id,
+    });
+    setFlatListData(prev => [
+      {
+        isOwn: true,
+        senderId: userDetails?.id!,
+        timestamp: new Date(),
+        type: 'message',
+        senderName: userDetails?.name!,
+        status: 'sent',
+        replyTo: replyTo ? replyTo : undefined,
+        text: newMessage,
+        id: new Date().toDateString(),
+        _id: new Date().toDateString(),
+      },
+      ...prev,
+    ]);
+    setBtnLoading(false);
+    setNewMessage('');
+    setReplyTo(null);
+    setTimeout(() => {
+      flatListRef.current?.scrollToIndex({
+        index: 0,
+        animated: true,
+      });
+    }, 100);
+  };
+
   return (
     <GestureHandlerRootView style={{flex: 1}}>
       <KeyboardAvoidingView style={styles.container}>
@@ -664,22 +692,7 @@ const ChatView: FC = () => {
                 },
               ]}
               onPress={() => {
-                if (!newMessage.trim()) return;
-                setBtnLoading(true);
-                sendTypingStatus(false, route?.params?.id);
-                // sendMessage({
-                //   message: newMessage.trim(),
-                //   request_id: route.params.id,
-                //   replyTo: replyTo || undefined,
-                // });
-                setNewMessage('');
-                setReplyTo(null);
-                setTimeout(() => {
-                  flatListRef.current?.scrollToIndex({
-                    index: 0,
-                    animated: true,
-                  });
-                }, 100);
+                sendMessage();
               }}
               disabled={btnLoading}>
               <Icon

@@ -20,12 +20,8 @@ import {
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
-import TickIcon from '@assets/svg/tick.svg';
 import CommonText from '@shared/components/commonText/CommonText';
-import CommonButton from '@shared/components/commonButton/CommonButton';
-import CommonRBSheet, {
-  RBSheetRef,
-} from '@shared/components/commonRBSheet/CommonRBSheet';
+import {RBSheetRef} from '@shared/components/commonRBSheet/CommonRBSheet';
 import LottieView from 'lottie-react-native';
 import {Toast} from '@shared/ToastConfig';
 import Popover from 'react-native-popover-view/dist/Popover';
@@ -37,6 +33,13 @@ import languageValue from '@assets/data/language.json';
 import {useTranslation} from 'react-i18next';
 import {RNRestart} from '@src/lib/restart';
 import CommonConfirmation from '@shared/components/CommonConfirmation';
+import {appFonts} from '@shared/appFonts';
+
+interface CurrencyData {
+  label: string;
+  value: string;
+  code: string;
+}
 
 const Language = () => {
   const dispatch = useDispatch();
@@ -57,44 +60,64 @@ const Language = () => {
     };
   }> = useRoute();
 
-  const renderItem = ({
-    item,
-    index,
-  }: {
-    item: {
-      label: string;
-      value: string;
-      code: string;
-    };
-    index: number;
-  }) => {
+  const renderItem = ({item, index}: {item: CurrencyData; index: number}) => {
+    const isSlected = route?.params?.selectedLanguage === item.code;
+
     return (
       <TouchableOpacity
+        activeOpacity={0.7}
         onPress={() => {
           setCurrentLanguage(item.code);
           rbSheetRef.current?.open();
           setRbSheetOpen(true);
         }}
         style={{
-          paddingVertical: 8,
+          borderColor: isSlected
+            ? appColors.transferBg
+            : appColors.formBorderColor,
+          borderWidth: 1,
           flexDirection: 'row',
-          justifyContent: 'space-between',
           alignItems: 'center',
-        }}
-        activeOpacity={0.5}
-        key={index}>
-        <CommonText
-          size={'label'}
-          color={
-            route?.params?.selectedLanguage === item.code
-              ? appColors.primary
-              : appColors.dark
-          }
-          content={`${item.label} (${item?.code})`}
-        />
-        {route?.params?.selectedLanguage === item.code && (
-          <TickIcon height={20} width={20} />
-        )}
+          justifyContent: 'space-between',
+          paddingVertical: 15,
+          paddingHorizontal: 25,
+          borderRadius: 8,
+          backgroundColor: isSlected ? appColors.buttonClear : appColors.light,
+          gap: 15,
+          flex: 1,
+          elevation: 2,
+        }}>
+        <View>
+          <CommonText
+            content={item.label}
+            size={'header'}
+            style={{fontFamily: isSlected ? appFonts.bold : appFonts.medium}}
+            color={isSlected ? appColors.transferBg : appColors.dark}
+          />
+          {!isSlected && (
+            <CommonText content={item?.value} color={appColors.borderColor} />
+          )}
+        </View>
+        <View
+          style={{
+            height: 15,
+            width: 15,
+            borderRadius: 10,
+            borderWidth: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+          {isSlected && (
+            <View
+              style={{
+                height: 8,
+                width: 8,
+                borderRadius: 5,
+                backgroundColor: appColors.transferBg,
+              }}
+            />
+          )}
+        </View>
       </TouchableOpacity>
     );
   };
@@ -153,9 +176,15 @@ const Language = () => {
       />
       <FlatList
         initialNumToRender={25}
-        contentContainerStyle={{paddingHorizontal: 15}}
+        contentContainerStyle={{
+          paddingHorizontal: 15,
+          gap: 15,
+          paddingBottom: 25,
+        }}
+        columnWrapperStyle={{gap: 15}}
         data={languageValue}
         renderItem={renderItem}
+        numColumns={2}
         showsVerticalScrollIndicator={false}
         onEndReachedThreshold={0.01}
         keyExtractor={(_, index) => index.toString()}
@@ -212,5 +241,3 @@ const Language = () => {
 };
 
 export default Language;
-
-const styles = StyleSheet.create({});
