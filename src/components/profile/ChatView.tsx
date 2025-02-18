@@ -17,7 +17,18 @@ import {useSocket} from '@src/hooks/useSocket';
 import {getDateLabel} from '@src/lib/functions';
 import {RootState} from '@store/store';
 import LottieView from 'lottie-react-native';
-import React, {useState, useRef, useCallback, FC, useEffect} from 'react';
+import React, {
+  useState,
+  useRef,
+  useCallback,
+  FC,
+  useEffect,
+  Dispatch,
+  SetStateAction,
+} from 'react';
+import EditIcon from '@assets/svg/edit.svg';
+import DeleteIcon from '@assets/svg/delete.svg';
+
 import {
   View,
   TextInput,
@@ -32,9 +43,16 @@ import {
   StatusBar,
   Modal,
   Vibration,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import ReAnimated, {FadeIn, FadeOut} from 'react-native-reanimated';
 import {useSelector} from 'react-redux';
+import {RBSheetRef} from '@shared/components/commonRBSheet/CommonRBSheet';
+import {
+  Gesture,
+  GestureDetector,
+  GestureHandlerRootView,
+} from 'react-native-gesture-handler';
 
 export interface Message {
   id: string;
@@ -49,7 +67,7 @@ export interface Message {
   status?: 'sent' | 'delivered' | 'read';
 }
 
-interface IFlatListData extends Message {
+export interface IFlatListData extends Message {
   type: 'date' | 'message' | 'typing';
 }
 
@@ -66,6 +84,7 @@ interface MessageBubbleProps {
   onReplyPress: (replyTo: Message) => void;
   highLightMessageIndex: number;
   index: number;
+  setShowMenu: Dispatch<SetStateAction<boolean>>;
 }
 
 const ReplyPreview: FC<ReplyPreviewProps> = ({replyTo, onCancel, isOwn}) => {
@@ -118,10 +137,10 @@ const MessageBubble: FC<MessageBubbleProps> = ({
   onReplyPress,
   highLightMessageIndex,
   index,
+  setShowMenu,
 }) => {
   const pan = useRef(new Animated.Value(0)).current;
   const bubbleRef = useRef<View>(null);
-
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => true,
     onPanResponderMove: (_, gestureState) => {
@@ -140,6 +159,14 @@ const MessageBubble: FC<MessageBubbleProps> = ({
       }).start();
     },
   });
+  const longPress = Gesture.LongPress()
+    .minDuration(1000)
+    .onStart(event => {
+      setShowMenu(prev => !prev);
+      Vibration.vibrate(60);
+      console.log('Long Press Ended:', event.state);
+    })
+    .runOnJS(true);
 
   return (
     <ReAnimated.View
@@ -164,67 +191,72 @@ const MessageBubble: FC<MessageBubbleProps> = ({
         <View
           style={[styles.tail, isOwn ? styles.ownTail : styles.otherTail]}
         />
-        <View
-          style={[
-            styles.bubble,
-            isOwn ? styles.ownBubble : styles.otherBubble,
-          ]}>
-          {message.replyTo && (
-            <TouchableOpacity
-              style={styles.replyContainer}
-              onPress={() => onReplyPress(message.replyTo!)}>
-              <View
-                style={[
-                  styles.replyBar,
-                  {backgroundColor: isOwn ? 'blue' : 'green'},
-                ]}
-              />
-              <View style={styles.replyContent}>
-                <CommonText
-                  color={isOwn ? 'blue' : 'green'}
-                  size="error"
-                  numberOfLines={1}
-                  ellipsizeMode="clip"
-                  content={isOwn ? 'You' : message.replyTo.senderName}
+        <GestureDetector gesture={longPress}>
+          <View
+            style={[
+              styles.bubble,
+              isOwn ? styles.ownBubble : styles.otherBubble,
+            ]}>
+            {message.replyTo && (
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={styles.replyContainer}
+                onPress={() => onReplyPress(message?.replyTo!)}>
+                <View
+                  style={[
+                    styles.replyBar,
+                    {backgroundColor: isOwn ? 'blue' : 'green'},
+                  ]}
                 />
-                <CommonText
-                  color="#7C7C7C"
-                  numberOfLines={1}
-                  content={message.replyTo.text}
-                />
-              </View>
-            </TouchableOpacity>
-          )}
-          <CommonText
-            size="large"
-            color={appColors.dark}
-            content={message?.text}
-          />
-          <View style={styles.timestampContainer}>
+                <View style={styles.replyContent}>
+                  <CommonText
+                    color={isOwn ? 'blue' : 'green'}
+                    size="error"
+                    numberOfLines={1}
+                    ellipsizeMode="clip"
+                    content={isOwn ? 'You' : message.replyTo.senderName}
+                  />
+                  <CommonText
+                    color="#7C7C7C"
+                    numberOfLines={1}
+                    content={message.replyTo.text}
+                  />
+                </View>
+              </TouchableOpacity>
+            )}
             <CommonText
-              color="#7C7C7C"
-              size="error"
-              content={new Date(message.timestamp).toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
+              size="large"
+              color={appColors.dark}
+              content={message?.text}
             />
-            {isOwn ? (
-              <Icon
-                name={
-                  message?.status === 'sent'
-                    ? 'checkmark-outline'
-                    : 'checkmark-done-outline'
-                }
-                type="ionicon"
-                color={
-                  message?.status === 'read' ? appColors.transferBg : '#7C7C7C'
-                }
-                size={15}
+            <View style={styles.timestampContainer}>
+              <CommonText
+                color="#7C7C7C"
+                size="error"
+                content={new Date(message.timestamp).toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
               />
-            ) : undefined}
+              {isOwn ? (
+                <Icon
+                  name={
+                    message?.status === 'sent'
+                      ? 'checkmark-outline'
+                      : 'checkmark-done-outline'
+                  }
+                  type="ionicon"
+                  color={
+                    message?.status === 'read'
+                      ? appColors.transferBg
+                      : '#7C7C7C'
+                  }
+                  size={15}
+                />
+              ) : undefined}
+            </View>
           </View>
-        </View>
+        </GestureDetector>
       </Animated.View>
     </ReAnimated.View>
   );
@@ -280,7 +312,6 @@ const ChatView: FC = () => {
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const [isLoading, setIsLoading] = useState(true);
   const [btnLoading, setBtnLoading] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [replyTo, setReplyTo] = useState<Message | null>(null);
   const flatListRef = useRef<FlatList<IFlatListData>>(null);
@@ -290,11 +321,14 @@ const ChatView: FC = () => {
   const [highLightMessageIndex, setHighLightMessageIndex] = useState<
     number | null
   >(null);
+  const [showMenuOption, setShowMenuOptions] = useState(false);
+  const [rbSheetOpen, setRbSheetOpen] = useState(false);
+  const deleteRBSheetRef = useRef<RBSheetRef>(null);
+
   const route = useRoute<RouteProp<{params: {id: string}}, 'params'>>();
   // FlatList viewability config
   const viewabilityConfig = useRef({itemVisiblePercentThreshold: 50}).current;
-  const {sendTypingStatus, socket, newMessages, joinRoom, leaveRoom} =
-    useSocket();
+  const {sendTypingStatus, socket, joinRoom, leaveRoom} = useSocket();
 
   useEffect(() => {
     if (highLightMessageIndex) {
@@ -308,8 +342,7 @@ const ChatView: FC = () => {
   useEffect(() => {
     if (!socket) return;
 
-    joinRoom(route?.params?.id);
-
+    joinRoom(route.params.id);
     const handleTyping = (data: {isTyping: boolean}) => {
       setIsTyping(data?.isTyping);
       setFlatListData(prev => {
@@ -343,15 +376,24 @@ const ChatView: FC = () => {
     };
   }, [socket, route?.params?.id]); // Ensure effect runs only when `socket` or `roomId` changes
 
-  useEffect(() => {
-    // joinRoom(userDetails?.id!);
-    if (newMessages) {
-      setFlatListData(prev => [newMessages, ...prev]);
-    }
-    return () => {
-      // leaveRoom(userDetails?.id!);
-    };
-  }, [newMessage]);
+  // useEffect(() => {
+  //   joinRoom(userDetails?.id!);
+  //   const handleSendMessage = () => {
+  //     if (newMessages) {
+  //       console.log(newMessages, userDetails?.name);
+
+  //       setFlatListData(prev => [newMessages, ...prev]);
+  //       setBtnLoading(false);
+  //     }
+
+  //   }
+  //   return () => {
+  //     leaveRoom(userDetails?.id!);
+  //     socket?.off("message:send")
+  //   };
+  // }, [socket]);
+
+  // const sendMessage
 
   // UseRef to avoid unnecessary re-renders
   const onViewableItemsChanged = useRef(
@@ -379,7 +421,6 @@ const ChatView: FC = () => {
           ...chat,
           isOwn: chat.senderId === userDetails?.id,
         }));
-        setMessages(data);
         data?.length > 0 ? groupMessagesByDate(data) : setIsLoading(false);
       }
     } catch (err: any) {
@@ -446,7 +487,7 @@ const ChatView: FC = () => {
         });
       }
     },
-    [messages],
+    [flatListData],
   );
 
   const onScrollToIndexFailed = useCallback(
@@ -471,7 +512,9 @@ const ChatView: FC = () => {
       'keyboardDidShow',
       () => {
         sendTypingStatus(true, route?.params?.id);
-        flatListRef.current?.scrollToIndex({index: 0, animated: true});
+        flatListData.length > 0
+          ? flatListRef.current?.scrollToIndex({index: 0, animated: true})
+          : undefined;
       },
     );
     const keyboardDidHideListener = Keyboard.addListener(
@@ -487,38 +530,37 @@ const ChatView: FC = () => {
     };
   }, []);
 
-  const sendMessage = async () => {
-    if (!newMessage.trim()) return;
+  // const sendMessage = async () => {
+  //   if (!newMessage.trim()) return;
 
-    setBtnLoading(true);
-    sendTypingStatus(false, route?.params?.id);
-    try {
-      const res: any = await ContactService.addReply({
-        message: newMessage.trim(),
-        request_id: route.params.id,
-        replyTo: replyTo || undefined,
-      });
+  //   setBtnLoading(true);
+  //   sendTypingStatus(false, route?.params?.id);
+  //   try {
+  //     const res: any = await ContactService.addReply({
+  //       message: newMessage.trim(),
+  //       request_id: route.params.id,
+  //       replyTo: replyTo || undefined,
+  //     });
 
-      if (res?.success) {
-        const data = res.chats.map((chat: Message) => ({
-          ...chat,
-          isOwn: chat.senderId === userDetails?.id,
-        }));
-        setMessages(data);
-        data?.length > 0 ? groupMessagesByDate(data) : setIsLoading(false);
-        setNewMessage('');
-        setReplyTo(null);
+  //     if (res?.success) {
+  //       // const data = res.chats.map((chat: Message) => ({
+  //       //   ...chat,
+  //       //   isOwn: chat.senderId === userDetails?.id,
+  //       // }));
+  //       // data?.length > 0 ? groupMessagesByDate(data) : setIsLoading(false);
+  // setNewMessage('');
+  // setReplyTo(null);
 
-        setTimeout(() => {
-          flatListRef.current?.scrollToIndex({index: 0, animated: true});
-        }, 100);
-      }
-    } catch (err: any) {
-      Toast({message: err?.response?.data?.message, type: 'error'});
-    } finally {
-      setBtnLoading(false);
-    }
-  };
+  // setTimeout(() => {
+  //   flatListRef.current?.scrollToIndex({index: 0, animated: true});
+  // }, 100);
+  //     }
+  //   } catch (err: any) {
+  //     Toast({message: err?.response?.data?.message, type: 'error'});
+  //   } finally {
+  //     setBtnLoading(false);
+  //   }
+  // };
 
   const renderMessage = ({item, index}: ListRenderItemInfo<IFlatListData>) => {
     if (item.type === 'date') {
@@ -536,73 +578,124 @@ const ChatView: FC = () => {
         onSwipeToReply={setReplyTo}
         onReplyPress={scrollToMessage}
         index={index}
+        setShowMenu={setShowMenuOptions}
       />
     );
   };
 
   return (
-    <KeyboardAvoidingView style={styles.container}>
-      <CommonHeader
-        leftIcon
-        leftIconPressBack={() => navigation.goBack()}
-        title="Chat"
-      />
-      <StatusBar
-        backgroundColor={
-          isLoading ? appColors.transparentBackground : appColors.light
-        }
-        barStyle={isLoading ? 'light-content' : 'dark-content'}
-      />
-      <FlatList
-        ref={flatListRef}
-        onStartReached={() => {}}
-        data={flatListData}
-        renderItem={renderMessage}
-        keyExtractor={(item, index) => index.toString()}
-        contentContainerStyle={styles.messagesList}
-        inverted
-        onScrollToIndexFailed={onScrollToIndexFailed}
-        onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={viewabilityConfig}
-      />
-
-      <View style={styles.inputSection}>
-        <ReplyPreview
-          replyTo={replyTo}
-          onCancel={() => setReplyTo(null)}
-          isOwn={replyTo?.isOwn!}
+    <GestureHandlerRootView style={{flex: 1}}>
+      <KeyboardAvoidingView style={styles.container}>
+        <CommonHeader
+          leftIcon
+          leftIconPressBack={() => navigation.goBack()}
+          title="Chat"
+          customRightHeaderComponent={
+            showMenuOption ? (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 25,
+                }}>
+                <TouchableOpacity>
+                  <Icon
+                    name="reply"
+                    type="octicon"
+                    color={appColors.dark}
+                    size={25}
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => {}}>
+                  <EditIcon width={20} height={20} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => {
+                    setRbSheetOpen(true);
+                    deleteRBSheetRef.current?.open();
+                  }}>
+                  <DeleteIcon height={25} width={25} color={appColors.dark} />
+                </TouchableOpacity>
+              </View>
+            ) : undefined
+          }
         />
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            value={newMessage}
-            onChangeText={setNewMessage}
-            placeholder="Type a message..."
-            multiline
+        <StatusBar
+          backgroundColor={
+            isLoading ? appColors.transparentBackground : appColors.light
+          }
+          barStyle={isLoading ? 'light-content' : 'dark-content'}
+        />
+        <FlatList
+          ref={flatListRef}
+          onStartReached={() => {}}
+          data={flatListData}
+          renderItem={renderMessage}
+          keyExtractor={(item, index) => index.toString()}
+          contentContainerStyle={styles.messagesList}
+          inverted
+          onScrollToIndexFailed={onScrollToIndexFailed}
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={viewabilityConfig}
+        />
+
+        <View style={styles.inputSection}>
+          <ReplyPreview
+            replyTo={replyTo}
+            onCancel={() => setReplyTo(null)}
+            isOwn={replyTo?.isOwn!}
           />
-          <TouchableOpacity
-            activeOpacity={0.7}
-            style={[
-              styles.sendButton,
-              !(btnLoading || newMessage?.length) && {
-                backgroundColor: appColors.placeholderColor,
-              },
-            ]}
-            onPress={sendMessage}
-            disabled={btnLoading}>
-            <Icon
-              type="feather"
-              name="send"
-              color={appColors.light}
-              size={18}
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              value={newMessage}
+              onChangeText={setNewMessage}
+              placeholder="Type a message..."
+              multiline
             />
-          </TouchableOpacity>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={[
+                styles.sendButton,
+                !(btnLoading || newMessage?.length) && {
+                  backgroundColor: appColors.placeholderColor,
+                },
+              ]}
+              onPress={() => {
+                if (!newMessage.trim()) return;
+                setBtnLoading(true);
+                sendTypingStatus(false, route?.params?.id);
+                // sendMessage({
+                //   message: newMessage.trim(),
+                //   request_id: route.params.id,
+                //   replyTo: replyTo || undefined,
+                // });
+                setNewMessage('');
+                setReplyTo(null);
+                setTimeout(() => {
+                  flatListRef.current?.scrollToIndex({
+                    index: 0,
+                    animated: true,
+                  });
+                }, 100);
+              }}
+              disabled={btnLoading}>
+              <Icon
+                type="feather"
+                name="send"
+                color={appColors.light}
+                size={18}
+              />
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
-      <Modal visible={isLoading} animationType="fade" transparent>
-        <CommonLoader />
-      </Modal>
-    </KeyboardAvoidingView>
+        <Modal visible={isLoading} animationType="fade" transparent>
+          <CommonLoader />
+        </Modal>
+      </KeyboardAvoidingView>
+    </GestureHandlerRootView>
   );
 };
 

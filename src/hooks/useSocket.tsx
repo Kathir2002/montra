@@ -12,13 +12,12 @@ export interface Room {
 }
 
 export interface MessagePayload {
-  content: string;
-  roomId?: string;
-  receiverId?: string;
-  type?: 'text' | 'image' | 'file';
+  message: string;
+  request_id: string;
+  replyTo: Message | undefined;
 }
 
-import {Message} from '@components/profile/ChatView';
+import {IFlatListData, Message} from '@components/profile/ChatView';
 // SocketContext.tsx
 import React, {
   createContext,
@@ -33,13 +32,10 @@ import {Socket, io} from 'socket.io-client';
 interface SocketContextType {
   socket: Socket | null;
   isConnected: boolean;
-  newMessages: Message | null;
   activeUsers: User[];
-  sendMessage: (messageData: MessagePayload) => void;
   joinRoom: (roomId: string) => void;
   leaveRoom: (roomId: string) => void;
   sendTypingStatus: (isTyping: boolean, roomId: string) => void;
-  clearMessages: () => void;
 }
 
 interface SocketProviderProps {
@@ -59,7 +55,6 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
 }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState<boolean>(false);
-  const [newMessages, setNewMessages] = useState<Message | null>(null);
   const [activeUsers, setActiveUsers] = useState<User[]>([]);
 
   useEffect(() => {
@@ -86,17 +81,10 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
       setActiveUsers(users);
     };
 
-    const handleReceiveMessage = (message: Message) => {
-      console.log(message, '==========');
-
-      setNewMessages(message);
-    };
-
     // Socket event listeners
     socketInstance.on('connect', handleConnect);
     socketInstance.on('disconnect', handleDisconnect);
     socketInstance.on('users:active', handleActiveUsers);
-    socketInstance.on('message:receive', handleReceiveMessage);
 
     setSocket(socketInstance);
 
@@ -106,27 +94,10 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
         socketInstance.off('connect', handleConnect);
         socketInstance.off('disconnect', handleDisconnect);
         socketInstance.off('users:active', handleActiveUsers);
-        socketInstance.off('message:receive', handleReceiveMessage);
         socketInstance.disconnect();
       }
     };
   }, [serverUrl, userId, username]);
-
-  const sendMessage = useCallback(
-    (messageData: MessagePayload): void => {
-      if (socket && isConnected) {
-        const message: Omit<Message, 'id'> = {
-          ...messageData,
-          senderId: userId,
-          timestamp: new Date(),
-          status: 'sent',
-        };
-
-        socket.emit('message:send', message);
-      }
-    },
-    [socket, isConnected, userId],
-  );
 
   const joinRoom = useCallback(
     (roomId: string): void => {
@@ -155,20 +126,14 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
     [socket, isConnected, userId],
   );
 
-  const clearMessages = useCallback((): void => {
-    setNewMessages(null);
-  }, []);
-
   const value: SocketContextType = {
     socket,
     isConnected,
-    newMessages,
     activeUsers,
-    sendMessage,
+
     joinRoom,
     leaveRoom,
     sendTypingStatus,
-    clearMessages,
   };
 
   return (

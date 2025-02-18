@@ -486,7 +486,7 @@ const Help = () => {
           setRbSheetOpen(false);
         }}
         handleOkBtn={() => {
-          navigation.goBack();
+          navigation.navigate('HelpRequest_List');
         }}
         onClose={() => {
           setRbSheetOpen(false);
@@ -550,7 +550,7 @@ const Help = () => {
             activeOpacity={0.7}
             onPress={() => {
               setIsSuccessPopoverVisible(false);
-              navigation.goBack();
+              navigation.navigate('HelpRequest_List');
               Clipboard.setString(requestId!);
               Vibration.vibrate(100);
             }}
@@ -584,7 +584,7 @@ const Help = () => {
             titleStyle={{paddingVertical: 2}}
             onPress={() => {
               setIsSuccessPopoverVisible(false);
-              navigation.goBack();
+              navigation.navigate('HelpRequest_List');
             }}
           />
         </View>
