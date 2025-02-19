@@ -52,7 +52,7 @@ export interface RequestTicketInterface {
     sender: string;
     role: 'Admin' | 'User';
     message: string;
-    status?: 'sent' | 'delivered' | 'read';
+    status?: 'sent' | 'read';
     createdAt: Date;
   }[];
 }

@@ -65,7 +65,7 @@ export interface Message {
   senderName: string;
   _id?: string;
 
-  status?: 'sent' | 'delivered' | 'read';
+  status?: 'sent' | 'read';
 }
 
 export interface IFlatListData extends Message {
@@ -376,8 +376,6 @@ const ChatView: FC = () => {
   useEffect(() => {
     joinRoom(userDetails?.id!);
     const handleReceiveMessage = (message: IFlatListData) => {
-      console.log(message, userDetails?.name);
-
       setFlatListData(prev => [{...message, type: 'message'}, ...prev]);
     };
     socket?.on('message:receive', handleReceiveMessage);
@@ -389,19 +387,42 @@ const ChatView: FC = () => {
 
   // UseRef to avoid unnecessary re-renders
   const onViewableItemsChanged = useRef(
-    ({viewableItems}: {viewableItems: {item: Message}[]}) => {
-      const visibleIds = viewableItems.map(item => item.item.id);
-      markAsRead(visibleIds);
+    ({viewableItems}: {viewableItems: {item: IFlatListData}[]}) => {
+      const visibleIds = viewableItems.map(item => {
+        if (
+          !item?.item?.isOwn &&
+          item?.item?.status !== 'read' &&
+          item?.item?.type === 'message'
+        )
+          return item?.item?.id;
+      });
+      const ids = visibleIds.filter(visibleId => visibleId !== undefined);
+      markAsRead(ids);
     },
   ).current;
 
   const markAsRead = (visibleItems: string[]) => {
-    setFlatListData(prevMessages =>
-      prevMessages.map(msg =>
-        visibleItems.includes(msg.id) ? {...msg, status: 'read'} : msg,
-      ),
-    );
+    socket?.emit('message:status', {
+      request_id: route?.params?.id,
+      messageIds: visibleItems,
+      senderId: userDetails?.id,
+    });
   };
+
+  useEffect(() => {
+    if (!socket) return;
+    joinRoom(userDetails?.id!);
+    const handleReceiveMessageStatus = (message: IFlatListData) => {
+      console.log(message, userDetails?.name);
+
+      setFlatListData(prev => [{...message, type: 'message'}, ...prev]);
+    };
+    socket?.on('message:status', handleReceiveMessageStatus);
+    return () => {
+      leaveRoom(userDetails?.id!);
+      socket?.off('message:status', handleReceiveMessageStatus);
+    };
+  }, [socket]);
 
   const getChat = async () => {
     try {
