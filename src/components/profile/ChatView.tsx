@@ -54,6 +54,7 @@ import {
   GestureHandlerRootView,
 } from 'react-native-gesture-handler';
 import {Pressable} from 'react-native';
+import CommonConfirmation from '@shared/components/CommonConfirmation';
 
 export interface Message {
   id: string;
@@ -85,7 +86,11 @@ interface MessageBubbleProps {
   onReplyPress: (replyTo: Message) => void;
   highLightMessageIndex: number;
   index: number;
-  setShowMenu: Dispatch<SetStateAction<boolean>>;
+  setShowMenu: Dispatch<
+    SetStateAction<{visible: boolean; message: Message | null}>
+  >;
+  setHighLightMessageIndex: Dispatch<SetStateAction<number | null>>;
+  isFocus: React.RefObject<TextInput>;
 }
 
 const ReplyPreview: FC<ReplyPreviewProps> = ({replyTo, onCancel, isOwn}) => {
@@ -139,6 +144,8 @@ const MessageBubble: FC<MessageBubbleProps> = ({
   highLightMessageIndex,
   index,
   setShowMenu,
+  setHighLightMessageIndex,
+  isFocus,
 }) => {
   const pan = useRef(new Animated.Value(0)).current;
   const bubbleRef = useRef<View>(null);
@@ -152,6 +159,8 @@ const MessageBubble: FC<MessageBubbleProps> = ({
     onPanResponderRelease: (_, gestureState) => {
       if (gestureState.dx > 50) {
         Vibration.vibrate(50);
+        Keyboard.isVisible;
+        isFocus?.current?.focus();
         onSwipeToReply(message);
       }
       Animated.spring(pan, {
@@ -165,6 +174,8 @@ const MessageBubble: FC<MessageBubbleProps> = ({
     <Pressable
       style={{width: '100%'}}
       onLongPress={() => {
+        setShowMenu({visible: true, message: message});
+        setHighLightMessageIndex(index);
         Vibration.vibrate(70);
       }}>
       <ReAnimated.View
@@ -314,21 +325,25 @@ const ChatView: FC = () => {
   const flatListRef = useRef<FlatList<IFlatListData>>(null);
   const userDetails = useSelector((state: RootState) => state.auth.userDetails);
   const [flatListData, setFlatListData] = useState<IFlatListData[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [highLightMessageIndex, setHighLightMessageIndex] = useState<
     number | null
   >(null);
-  const [showMenuOption, setShowMenuOptions] = useState(false);
+  const [showMenuOption, setShowMenuOptions] = useState<{
+    visible: boolean;
+    message: Message | null;
+  }>({visible: false, message: null});
   const [rbSheetOpen, setRbSheetOpen] = useState(false);
   const deleteRBSheetRef = useRef<RBSheetRef>(null);
-
+  const isFieldFocus = useRef<TextInput>(null);
   const route = useRoute<RouteProp<{params: {id: string}}, 'params'>>();
   // FlatList viewability config
   const viewabilityConfig = useRef({itemVisiblePercentThreshold: 50}).current;
   const {sendTypingStatus, socket, joinRoom, leaveRoom} = useSocket();
 
   useEffect(() => {
-    if (highLightMessageIndex) {
+    if (highLightMessageIndex && !showMenuOption?.message?.id) {
       setTimeout(() => {
         setHighLightMessageIndex(null);
       }, 1000);
@@ -364,31 +379,84 @@ const ChatView: FC = () => {
           : filteredData; // Otherwise, just return filtered data
       });
     };
+    const handleReceiveMessage = (message: IFlatListData) => {
+      setMessages(prev => {
+        // if (replyTo) {
+        //   const index = prev.findIndex(item => item.id === replyTo?._id);
+        //   console.log(index);
+        // }
+        return [
+          {
+            ...message,
+            isOwn: userDetails?.id === message?.senderId,
+          },
+          ...prev,
+        ];
+      });
+      const data = [
+        {
+          ...message,
+          isOwn: userDetails?.id === message?.senderId,
+        },
+        ...messages,
+      ];
+      groupMessagesByDate(messages);
+      setBtnLoading(false);
+      setNewMessage('');
+      setReplyTo(null);
+      setTimeout(() => {
+        // flatListRef.current?.scrollToIndex({
+        //   index: 0,
+        //   animated: true,
+        // });
+      }, 100);
+    };
+    const handleReceiveMessageStatus = (message: IFlatListData) => {
+      // console.log(message, userDetails?.name);
 
+      setFlatListData(prev => [
+        {
+          ...message,
+
+          type: 'message',
+        },
+        ...prev,
+      ]);
+    };
+    const handleMessageDeleteStatus = (message: {
+      messageId: string;
+      success: boolean;
+    }) => {
+      console.log(message, 'From delete');
+
+      if (message?.success) {
+        setBtnLoading(false);
+        setRbSheetOpen(false);
+        setHighLightMessageIndex(null);
+        deleteRBSheetRef.current?.close();
+        setShowMenuOptions({visible: false, message: null});
+        setFlatListData(prev =>
+          prev.filter(item => item.id !== message.messageId),
+        );
+      }
+    };
     socket.on('user:typing', handleTyping);
-
+    socket?.on('message:receive', handleReceiveMessage); // Listen for incoming messages
+    // socket?.on('message:status', handleReceiveMessageStatus);
+    socket?.on('message:deleteStatus', handleMessageDeleteStatus);
     return () => {
       socket.off('user:typing', handleTyping); // Cleanup the listener
+      socket?.off('message:receive', handleReceiveMessage);
+      // socket?.off('message:status', handleReceiveMessageStatus);
+      socket?.off('message:deleteStatus', handleMessageDeleteStatus);
       leaveRoom(route?.params?.id);
     };
   }, [socket, route?.params?.id]); // Ensure effect runs only when `socket` or `roomId` changes
 
-  useEffect(() => {
-    joinRoom(userDetails?.id!);
-    const handleReceiveMessage = (message: IFlatListData) => {
-      setFlatListData(prev => [{...message, type: 'message'}, ...prev]);
-    };
-    socket?.on('message:receive', handleReceiveMessage);
-    return () => {
-      leaveRoom(userDetails?.id!);
-      socket?.off('message:receive', handleReceiveMessage);
-    };
-  }, [socket]);
-
   // UseRef to avoid unnecessary re-renders
   const onViewableItemsChanged = useRef(
     ({viewableItems}: {viewableItems: {item: IFlatListData}[]}) => {
-      const visibleIds = viewableItems.map(item => {
+      const visibleIds = viewableItems?.map(item => {
         if (
           !item?.item?.isOwn &&
           item?.item?.status !== 'read' &&
@@ -409,28 +477,13 @@ const ChatView: FC = () => {
     });
   };
 
-  useEffect(() => {
-    if (!socket) return;
-    joinRoom(userDetails?.id!);
-    const handleReceiveMessageStatus = (message: IFlatListData) => {
-      console.log(message, userDetails?.name);
-
-      setFlatListData(prev => [{...message, type: 'message'}, ...prev]);
-    };
-    socket?.on('message:status', handleReceiveMessageStatus);
-    return () => {
-      leaveRoom(userDetails?.id!);
-      socket?.off('message:status', handleReceiveMessageStatus);
-    };
-  }, [socket]);
-
   const getChat = async () => {
     try {
       const res: any = await ContactService.getChatDetails({
         request_id: route.params.id,
       });
       if (res?.success) {
-        const data = res.chats.map((chat: Message) => ({
+        const data = res.chats?.map((chat: Message) => ({
           ...chat,
           isOwn: chat.senderId === userDetails?.id,
         }));
@@ -510,11 +563,11 @@ const ChatView: FC = () => {
       averageItemLength: number;
     }) => {
       setTimeout(() => {
-        flatListRef.current?.scrollToIndex({
-          index: info.index,
-          animated: true,
-          viewPosition: 0.5,
-        });
+        // flatListRef.current?.scrollToIndex({
+        //   index: info.index,
+        //   animated: true,
+        //   viewPosition: 0.5,
+        // });
       }, 500);
     },
     [],
@@ -533,6 +586,7 @@ const ChatView: FC = () => {
     const keyboardDidHideListener = Keyboard.addListener(
       'keyboardDidHide',
       () => {
+        isFieldFocus.current?.blur();
         sendTypingStatus(false, route?.params?.id);
       },
     );
@@ -543,37 +597,14 @@ const ChatView: FC = () => {
     };
   }, []);
 
-  // const sendMessage = async () => {
-  //   if (!newMessage.trim()) return;
-
-  //   setBtnLoading(true);
-  //   sendTypingStatus(false, route?.params?.id);
-  //   try {
-  //     const res: any = await ContactService.addReply({
-  //       message: newMessage.trim(),
-  //       request_id: route.params.id,
-  //       replyTo: replyTo || undefined,
-  //     });
-
-  //     if (res?.success) {
-  //       // const data = res.chats.map((chat: Message) => ({
-  //       //   ...chat,
-  //       //   isOwn: chat.senderId === userDetails?.id,
-  //       // }));
-  //       // data?.length > 0 ? groupMessagesByDate(data) : setIsLoading(false);
-  // setNewMessage('');
-  // setReplyTo(null);
-
-  // setTimeout(() => {
-  //   flatListRef.current?.scrollToIndex({index: 0, animated: true});
-  // }, 100);
-  //     }
-  //   } catch (err: any) {
-  //     Toast({message: err?.response?.data?.message, type: 'error'});
-  //   } finally {
-  //     setBtnLoading(false);
-  //   }
-  // };
+  const handleDeleteMessage = () => {
+    setBtnLoading(true);
+    socket?.emit('message:delete', {
+      request_id: route.params.id,
+      messageId: showMenuOption?.message?.id,
+      senderId: userDetails?.id,
+    });
+  };
 
   const renderMessage = ({item, index}: ListRenderItemInfo<IFlatListData>) => {
     if (item.type === 'date') {
@@ -592,11 +623,13 @@ const ChatView: FC = () => {
         onReplyPress={scrollToMessage}
         index={index}
         setShowMenu={setShowMenuOptions}
+        isFocus={isFieldFocus}
+        setHighLightMessageIndex={setHighLightMessageIndex}
       />
     );
   };
 
-  const sendMessage = () => {
+  const sendMessage = useCallback(() => {
     if (!newMessage.trim()) return;
     setBtnLoading(true);
     sendTypingStatus(false, route?.params?.id);
@@ -606,31 +639,7 @@ const ChatView: FC = () => {
       replyTo: replyTo || undefined,
       senderId: userDetails?.id,
     });
-    setFlatListData(prev => [
-      {
-        isOwn: true,
-        senderId: userDetails?.id!,
-        timestamp: new Date(),
-        type: 'message',
-        senderName: userDetails?.name!,
-        status: 'sent',
-        replyTo: replyTo ? replyTo : undefined,
-        text: newMessage,
-        id: new Date().toDateString(),
-        _id: new Date().toDateString(),
-      },
-      ...prev,
-    ]);
-    setBtnLoading(false);
-    setNewMessage('');
-    setReplyTo(null);
-    setTimeout(() => {
-      flatListRef.current?.scrollToIndex({
-        index: 0,
-        animated: true,
-      });
-    }, 100);
-  };
+  }, [newMessage]);
 
   return (
     <GestureHandlerRootView style={{flex: 1}}>
@@ -640,7 +649,7 @@ const ChatView: FC = () => {
           leftIconPressBack={() => navigation.goBack()}
           title="Chat"
           customRightHeaderComponent={
-            showMenuOption ? (
+            showMenuOption?.visible ? (
               <View
                 style={{
                   flexDirection: 'row',
@@ -648,7 +657,13 @@ const ChatView: FC = () => {
                   justifyContent: 'center',
                   gap: 25,
                 }}>
-                <TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    Vibration.vibrate(50);
+                    Keyboard.isVisible;
+                    isFieldFocus?.current?.focus();
+                    setReplyTo(showMenuOption?.message);
+                  }}>
                   <Icon
                     name="reply"
                     type="octicon"
@@ -656,7 +671,10 @@ const ChatView: FC = () => {
                     size={25}
                   />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => {}}>
+                <TouchableOpacity
+                  onPress={() => {
+                    deleteRBSheetRef.current?.open();
+                  }}>
                   <EditIcon width={20} height={20} />
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -673,9 +691,11 @@ const ChatView: FC = () => {
         />
         <StatusBar
           backgroundColor={
-            isLoading ? appColors.transparentBackground : appColors.light
+            isLoading || rbSheetOpen
+              ? appColors.transparentBackground
+              : appColors.light
           }
-          barStyle={isLoading ? 'light-content' : 'dark-content'}
+          barStyle={isLoading || rbSheetOpen ? 'light-content' : 'dark-content'}
         />
         <FlatList
           ref={flatListRef}
@@ -693,11 +713,15 @@ const ChatView: FC = () => {
         <View style={styles.inputSection}>
           <ReplyPreview
             replyTo={replyTo}
-            onCancel={() => setReplyTo(null)}
+            onCancel={() => {
+              setReplyTo(null);
+              Keyboard.dismiss();
+            }}
             isOwn={replyTo?.isOwn!}
           />
           <View style={styles.inputContainer}>
             <TextInput
+              ref={isFieldFocus}
               style={styles.input}
               value={newMessage}
               onChangeText={setNewMessage}
@@ -729,6 +753,26 @@ const ChatView: FC = () => {
           <CommonLoader />
         </Modal>
       </KeyboardAvoidingView>
+      <CommonConfirmation
+        titleText={'Remove this message?'}
+        subText={'Are you sure do you wanna remove this transaction?'}
+        handleCancelBtn={() => {
+          deleteRBSheetRef.current?.close();
+          setRbSheetOpen(false);
+        }}
+        handleOkBtn={() => handleDeleteMessage()}
+        onClose={() => {
+          setRbSheetOpen(false);
+        }}
+        ref={deleteRBSheetRef}
+        height={200}
+        closeOnPressBack={true}
+        closeOnPressMask={true}
+        draggable={true}
+        customStyles={{
+          container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
+        }}
+      />
     </GestureHandlerRootView>
   );
 };
