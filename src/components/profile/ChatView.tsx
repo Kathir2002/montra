@@ -172,6 +172,10 @@ const MessageBubble: FC<MessageBubbleProps> = ({
 
   return (
     <Pressable
+      onPress={() => {
+        setShowMenu({visible: false, message: null});
+        setHighLightMessageIndex(null);
+      }}
       style={{width: '100%'}}
       onLongPress={() => {
         setShowMenu({visible: true, message: message});
@@ -643,7 +647,13 @@ const ChatView: FC = () => {
 
   return (
     <GestureHandlerRootView style={{flex: 1}}>
-      <KeyboardAvoidingView style={styles.container}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        onStartShouldSetResponder={() => {
+          setShowMenuOptions({visible: false, message: null});
+          setHighLightMessageIndex(null);
+          return false;
+        }}>
         <CommonHeader
           leftIcon
           leftIconPressBack={() => navigation.goBack()}
@@ -673,7 +683,8 @@ const ChatView: FC = () => {
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
-                    deleteRBSheetRef.current?.open();
+                    setNewMessage(showMenuOption?.message?.text!);
+                    isFieldFocus.current?.focus();
                   }}>
                   <EditIcon width={20} height={20} />
                 </TouchableOpacity>
