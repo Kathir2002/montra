@@ -355,6 +355,10 @@ const ChatView: FC = () => {
     }
   }, [highLightMessageIndex]);
 
+  useEffect(() => {
+    groupMessagesByDate(messages);
+  }, [messages]);
+
   // To get the user is typing or not
   useEffect(() => {
     if (!socket) return;
@@ -386,10 +390,6 @@ const ChatView: FC = () => {
     };
     const handleReceiveMessage = (message: IFlatListData) => {
       setMessages(prev => {
-        // if (replyTo) {
-        //   const index = prev.findIndex(item => item.id === replyTo?._id);
-        //   console.log(index);
-        // }
         return [
           {
             ...message,
@@ -398,24 +398,16 @@ const ChatView: FC = () => {
           ...prev,
         ];
       });
-      const data = [
-        {
-          ...message,
-          isOwn: userDetails?.id === message?.senderId,
-        },
-        ...messages,
-      ];
-      console.log(data, userDetails?.name, '================');
 
-      groupMessagesByDate(data);
+      // groupMessagesByDate(data);
       setBtnLoading(false);
       setNewMessage('');
       setReplyTo(null);
       setTimeout(() => {
-        // flatListRef.current?.scrollToIndex({
-        //   index: 0,
-        //   animated: true,
-        // });
+        flatListRef.current?.scrollToIndex({
+          index: 0,
+          animated: true,
+        });
       }, 100);
     };
     const handleReceiveMessageStatus = (message: IFlatListData) => {
@@ -440,22 +432,25 @@ const ChatView: FC = () => {
         setHighLightMessageIndex(null);
         deleteRBSheetRef.current?.close();
         setShowMenuOptions({visible: false, message: null});
-        setFlatListData(prev => {
-          let skipNext = false;
-          return prev.filter((item, index, array) => {
-            if (skipNext) {
-              skipNext = false;
-              return false; // Skip the next item if flagged
-            }
-            if (item.id === message.messageId) {
-              if (array[index + 1]?.type === 'date') {
-                skipNext = true; // Mark the next item to be skipped
-              }
-              return false; // Remove current item
-            }
-            return true; // Keep other items
-          });
-        });
+        setMessages(prev =>
+          prev.filter(item => item.id !== message?.messageId),
+        );
+        // setFlatListData(prev => {
+        //   let skipNext = false;
+        //   return prev.filter((item, index, array) => {
+        //     if (skipNext) {
+        //       skipNext = false;
+        //       return false; // Skip the next item if flagged
+        //     }
+        //     if (item.id === message.messageId) {
+        //       if (array[index + 1]?.type === 'date') {
+        //         skipNext = true; // Mark the next item to be skipped
+        //       }
+        //       return false; // Remove current item
+        //     }
+        //     return true; // Keep other items
+        //   });
+        // });
       }
     };
 
@@ -506,8 +501,8 @@ const ChatView: FC = () => {
           ...chat,
           isOwn: chat.senderId === userDetails?.id,
         }));
+
         setMessages(data);
-        data?.length > 0 ? groupMessagesByDate(data) : setIsLoading(false);
       }
     } catch (err: any) {
       setIsLoading(false);
@@ -558,7 +553,7 @@ const ChatView: FC = () => {
       setFlatListData(groups);
       setIsLoading(false);
     },
-    [isTyping],
+    [isTyping, messages],
   );
 
   const scrollToMessage = useCallback(
@@ -725,6 +720,7 @@ const ChatView: FC = () => {
           barStyle={isLoading || rbSheetOpen ? 'light-content' : 'dark-content'}
         />
         <FlatList
+          initialNumToRender={15}
           ref={flatListRef}
           onStartReached={() => {}}
           data={flatListData}

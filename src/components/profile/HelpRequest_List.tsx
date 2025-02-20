@@ -122,8 +122,9 @@ const HelpRequest_List = () => {
     return (
       <TouchableOpacity
         onPress={() => {
+          setIsLoading(true);
           navigation.navigate('HelpRequest_Details', {
-            request_id: item?._id,
+            id: item?._id,
           });
         }}
         activeOpacity={0.7}

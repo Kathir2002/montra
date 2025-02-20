@@ -45,6 +45,12 @@ const AppWrapper = () => {
                   userToken: (userToken) => `${userToken}`,
                 },
               },
+              HelpRequest_Details: {
+                path: 'help-support-details/:id',
+                parse: {
+                  id: (id) => `${id}`,
+                },
+              },
               Help: {
                 path: "help-center"
               },

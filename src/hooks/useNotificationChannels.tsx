@@ -72,6 +72,16 @@ const getDefaultChannels: NotificationChannelConfig[] = [
     description:
       'Stay informed with notifications about account status changes, including deactivations and reactivations.',
   },
+  {
+    id: 'help-center',
+    name: 'Help Center Updates',
+    importance: AndroidImportance.HIGH,
+    vibration: true,
+    lights: true,
+    badge: true,
+    description:
+      'Get updates on your support requests, including status changes and responses from our team.',
+  },
 ];
 
 // Custom hook for notification channel management

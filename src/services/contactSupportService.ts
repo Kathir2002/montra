@@ -42,6 +42,12 @@ class contactSupportService {
   async addReply(data: any) {
     return HttpRoutingService.postMethod('api/contact-support/add-reply', data);
   }
+  async updateStatus(data: any) {
+    return HttpRoutingService.postMethod(
+      'api/contact-support/update-request-status',
+      data,
+    );
+  }
 }
 const ContactService = new contactSupportService();
 export default ContactService;

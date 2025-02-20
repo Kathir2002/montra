@@ -28,7 +28,6 @@ import {TouchableOpacity} from 'react-native';
 import {Icon, Image} from '@rneui/base';
 import moment from 'moment';
 import CommonDropDown from '@shared/components/commonDropdown/CommonDropDown';
-import ChatView from './ChatView';
 import {useSelector} from 'react-redux';
 import {RootState} from '@store/store';
 import {formatBytes, openFileFromUrl} from '@src/lib/functions';
@@ -40,7 +39,7 @@ import CommonButton from '@shared/components/commonButton/CommonButton';
 
 const HelpRequest_Details = () => {
   const isFocused = useIsFocused();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const [ticketDetails, setTicketDetails] = useState<RequestTicketInterface>();
   const {t} = useTranslation('profile');
@@ -82,14 +81,13 @@ const HelpRequest_Details = () => {
   ];
   const route: RouteProp<{
     params: {
-      request_id: string;
+      id: string;
     };
   }> = useRoute();
 
   const getTicketDetails = async () => {
-    setIsLoading(true);
     const data = {
-      request_id: route?.params?.request_id,
+      request_id: route?.params?.id,
       isAdmin: userDetails?.isAdmin,
     };
 
@@ -113,6 +111,41 @@ const HelpRequest_Details = () => {
       getTicketDetails();
     }
   }, [isFocused]);
+
+  const updateStatus = async ({
+    priority,
+    status,
+  }: {
+    priority?: string;
+    status?: string;
+  }) => {
+    setIsLoading(true);
+    const data: {
+      request_id: string;
+      priority?: string;
+      status?: string;
+    } = {
+      request_id: route?.params?.id,
+    };
+    if (priority) {
+      data['priority'] = priority;
+    }
+    if (status) {
+      data['status'] = status;
+    }
+    await ContactService.updateStatus(data)
+      .then((res: any) => {
+        setIsLoading(false);
+        if (res?.success) {
+          Toast({message: res?.message, type: 'success'});
+          getTicketDetails();
+        }
+      })
+      .catch(err => {
+        setIsLoading(false);
+        Toast({message: err?.response?.data?.message, type: 'error'});
+      });
+  };
 
   return (
     <KeyboardAvoidingView
@@ -203,7 +236,9 @@ const HelpRequest_Details = () => {
                 setOpen={setStatusDropdownOpen}
                 value={statusDropdownValue!}
                 setValue={setStatusDropdownValue}
-                onSelectItem={() => undefined}
+                onSelectItem={async data => {
+                  await updateStatus({status: data?.value as string});
+                }}
                 zIndex={2}
               />
             </View>
@@ -216,7 +251,9 @@ const HelpRequest_Details = () => {
                 setOpen={setPriorityDropdownOpen}
                 value={priorityDropdownValue!}
                 setValue={setPriorityDropdownValue}
-                onSelectItem={() => undefined}
+                onSelectItem={async data =>
+                  await updateStatus({priority: data?.value as string})
+                }
                 zIndex={2}
               />
             </View>
@@ -374,8 +411,9 @@ const HelpRequest_Details = () => {
             <CommonButton
               title="Send Reply"
               onPress={() => {
+                setIsLoading(true);
                 navigation.navigate('ChatView', {
-                  id: route?.params?.request_id,
+                  id: route?.params?.id,
                 });
               }}
               iconContainerStyle={{marginRight: 10}}
