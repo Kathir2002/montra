@@ -7,6 +7,8 @@ import {
   useRoute,
 } from '@react-navigation/native';
 import {Icon} from '@rneui/base';
+const x = 10;
+
 import ContactService from '@services/contactSupportService';
 import {appColors} from '@shared/appColors';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
@@ -65,7 +67,6 @@ export interface Message {
   senderId: string;
   senderName: string;
   _id?: string;
-
   status?: 'sent' | 'read';
 }
 
@@ -199,7 +200,7 @@ const MessageBubble: FC<MessageBubbleProps> = ({
           style={[
             styles.bubbleContainer,
             isOwn ? styles.ownMessageContainer : styles.otherMessageContainer,
-            {transform: [{translateX: pan}]},
+            {transform: [{translateX: pan}], zIndex: -10},
           ]}>
           <View
             style={[styles.tail, isOwn ? styles.ownTail : styles.otherTail]}
@@ -404,7 +405,9 @@ const ChatView: FC = () => {
         },
         ...messages,
       ];
-      groupMessagesByDate(messages);
+      console.log(data, userDetails?.name, '================');
+
+      groupMessagesByDate(data);
       setBtnLoading(false);
       setNewMessage('');
       setReplyTo(null);
@@ -431,19 +434,31 @@ const ChatView: FC = () => {
       messageId: string;
       success: boolean;
     }) => {
-      console.log(message, 'From delete');
-
       if (message?.success) {
         setBtnLoading(false);
         setRbSheetOpen(false);
         setHighLightMessageIndex(null);
         deleteRBSheetRef.current?.close();
         setShowMenuOptions({visible: false, message: null});
-        setFlatListData(prev =>
-          prev.filter(item => item.id !== message.messageId),
-        );
+        setFlatListData(prev => {
+          let skipNext = false;
+          return prev.filter((item, index, array) => {
+            if (skipNext) {
+              skipNext = false;
+              return false; // Skip the next item if flagged
+            }
+            if (item.id === message.messageId) {
+              if (array[index + 1]?.type === 'date') {
+                skipNext = true; // Mark the next item to be skipped
+              }
+              return false; // Remove current item
+            }
+            return true; // Keep other items
+          });
+        });
       }
     };
+
     socket.on('user:typing', handleTyping);
     socket?.on('message:receive', handleReceiveMessage); // Listen for incoming messages
     // socket?.on('message:status', handleReceiveMessageStatus);
@@ -491,6 +506,7 @@ const ChatView: FC = () => {
           ...chat,
           isOwn: chat.senderId === userDetails?.id,
         }));
+        setMessages(data);
         data?.length > 0 ? groupMessagesByDate(data) : setIsLoading(false);
       }
     } catch (err: any) {
