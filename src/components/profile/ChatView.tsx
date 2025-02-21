@@ -38,25 +38,34 @@ import {
   FlatList,
   StyleSheet,
   KeyboardAvoidingView,
-  Animated,
-  PanResponder,
   Keyboard,
   ListRenderItemInfo,
   StatusBar,
   Modal,
   Vibration,
-  TouchableWithoutFeedback,
+  Text,
+  ActivityIndicator,
 } from 'react-native';
-import ReAnimated, {FadeIn, FadeOut} from 'react-native-reanimated';
+import Animated, {
+  FadeIn,
+  FadeOut,
+  runOnJS,
+  useAnimatedGestureHandler,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
 import {useSelector} from 'react-redux';
 import {RBSheetRef} from '@shared/components/commonRBSheet/CommonRBSheet';
 import {
   Gesture,
   GestureDetector,
   GestureHandlerRootView,
+  PanGestureHandler,
 } from 'react-native-gesture-handler';
 import {Pressable} from 'react-native';
 import CommonConfirmation from '@shared/components/CommonConfirmation';
+import Popover from 'react-native-popover-view';
 
 export interface Message {
   id: string;
@@ -137,7 +146,7 @@ const ReplyPreview: FC<ReplyPreviewProps> = ({replyTo, onCancel, isOwn}) => {
   );
 };
 
-const MessageBubble: FC<MessageBubbleProps> = ({
+const MessageBubble: React.FC<MessageBubbleProps> = ({
   message,
   isOwn,
   onSwipeToReply,
@@ -148,27 +157,41 @@ const MessageBubble: FC<MessageBubbleProps> = ({
   setHighLightMessageIndex,
   isFocus,
 }) => {
-  const pan = useRef(new Animated.Value(0)).current;
+  const translateX = useSharedValue(0);
   const bubbleRef = useRef<View>(null);
-  const panResponder = PanResponder.create({
-    onStartShouldSetPanResponder: () => true,
-    onPanResponderMove: (_, gestureState) => {
-      if (gestureState.dx > 0) {
-        pan.setValue(Math.min(gestureState.dx, 100));
+
+  const handleFocus = useCallback(() => {
+    if (isFocus?.current) {
+      isFocus.current.focus();
+    }
+  }, [isFocus]);
+
+  const onGestureEvent = useAnimatedGestureHandler({
+    onStart: () => {
+      translateX.value = 0;
+    },
+    onActive: event => {
+      if (event.translationX > 0) {
+        translateX.value = Math.min(event.translationX, 100);
       }
     },
-    onPanResponderRelease: (_, gestureState) => {
-      if (gestureState.dx > 50) {
-        Vibration.vibrate(50);
-        Keyboard.isVisible;
-        isFocus?.current?.focus();
-        onSwipeToReply(message);
+    onEnd: event => {
+      if (event.translationX > 50) {
+        runOnJS(Vibration.vibrate)(50);
+        runOnJS(onSwipeToReply)(message);
+        runOnJS(handleFocus)();
       }
-      Animated.spring(pan, {
-        toValue: 0,
-        useNativeDriver: true,
-      }).start();
+      translateX.value = withSpring(0, {
+        damping: 15,
+        stiffness: 150,
+      });
     },
+  });
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{translateX: translateX.value}],
+    };
   });
 
   return (
@@ -179,11 +202,13 @@ const MessageBubble: FC<MessageBubbleProps> = ({
       }}
       style={{width: '100%'}}
       onLongPress={() => {
-        setShowMenu({visible: true, message: message});
-        setHighLightMessageIndex(index);
-        Vibration.vibrate(70);
+        if (message?.isOwn) {
+          setShowMenu({visible: true, message: message});
+          setHighLightMessageIndex(index);
+          Vibration.vibrate(70);
+        }
       }}>
-      <ReAnimated.View
+      <Animated.View
         entering={highLightMessageIndex === index ? FadeIn : undefined}
         exiting={highLightMessageIndex === index ? FadeOut : undefined}
         style={[
@@ -195,82 +220,73 @@ const MessageBubble: FC<MessageBubbleProps> = ({
           },
         ]}
         ref={bubbleRef}>
-        <Animated.View
-          {...panResponder.panHandlers}
-          style={[
-            styles.bubbleContainer,
-            isOwn ? styles.ownMessageContainer : styles.otherMessageContainer,
-            {transform: [{translateX: pan}], zIndex: -10},
-          ]}>
-          <View
-            style={[styles.tail, isOwn ? styles.ownTail : styles.otherTail]}
-          />
-          <View
+        <PanGestureHandler onGestureEvent={onGestureEvent}>
+          <Animated.View
             style={[
-              styles.bubble,
-              isOwn ? styles.ownBubble : styles.otherBubble,
+              styles.bubbleContainer,
+              isOwn ? styles.ownMessageContainer : styles.otherMessageContainer,
+              animatedStyle,
             ]}>
-            {message.replyTo && (
-              <TouchableOpacity
-                activeOpacity={0.7}
-                style={styles.replyContainer}
-                onPress={() => onReplyPress(message?.replyTo!)}>
-                <View
-                  style={[
-                    styles.replyBar,
-                    {backgroundColor: isOwn ? 'blue' : 'green'},
-                  ]}
-                />
-                <View style={styles.replyContent}>
-                  <CommonText
-                    color={isOwn ? 'blue' : 'green'}
-                    size="error"
-                    numberOfLines={1}
-                    ellipsizeMode="clip"
-                    content={isOwn ? 'You' : message.replyTo.senderName}
-                  />
-                  <CommonText
-                    color="#7C7C7C"
-                    numberOfLines={1}
-                    content={message.replyTo.text}
-                  />
-                </View>
-              </TouchableOpacity>
-            )}
-            <CommonText
-              size="large"
-              color={appColors.dark}
-              content={message?.text}
+            <View
+              style={[styles.tail, isOwn ? styles.ownTail : styles.otherTail]}
             />
-            <View style={styles.timestampContainer}>
-              <CommonText
-                color="#7C7C7C"
-                size="error"
-                content={new Date(message.timestamp).toLocaleTimeString([], {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              />
-              {isOwn ? (
-                <Icon
-                  name={
-                    message?.status === 'sent'
-                      ? 'checkmark-outline'
-                      : 'checkmark-done-outline'
-                  }
-                  type="ionicon"
-                  color={
-                    message?.status === 'read'
-                      ? appColors.transferBg
-                      : '#7C7C7C'
-                  }
-                  size={15}
-                />
-              ) : undefined}
+            <View
+              style={[
+                styles.bubble,
+                isOwn ? styles.ownBubble : styles.otherBubble,
+              ]}>
+              {message.replyTo && (
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  style={styles.replyContainer}
+                  onPress={() => onReplyPress(message.replyTo!)}>
+                  <View
+                    style={[
+                      styles.replyBar,
+                      {backgroundColor: isOwn ? 'blue' : 'green'},
+                    ]}
+                  />
+                  <View style={styles.replyContent}>
+                    <Text
+                      style={[
+                        styles.replyName,
+                        {color: isOwn ? 'blue' : 'green'},
+                      ]}
+                      numberOfLines={1}
+                      ellipsizeMode="clip">
+                      {isOwn ? 'You' : message.replyTo.senderName}
+                    </Text>
+                    <Text style={styles.replyText} numberOfLines={1}>
+                      {message.replyTo.text}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              )}
+              <Text style={styles.messageText}>{message.text}</Text>
+              <View style={styles.timestampContainer}>
+                <Text style={styles.timestamp}>
+                  {new Date(message.timestamp).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </Text>
+                {isOwn && (
+                  <Icon
+                    name={
+                      message.status === 'sent'
+                        ? 'checkmark-outline'
+                        : 'checkmark-done-outline'
+                    }
+                    type="ionicon"
+                    color={message.status === 'read' ? '#007AFF' : '#7C7C7C'}
+                    size={15}
+                  />
+                )}
+              </View>
             </View>
-          </View>
-        </Animated.View>
-      </ReAnimated.View>
+          </Animated.View>
+        </PanGestureHandler>
+      </Animated.View>
     </Pressable>
   );
 };
@@ -342,10 +358,12 @@ const ChatView: FC = () => {
   const [rbSheetOpen, setRbSheetOpen] = useState(false);
   const deleteRBSheetRef = useRef<RBSheetRef>(null);
   const isFieldFocus = useRef<TextInput>(null);
+  const [isSocketReconnecting, setisSocketReconnecting] = useState(false);
   const route = useRoute<RouteProp<{params: {id: string}}, 'params'>>();
   // FlatList viewability config
   const viewabilityConfig = useRef({itemVisiblePercentThreshold: 50}).current;
-  const {sendTypingStatus, socket, joinRoom, leaveRoom} = useSocket();
+  const {sendTypingStatus, socket, joinRoom, leaveRoom, isConnected, connect} =
+    useSocket();
 
   useEffect(() => {
     if (highLightMessageIndex && !showMenuOption?.message?.id) {
@@ -354,6 +372,24 @@ const ChatView: FC = () => {
       }, 1000);
     }
   }, [highLightMessageIndex]);
+
+  useEffect(() => {
+    if (isConnected) {
+      setisSocketReconnecting(false);
+    } else {
+      setisSocketReconnecting(true);
+
+      // Try to reconnect
+      connect()
+        .then(() => {
+          setisSocketReconnecting(false);
+        })
+        .catch(error => {
+          console.error('Socket reconnection failed:', error);
+          setisSocketReconnecting(true);
+        });
+    }
+  }, [isConnected, connect]);
 
   useEffect(() => {
     groupMessagesByDate(messages);
@@ -399,7 +435,6 @@ const ChatView: FC = () => {
         ];
       });
 
-      // groupMessagesByDate(data);
       setBtnLoading(false);
       setNewMessage('');
       setReplyTo(null);
@@ -432,25 +467,20 @@ const ChatView: FC = () => {
         setHighLightMessageIndex(null);
         deleteRBSheetRef.current?.close();
         setShowMenuOptions({visible: false, message: null});
-        setMessages(prev =>
-          prev.filter(item => item.id !== message?.messageId),
-        );
-        // setFlatListData(prev => {
-        //   let skipNext = false;
-        //   return prev.filter((item, index, array) => {
-        //     if (skipNext) {
-        //       skipNext = false;
-        //       return false; // Skip the next item if flagged
-        //     }
-        //     if (item.id === message.messageId) {
-        //       if (array[index + 1]?.type === 'date') {
-        //         skipNext = true; // Mark the next item to be skipped
-        //       }
-        //       return false; // Remove current item
-        //     }
-        //     return true; // Keep other items
-        //   });
-        // });
+        setMessages(prevMessages => {
+          // Filter out the message with the given ID
+          const filteredMessages = prevMessages.filter(
+            msg => msg.id !== message?.messageId,
+          );
+
+          // Update replyTo in remaining messages
+          return filteredMessages.map(msg => {
+            if (msg.replyTo && msg.replyTo._id === message?.messageId) {
+              return {...msg, replyTo: undefined};
+            }
+            return msg;
+          });
+        });
       }
     };
 
@@ -646,14 +676,18 @@ const ChatView: FC = () => {
 
   const sendMessage = useCallback(() => {
     if (!newMessage.trim()) return;
-    setBtnLoading(true);
-    sendTypingStatus(false, route?.params?.id);
-    socket?.emit('message:send', {
-      message: newMessage.trim(),
-      request_id: route.params.id,
-      replyTo: replyTo || undefined,
-      senderId: userDetails?.id,
-    });
+    if (isConnected) {
+      setBtnLoading(true);
+      sendTypingStatus(false, route?.params?.id);
+      socket?.emit('message:send', {
+        message: newMessage.trim(),
+        request_id: route.params.id,
+        replyTo: replyTo || undefined,
+        senderId: userDetails?.id,
+      });
+    } else {
+      setisSocketReconnecting(true);
+    }
   }, [newMessage]);
 
   return (
@@ -680,7 +714,7 @@ const ChatView: FC = () => {
                 }}>
                 <TouchableOpacity
                   onPress={() => {
-                    Vibration.vibrate(50);
+                    Vibration.vibrate(70);
                     Keyboard.isVisible;
                     isFieldFocus?.current?.focus();
                     setReplyTo(showMenuOption?.message);
@@ -713,11 +747,15 @@ const ChatView: FC = () => {
         />
         <StatusBar
           backgroundColor={
-            isLoading || rbSheetOpen
+            isLoading || rbSheetOpen || isSocketReconnecting
               ? appColors.transparentBackground
               : appColors.light
           }
-          barStyle={isLoading || rbSheetOpen ? 'light-content' : 'dark-content'}
+          barStyle={
+            isLoading || rbSheetOpen || isSocketReconnecting
+              ? 'light-content'
+              : 'dark-content'
+          }
         />
         <FlatList
           initialNumToRender={15}
@@ -796,6 +834,21 @@ const ChatView: FC = () => {
           container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
         }}
       />
+      <Popover
+        popoverStyle={{
+          padding: 15,
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: 8,
+          width: 150,
+          height: 100,
+        }}
+        isVisible={isSocketReconnecting}>
+        <View style={{gap: 10}}>
+          <ActivityIndicator size={'small'} color={appColors.primary} />
+          <CommonText content="Reconnecting..." />
+        </View>
+      </Popover>
     </GestureHandlerRootView>
   );
 };
@@ -973,6 +1026,19 @@ const styles = StyleSheet.create({
     backgroundColor: 'gray',
     borderRadius: 4,
     marginHorizontal: 3,
+  },
+  timestamp: {
+    fontSize: 11,
+    color: '#7C7C7C',
+    marginRight: 4,
+  },
+  messageText: {
+    fontSize: 16,
+    color: '#000000',
+  },
+  replyText: {
+    fontSize: 12,
+    color: '#7C7C7C',
   },
 });
 

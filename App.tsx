@@ -11,7 +11,7 @@ import AuthStack from '@navigations/AuthStack';
 import {RootState} from './src/store/store';
 import {useDispatch, useSelector} from 'react-redux';
 import AppStack from '@navigations/AppStack';
-import {useNetInfo} from '@react-native-community/netinfo';
+import NetInfo, {useNetInfo} from '@react-native-community/netinfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ReactNativeBiometrics from 'react-native-biometrics';
 import messaging from '@react-native-firebase/messaging';
@@ -68,6 +68,7 @@ const App = () => {
   const [isNavigateToLogin, setIsNavigateToLogin] = useState<null | boolean>(
     null,
   );
+  const [isConnected, setIsConnected] = useState(false);
   const netInfo = useNetInfo();
   const dispatch = useDispatch();
   const {t, i18n} = useTranslation('profile');
@@ -195,6 +196,26 @@ const App = () => {
       });
   }, [netInfo?.isConnected]);
 
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(state => {
+      console.log('Connection type', state.type);
+      console.log('Is connected?', state.isConnected);
+      setIsConnected(state.isConnected!);
+    });
+
+    // Unsubscribe
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+  const checkConnction = () => {
+    NetInfo.fetch().then(state => {
+      console.log('Connection type', state.type);
+      console.log('connected?', state.isConnected);
+      setIsConnected(state.isConnected!);
+    });
+  };
+
   const loginStatusCheck = async () => {
     const userToken = await CommonDataService.getToken();
 
@@ -240,7 +261,7 @@ const App = () => {
               body: remoteMessage.notification?.body || '',
               data: remoteMessage.data as Record<string, string>,
             };
-            console.log(message);
+            // console.log(message);
 
             // Display notification
             await displayNotification(message);
@@ -257,7 +278,6 @@ const App = () => {
         // Check for initial notification (app opened from quit state)
         const initialNotification = await messaging().getInitialNotification();
         if (initialNotification) {
-          console.log('Initial notification:', initialNotification);
           handleNotificationPress(initialNotification);
         }
 
@@ -266,7 +286,6 @@ const App = () => {
           ({type, detail}) => {
             switch (type) {
               case EventType.PRESS:
-                console.log('User pressed notification:', detail.notification);
                 handleNotificationPress(detail.notification);
                 break;
               case EventType.DISMISSED:
