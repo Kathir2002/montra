@@ -7,7 +7,6 @@ import {
   useRoute,
 } from '@react-navigation/native';
 import {Icon} from '@rneui/base';
-const x = 10;
 
 import ContactService from '@services/contactSupportService';
 import {appColors} from '@shared/appColors';
@@ -43,7 +42,6 @@ import {
   StatusBar,
   Modal,
   Vibration,
-  Text,
   ActivityIndicator,
 } from 'react-native';
 import Animated, {
@@ -58,8 +56,6 @@ import Animated, {
 import {useSelector} from 'react-redux';
 import {RBSheetRef} from '@shared/components/commonRBSheet/CommonRBSheet';
 import {
-  Gesture,
-  GestureDetector,
   GestureHandlerRootView,
   PanGestureHandler,
 } from 'react-native-gesture-handler';
@@ -76,7 +72,8 @@ export interface Message {
   senderId: string;
   senderName: string;
   _id?: string;
-  status?: 'sent' | 'read';
+  isRead?: boolean;
+  isEdited?: boolean;
 }
 
 export interface IFlatListData extends Message {
@@ -159,7 +156,6 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
 }) => {
   const translateX = useSharedValue(0);
   const bubbleRef = useRef<View>(null);
-
   const handleFocus = useCallback(() => {
     if (isFocus?.current) {
       isFocus.current.focus();
@@ -247,38 +243,56 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
                     ]}
                   />
                   <View style={styles.replyContent}>
-                    <Text
-                      style={[
-                        styles.replyName,
-                        {color: isOwn ? 'blue' : 'green'},
-                      ]}
+                    <CommonText
+                      content={isOwn ? 'You' : message.replyTo.senderName}
+                      bold
+                      color={isOwn ? 'blue' : 'green'}
                       numberOfLines={1}
-                      ellipsizeMode="clip">
-                      {isOwn ? 'You' : message.replyTo.senderName}
-                    </Text>
-                    <Text style={styles.replyText} numberOfLines={1}>
-                      {message.replyTo.text}
-                    </Text>
+                      ellipsizeMode="clip"
+                    />
+
+                    <CommonText
+                      content={message.replyTo.text}
+                      color="#7C7C7C"
+                      size={'error'}
+                      numberOfLines={1}
+                    />
                   </View>
                 </TouchableOpacity>
               )}
-              <Text style={styles.messageText}>{message.text}</Text>
+              <CommonText
+                content={message?.text}
+                size={'large'}
+                color={appColors.dark}
+              />
               <View style={styles.timestampContainer}>
-                <Text style={styles.timestamp}>
-                  {new Date(message.timestamp).toLocaleTimeString([], {
+                {message?.isEdited ? (
+                  <Icon
+                    name="edit-2"
+                    type="feather"
+                    size={12}
+                    color={'#7C7C7C'}
+                  />
+                ) : undefined}
+                <CommonText
+                  content={new Date(message.timestamp).toLocaleTimeString([], {
                     hour: '2-digit',
                     minute: '2-digit',
                   })}
-                </Text>
+                  style={styles.timestamp}
+                  size={11}
+                  color="#7C7C7C"
+                />
+
                 {isOwn && (
                   <Icon
                     name={
-                      message.status === 'sent'
-                        ? 'checkmark-outline'
-                        : 'checkmark-done-outline'
+                      message?.isRead
+                        ? 'checkmark-done-outline'
+                        : 'checkmark-outline'
                     }
                     type="ionicon"
-                    color={message.status === 'read' ? '#007AFF' : '#7C7C7C'}
+                    color={message.isRead ? '#007AFF' : '#7C7C7C'}
                     size={15}
                   />
                 )}
@@ -348,6 +362,7 @@ const ChatView: FC = () => {
   const [flatListData, setFlatListData] = useState<IFlatListData[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [editIndex, setEditIndex] = useState<number | null>(null);
   const [highLightMessageIndex, setHighLightMessageIndex] = useState<
     number | null
   >(null);
@@ -361,12 +376,15 @@ const ChatView: FC = () => {
   const [isSocketReconnecting, setisSocketReconnecting] = useState(false);
   const route = useRoute<RouteProp<{params: {id: string}}, 'params'>>();
   // FlatList viewability config
-  const viewabilityConfig = useRef({itemVisiblePercentThreshold: 50}).current;
+  const viewabilityConfig = useRef({
+    // itemVisiblePercentThreshold: 50,
+    viewAreaCoveragePercentThreshold: 50,
+  }).current;
   const {sendTypingStatus, socket, joinRoom, leaveRoom, isConnected, connect} =
     useSocket();
 
   useEffect(() => {
-    if (highLightMessageIndex && !showMenuOption?.message?.id) {
+    if (highLightMessageIndex && !showMenuOption?.visible) {
       setTimeout(() => {
         setHighLightMessageIndex(null);
       }, 1000);
@@ -374,6 +392,8 @@ const ChatView: FC = () => {
   }, [highLightMessageIndex]);
 
   useEffect(() => {
+    console.log(isConnected, isLoading);
+
     if (isConnected) {
       setisSocketReconnecting(false);
     } else {
@@ -416,7 +436,7 @@ const ChatView: FC = () => {
                 text: '',
                 senderId: '',
                 timestamp: new Date(),
-                status: 'sent',
+                isRead: false,
                 senderName: '',
               },
               ...filteredData,
@@ -445,17 +465,16 @@ const ChatView: FC = () => {
         });
       }, 100);
     };
-    const handleReceiveMessageStatus = (message: IFlatListData) => {
-      // console.log(message, userDetails?.name);
-
-      setFlatListData(prev => [
-        {
-          ...message,
-
-          type: 'message',
-        },
-        ...prev,
-      ]);
+    const handleReceiveMessageStatus = (messageIds: string[]) => {
+      console.log(messageIds, 'Receive message status ', userDetails?.name);
+      setMessages(prev => {
+        return prev.map(item => {
+          if (messageIds?.includes(item?.id)) {
+            return {...item, isRead: true};
+          }
+          return item;
+        });
+      });
     };
     const handleMessageDeleteStatus = (message: {
       messageId: string;
@@ -484,37 +503,67 @@ const ChatView: FC = () => {
       }
     };
 
+    const handleMessageUpdate = (message: IFlatListData) => {
+      setMessages(prev =>
+        prev.map(msg =>
+          msg.id === message.id
+            ? {...msg, text: message.text} // Update only the text or other necessary fields
+            : msg,
+        ),
+      );
+      setEditIndex(null);
+      setBtnLoading(false);
+      setNewMessage('');
+      setReplyTo(null);
+      setHighLightMessageIndex(null);
+      setTimeout(() => {
+        flatListRef.current?.scrollToIndex({
+          index: 0,
+          animated: true,
+        });
+      }, 100);
+    };
+
     socket.on('user:typing', handleTyping);
     socket?.on('message:receive', handleReceiveMessage); // Listen for incoming messages
-    // socket?.on('message:status', handleReceiveMessageStatus);
+    socket?.on('message:read-status', handleReceiveMessageStatus);
     socket?.on('message:deleteStatus', handleMessageDeleteStatus);
+    socket.on('message:update', handleMessageUpdate);
     return () => {
       socket.off('user:typing', handleTyping); // Cleanup the listener
       socket?.off('message:receive', handleReceiveMessage);
-      // socket?.off('message:status', handleReceiveMessageStatus);
+      socket?.off('message:read-status', handleReceiveMessageStatus);
       socket?.off('message:deleteStatus', handleMessageDeleteStatus);
+      socket.off('message:update', handleMessageUpdate);
       leaveRoom(route?.params?.id);
     };
   }, [socket, route?.params?.id]); // Ensure effect runs only when `socket` or `roomId` changes
 
   // UseRef to avoid unnecessary re-renders
-  const onViewableItemsChanged = useRef(
-    ({viewableItems}: {viewableItems: {item: IFlatListData}[]}) => {
-      const visibleIds = viewableItems?.map(item => {
-        if (
-          !item?.item?.isOwn &&
-          item?.item?.status !== 'read' &&
-          item?.item?.type === 'message'
-        )
-          return item?.item?.id;
-      });
-      const ids = visibleIds.filter(visibleId => visibleId !== undefined);
+  const onViewableItemsChanged = ({
+    viewableItems,
+  }: {
+    viewableItems: {item: IFlatListData}[];
+  }) => {
+    const visibleIds = viewableItems?.map(({item}) => {
+      if (!item?.isOwn && !item?.isRead && item?.type === 'message')
+        return item?.id;
+    });
+
+    const ids = visibleIds.filter(visibleId => visibleId !== undefined);
+    if (ids.length > 0) {
+      console.log(ids, 'IDS');
+
       markAsRead(ids);
-    },
-  ).current;
+    }
+  };
+
+  const viewabilityConfigCallbackPairs = useRef([
+    {viewabilityConfig, onViewableItemsChanged},
+  ]).current;
 
   const markAsRead = (visibleItems: string[]) => {
-    socket?.emit('message:status', {
+    socket?.emit('message:update-read-status', {
       request_id: route?.params?.id,
       messageIds: visibleItems,
       senderId: userDetails?.id,
@@ -531,7 +580,6 @@ const ChatView: FC = () => {
           ...chat,
           isOwn: chat.senderId === userDetails?.id,
         }));
-
         setMessages(data);
       }
     } catch (err: any) {
@@ -684,6 +732,8 @@ const ChatView: FC = () => {
         request_id: route.params.id,
         replyTo: replyTo || undefined,
         senderId: userDetails?.id,
+        isFromEdit: editIndex !== null ? true : false,
+        messageId: flatListData[editIndex!]?.id,
       });
     } else {
       setisSocketReconnecting(true);
@@ -713,6 +763,12 @@ const ChatView: FC = () => {
                   gap: 25,
                 }}>
                 <TouchableOpacity
+                  hitSlop={{
+                    left: 15,
+                    right: 15,
+                    top: 15,
+                    bottom: 15,
+                  }}
                   onPress={() => {
                     Vibration.vibrate(70);
                     Keyboard.isVisible;
@@ -727,7 +783,14 @@ const ChatView: FC = () => {
                   />
                 </TouchableOpacity>
                 <TouchableOpacity
+                  hitSlop={{
+                    left: 15,
+                    right: 15,
+                    top: 15,
+                    bottom: 15,
+                  }}
                   onPress={() => {
+                    setEditIndex(highLightMessageIndex!);
                     setNewMessage(showMenuOption?.message?.text!);
                     isFieldFocus.current?.focus();
                   }}>
@@ -767,8 +830,7 @@ const ChatView: FC = () => {
           contentContainerStyle={styles.messagesList}
           inverted
           onScrollToIndexFailed={onScrollToIndexFailed}
-          onViewableItemsChanged={onViewableItemsChanged}
-          viewabilityConfig={viewabilityConfig}
+          viewabilityConfigCallbackPairs={viewabilityConfigCallbackPairs}
         />
 
         <View style={styles.inputSection}>
@@ -985,12 +1047,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
 
-  replyName: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#25D366',
-  },
-
   replyButton: {
     padding: 8,
     marginLeft: 8,
@@ -1028,17 +1084,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 3,
   },
   timestamp: {
-    fontSize: 11,
-    color: '#7C7C7C',
     marginRight: 4,
-  },
-  messageText: {
-    fontSize: 16,
-    color: '#000000',
-  },
-  replyText: {
-    fontSize: 12,
-    color: '#7C7C7C',
   },
 });
 

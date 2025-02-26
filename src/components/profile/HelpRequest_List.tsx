@@ -71,7 +71,7 @@ const HelpRequest_List = () => {
   const [isLoading, setIsLoading] = useState(false);
   const isFocused = useIsFocused();
 
-  const getRequsetList = async () => {
+  const getRequestList = async () => {
     await ContactService.getSupportList({
       searchText: search !== '' ? search : undefined,
       isAdmin: userDetails?.isAdmin,
@@ -98,17 +98,20 @@ const HelpRequest_List = () => {
     if (search.trim().length > 0) {
       const searchDebounceFunction = setTimeout(() => {
         setIsLoading(true);
-        getRequsetList();
+        getRequestList();
       }, 1000);
 
       return () => clearTimeout(searchDebounceFunction);
+    } else {
+      setIsLoading(true);
+      getRequestList();
     }
   }, [search]);
 
   useEffect(() => {
     if (isFocused) {
       setIsLoading(true);
-      getRequsetList();
+      getRequestList();
     }
   }, [isFocused]);
 
@@ -332,7 +335,7 @@ const HelpRequest_List = () => {
 
   const onRefresh = () => {
     setRefreshing(true);
-    getRequsetList();
+    getRequestList();
   };
 
   return (

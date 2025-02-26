@@ -14,6 +14,8 @@ import TransferIcon from '@assets/svg/transfer.svg';
 import {paymentData, PaymentDataInterface} from '@assets/svg';
 import {getCurrencySymbol} from '@src/lib/functions';
 import {useTranslation} from 'react-i18next';
+// import DividendIcon from '@assets/svg/income/dividends.svg';
+import InterestIcon from '@assets/svg/income/interest.svg';
 
 const TransactionRenderItem = ({
   item,
@@ -43,6 +45,11 @@ const TransactionRenderItem = ({
       switch (item?.transactionFor) {
         case 'Salary':
           return <SalaryIcon width={30} height={30} />;
+        case 'Dividend':
+        // return <DividendIcon width={30} height={30} />;
+        case 'Interest':
+          return <InterestIcon width={30} height={30} />;
+
         default:
           return <TransportationIcon width={30} height={30} />;
       }
