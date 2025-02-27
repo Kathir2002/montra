@@ -68,16 +68,6 @@ jobs:
           path: android/app/build/outputs/apk/release/app-release.apk
           retention-days: 90
           
-      - name: Commit and Push APK to "apk-builds" Branch
-        run: |
-          git config --global user.name 'github-actions'
-          git config --global user.email 'github-actions@github.com'
-          git checkout --orphan apk-builds  # Creates a new branch if it doesn't exist
-          git rm -rf .  # Removes everything (since it's an orphan branch)
-          git add android/app/build/outputs/apk/release/app-release.apk
-          git commit -m "Auto-commit: Update built APK"
-          git push origin apk-builds --force  # Pushes the branch to remote
-
         # New steps for creating a GitHub Release
       - name: Extract version and release notes
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -123,4 +113,14 @@ jobs:
           files: android/app/build/outputs/apk/release/app-release.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Commit and Push APK to "apk-builds" Branch
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git checkout --orphan apk-builds  # Creates a new branch if it doesn't exist
+          git rm -rf .  # Removes everything (since it's an orphan branch)
+          git add android/app/build/outputs/apk/release/app-release.apk
+          git commit -m "Auto-commit: Update built APK"
+          git push origin apk-builds --force  # Pushes the branch to remote
 
