@@ -67,3 +67,12 @@ jobs:
           name: android-production-release
           path: android/app/build/outputs/apk/release/app-release.apk
           retention-days: 90
+          
+      - name: Commit and Push APK to Repository
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git add android/app/build/outputs/apk/release/app-release.apk
+          git commit -m "Auto-commit: Update built APK"
+          git push
+
