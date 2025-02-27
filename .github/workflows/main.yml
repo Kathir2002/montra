@@ -82,15 +82,34 @@ jobs:
       - name: Extract version and release notes
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
-          # Extract version from the first line of RELEASE_NOTES.md
-          VERSION=$(head -n 1 RELEASE_NOTES.md | sed 's/[^0-9.v]//g')
-          # Get the remaining content as release notes (skipping the first line)
-          RELEASE_NOTES=$(tail -n +2 RELEASE_NOTES.md)
-          
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
-          echo "$RELEASE_NOTES" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          # Debug to see current directory contents
+          echo "Current directory contents:"
+          ls -la
+    
+          # Check if the file exists
+          if [ -f "RELEASE_NOTES.md" ]; then
+            echo "RELEASE_NOTES.md found"
+          else
+            echo "RELEASE_NOTES.md not found"
+            # Try finding it in different locations
+            find . -name "RELEASE_NOTES.md" -type f
+          fi
+    
+          # Try a different approach - use cat with error handling
+          if [ -f "RELEASE_NOTES.md" ]; then
+            VERSION=$(cat RELEASE_NOTES.md | head -n 1 | sed 's/[^0-9.v]//g')
+            RELEASE_NOTES=$(cat RELEASE_NOTES.md | tail -n +2)
+      
+            echo "VERSION=$VERSION" >> $GITHUB_ENV
+            echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+            echo "$RELEASE_NOTES" >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+          else
+            # Fallback to a default version if file not found
+            echo "VERSION=v1.0.0" >> $GITHUB_ENV
+            echo "RELEASE_NOTES=Initial Release" >> $GITHUB_ENV
+            echo "Warning: Could not find RELEASE_NOTES.md, using default values"
+          fi
       
       - name: Create Release
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
