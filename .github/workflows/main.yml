@@ -49,13 +49,12 @@ jobs:
           ls -la android/app/
           echo "Working directory: $(pwd)"
 
-      - name: Create gradle.properties
+      - name: Update gradle.properties
         run: |
-          echo "MYAPP_RELEASE_STORE_FILE=app/montra.keystore" > android/gradle.properties
+          echo "MYAPP_RELEASE_STORE_FILE=app/montra.keystore" >> android/gradle.properties
           echo "MYAPP_RELEASE_STORE_PASSWORD=${{ secrets.MYAPP_RELEASE_STORE_PASSWORD }}" >> android/gradle.properties
           echo "MYAPP_RELEASE_KEY_ALIAS=${{ secrets.MYAPP_RELEASE_KEY_ALIAS }}" >> android/gradle.properties
           echo "MYAPP_RELEASE_KEY_PASSWORD=${{ secrets.MYAPP_RELEASE_KEY_PASSWORD }}" >> android/gradle.properties
-          cat android/gradle.properties # To verify the file content (remove sensitive data before checking)
 
       - name: Build Signed APK
         run: |
