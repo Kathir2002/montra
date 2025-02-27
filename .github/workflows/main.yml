@@ -78,4 +78,30 @@ jobs:
           git commit -m "Auto-commit: Update built APK"
           git push origin apk-builds --force  # Pushes the branch to remote
 
+        # New steps for creating a GitHub Release
+      - name: Extract version and release notes
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          # Extract version from the first line of RELEASE_NOTES.md
+          VERSION=$(head -n 1 RELEASE_NOTES.md | sed 's/[^0-9.v]//g')
+          # Get the remaining content as release notes (skipping the first line)
+          RELEASE_NOTES=$(tail -n +2 RELEASE_NOTES.md)
+          
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+          echo "$RELEASE_NOTES" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+      
+      - name: Create Release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ env.VERSION }}
+          name: Release ${{ env.VERSION }}
+          body: ${{ env.RELEASE_NOTES }}
+          draft: false
+          prerelease: false
+          files: android/app/build/outputs/apk/release/app-release.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
