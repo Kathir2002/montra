@@ -105,6 +105,7 @@ interface MessageBubbleProps {
 
 const ReplyPreview: FC<ReplyPreviewProps> = ({replyTo, onCancel, isOwn}) => {
   if (!replyTo) return null;
+  console.log('Dev');
 
   return (
     <View style={styles.replyPreview}>
