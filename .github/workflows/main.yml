@@ -50,7 +50,7 @@ jobs:
         run: |
           cd android
           ./gradlew assembleRelease \
-            -Pandroid.injected.signing.store.file=montra.keystore \
+            -Pandroid.injected.signing.store.file=app/montra.keystore \
             -Pandroid.injected.signing.store.password=${{ secrets.MYAPP_RELEASE_STORE_PASSWORD }} \
             -Pandroid.injected.signing.key.alias=${{ secrets.MYAPP_RELEASE_KEY_ALIAS }} \
             -Pandroid.injected.signing.key.password=${{ secrets.MYAPP_RELEASE_KEY_PASSWORD }}
