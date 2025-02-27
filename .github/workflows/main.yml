@@ -28,7 +28,6 @@ jobs:
           key: npm-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             npm-${{ runner.os }}-
-
       - name: Install dependencies
         run: npm install
 
@@ -37,23 +36,26 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '17'
-      - name: Decode Keystore from Base64
-        run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/montra.keystore
-
-      - name: Verify Gradle Wrapper
-        run: ls -la android/gradlew
         
       - name: Grant execute permission to Gradlew
         run: chmod +x android/gradlew
+
+      - name: Decode Keystore from Base64
+        run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/montra.keystore
+
+      - name: Verify keystore location
+        run: |
+          ls -la android/app/
+          echo "Working directory: $(pwd)"
 
       - name: Build Signed APK
         run: |
           cd android
           ./gradlew assembleRelease \
-            -Pandroid.injected.signing.store.file=app/montra.keystore \
-            -Pandroid.injected.signing.store.password=${{ secrets.MYAPP_RELEASE_STORE_PASSWORD }} \
-            -Pandroid.injected.signing.key.alias=${{ secrets.MYAPP_RELEASE_KEY_ALIAS }} \
-            -Pandroid.injected.signing.key.password=${{ secrets.MYAPP_RELEASE_KEY_PASSWORD }}
+          -Pandroid.injected.signing.store.file=app/montra.keystore \
+          -Pandroid.injected.signing.store.password=${{ secrets.MYAPP_RELEASE_STORE_PASSWORD }} \
+          -Pandroid.injected.signing.key.alias=${{ secrets.MYAPP_RELEASE_KEY_ALIAS }} \
+          -Pandroid.injected.signing.key.password=${{ secrets.MYAPP_RELEASE_KEY_PASSWORD }}
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
