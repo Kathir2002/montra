@@ -44,7 +44,7 @@ jobs:
       - name: Build APK in Production Release mode
         run: |
           cd android
-          ./gradlew assembleProductionRelease
+          ./gradlew assembleRelease
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
