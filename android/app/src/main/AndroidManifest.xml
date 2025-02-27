@@ -18,8 +18,6 @@
     android:allowBackup="false"
     android:theme="@style/AppTheme"
     android:extractNativeLibs="true"
-    android:usesCleartextTraffic="true"
-
   >
     <!-- android:usesCleartextTraffic="true" -->
     <!-- for push notification popup-->
