@@ -65,7 +65,6 @@ const LoginWithGoogle = (props: LoginWithGoogleProps) => {
 
       // Get the users ID token
       const getToken = await GoogleSignin.signIn();
-      const tokens = await GoogleSignin.getTokens();
 
       if (getToken?.idToken) {
         setIsLoading(true);

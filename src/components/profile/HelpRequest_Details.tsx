@@ -411,7 +411,6 @@ const HelpRequest_Details = () => {
             <CommonButton
               title="Send Reply"
               onPress={() => {
-                setIsLoading(true);
                 navigation.navigate('ChatView', {
                   id: route?.params?.id,
                 });

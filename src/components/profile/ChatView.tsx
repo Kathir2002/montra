@@ -71,12 +71,12 @@ export interface Message {
   id: string;
   text: string;
   isOwn: boolean;
+  isRead: boolean;
   timestamp: Date;
   replyTo?: Message;
   senderId: string;
   senderName: string;
   _id?: string;
-  status?: 'sent' | 'read';
 }
 
 export interface IFlatListData extends Message {
@@ -105,8 +105,6 @@ interface MessageBubbleProps {
 
 const ReplyPreview: FC<ReplyPreviewProps> = ({replyTo, onCancel, isOwn}) => {
   if (!replyTo) return null;
-  console.log('Dev');
-
   return (
     <View style={styles.replyPreview}>
       <View style={styles.replyContainer}>
@@ -274,12 +272,12 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
                 {isOwn && (
                   <Icon
                     name={
-                      message.status === 'sent'
-                        ? 'checkmark-outline'
-                        : 'checkmark-done-outline'
+                      message.isRead
+                        ? 'checkmark-done-outline'
+                        : 'checkmark-outline'
                     }
                     type="ionicon"
-                    color={message.status === 'read' ? '#007AFF' : '#7C7C7C'}
+                    color={message.isRead ? '#007AFF' : '#7C7C7C'}
                     size={15}
                   />
                 )}
@@ -363,6 +361,8 @@ const ChatView: FC = () => {
   const route = useRoute<RouteProp<{params: {id: string}}, 'params'>>();
   // FlatList viewability config
   const viewabilityConfig = useRef({itemVisiblePercentThreshold: 50}).current;
+  const typingTimeout = useRef<NodeJS.Timeout | null>(null);
+
   const {sendTypingStatus, socket, joinRoom, leaveRoom, isConnected, connect} =
     useSocket();
 
@@ -401,6 +401,7 @@ const ChatView: FC = () => {
     if (!socket) return;
 
     joinRoom(route?.params?.id);
+
     const handleTyping = (data: {isTyping: boolean}) => {
       setIsTyping(data?.isTyping);
       setFlatListData(prev => {
@@ -417,7 +418,7 @@ const ChatView: FC = () => {
                 text: '',
                 senderId: '',
                 timestamp: new Date(),
-                status: 'sent',
+                isRead: false,
                 senderName: '',
               },
               ...filteredData,
@@ -446,18 +447,18 @@ const ChatView: FC = () => {
         });
       }, 100);
     };
-    const handleReceiveMessageStatus = (message: IFlatListData) => {
-      // console.log(message, userDetails?.name);
-
-      setFlatListData(prev => [
-        {
-          ...message,
-
-          type: 'message',
-        },
-        ...prev,
-      ]);
+    const handleReceiveMessageStatus = (messageIDs: string[]) => {
+      console.log(messageIDs, userDetails?.name);
+      setMessages(prev => {
+        return prev.map(item => {
+          if (messageIDs?.includes(item?.id)) {
+            return {...item, isRead: true};
+          }
+          return item;
+        });
+      });
     };
+
     const handleMessageDeleteStatus = (message: {
       messageId: string;
       success: boolean;
@@ -487,12 +488,12 @@ const ChatView: FC = () => {
 
     socket.on('user:typing', handleTyping);
     socket?.on('message:receive', handleReceiveMessage); // Listen for incoming messages
-    // socket?.on('message:status', handleReceiveMessageStatus);
+    socket?.on('message:read-status', handleReceiveMessageStatus);
     socket?.on('message:deleteStatus', handleMessageDeleteStatus);
     return () => {
       socket.off('user:typing', handleTyping); // Cleanup the listener
       socket?.off('message:receive', handleReceiveMessage);
-      // socket?.off('message:status', handleReceiveMessageStatus);
+      socket?.off('message:read-status', handleReceiveMessageStatus);
       socket?.off('message:deleteStatus', handleMessageDeleteStatus);
       leaveRoom(route?.params?.id);
     };
@@ -501,25 +502,36 @@ const ChatView: FC = () => {
   // UseRef to avoid unnecessary re-renders
   const onViewableItemsChanged = useRef(
     ({viewableItems}: {viewableItems: {item: IFlatListData}[]}) => {
-      const visibleIds = viewableItems?.map(item => {
-        if (
-          !item?.item?.isOwn &&
-          item?.item?.status !== 'read' &&
-          item?.item?.type === 'message'
-        )
-          return item?.item?.id;
+      const visibleIds = viewableItems?.map(({item}) => {
+        if (!item?.isOwn && !item?.isRead && item?.type === 'message')
+          return item?.id;
       });
+
       const ids = visibleIds.filter(visibleId => visibleId !== undefined);
-      markAsRead(ids);
+      if (ids.length) {
+        markAsRead(ids);
+      }
     },
   ).current;
 
   const markAsRead = (visibleItems: string[]) => {
-    socket?.emit('message:status', {
+    socket?.emit('message:update-read-status', {
       request_id: route?.params?.id,
       messageIds: visibleItems,
       senderId: userDetails?.id,
     });
+  };
+
+  const handleTyping = () => {
+    sendTypingStatus(true, route?.params?.id);
+
+    if (typingTimeout.current) {
+      clearTimeout(typingTimeout.current);
+    }
+
+    typingTimeout.current = setTimeout(() => {
+      sendTypingStatus(false, route?.params?.id);
+    }, 2000); // Hide typing status after 2 seconds of inactivity
   };
 
   const getChat = async () => {
@@ -601,47 +613,6 @@ const ChatView: FC = () => {
     },
     [flatListData],
   );
-
-  const onScrollToIndexFailed = useCallback(
-    (info: {
-      index: number;
-      highestMeasuredFrameIndex: number;
-      averageItemLength: number;
-    }) => {
-      setTimeout(() => {
-        // flatListRef.current?.scrollToIndex({
-        //   index: info.index,
-        //   animated: true,
-        //   viewPosition: 0.5,
-        // });
-      }, 500);
-    },
-    [],
-  );
-
-  useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener(
-      'keyboardDidShow',
-      () => {
-        sendTypingStatus(true, route?.params?.id);
-        flatListData.length > 0
-          ? flatListRef.current?.scrollToIndex({index: 0, animated: true})
-          : undefined;
-      },
-    );
-    const keyboardDidHideListener = Keyboard.addListener(
-      'keyboardDidHide',
-      () => {
-        isFieldFocus.current?.blur();
-        sendTypingStatus(false, route?.params?.id);
-      },
-    );
-
-    return () => {
-      keyboardDidShowListener.remove();
-      keyboardDidHideListener.remove();
-    };
-  }, []);
 
   const handleDeleteMessage = () => {
     setBtnLoading(true);
@@ -767,7 +738,6 @@ const ChatView: FC = () => {
           keyExtractor={(item, index) => index.toString()}
           contentContainerStyle={styles.messagesList}
           inverted
-          onScrollToIndexFailed={onScrollToIndexFailed}
           onViewableItemsChanged={onViewableItemsChanged}
           viewabilityConfig={viewabilityConfig}
         />
@@ -786,7 +756,10 @@ const ChatView: FC = () => {
               ref={isFieldFocus}
               style={styles.input}
               value={newMessage}
-              onChangeText={setNewMessage}
+              onChangeText={text => {
+                setNewMessage(text);
+                handleTyping();
+              }}
               placeholder="Type a message..."
               multiline
             />
@@ -794,7 +767,7 @@ const ChatView: FC = () => {
               activeOpacity={0.7}
               style={[
                 styles.sendButton,
-                !(btnLoading || newMessage?.length) && {
+                !(btnLoading || newMessage.trim()?.length) && {
                   backgroundColor: appColors.placeholderColor,
                 },
               ]}
@@ -964,7 +937,8 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     position: 'absolute',
     right: 22,
-    top: 4,
+    top: '50%',
+    transform: [{translateY: -17}],
   },
   replyPreview: {
     backgroundColor: '#f0f0ff',

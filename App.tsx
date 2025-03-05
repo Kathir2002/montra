@@ -38,6 +38,7 @@ import {
 } from '@src/hooks/useNotificationChannels';
 import {navigationStore} from '@services/setup/navigationStore';
 import {SocketProvider} from '@src/hooks/useSocket';
+import {config} from './environment';
 
 const App = () => {
   useEffect(() => {
@@ -345,7 +346,7 @@ const App = () => {
             <SetUpStack />
           ) : !isLoading && isloggedin ? (
             <SocketProvider
-              serverUrl="http://192.168.35.105:3000"
+              serverUrl={config?.apiUrldb}
               userId={userDetails?.id!}
               username={userDetails?.name}>
               <AppStack />

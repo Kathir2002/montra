@@ -28,12 +28,13 @@ import AuthService from '@services/authService';
 import LoginWithGoogle from '@shared/components/auth/LoginWithGoogle';
 import {useTranslation} from 'react-i18next';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
+import LegalDocumentsModal from './LegalContent';
 
 const SignUp = () => {
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const {t} = useTranslation('auth');
   const [isLoading, setIsLoading] = useState(false);
-
+  const [termsModalVisible, setTermsModalVisible] = useState(false);
   const validationSchema = yup.object().shape({
     email: yup
       .string()
@@ -105,7 +106,9 @@ const SignUp = () => {
       />
       <StatusBar
         backgroundColor={
-          isLoading ? appColors.transparentBackground : appColors.light
+          isLoading || termsModalVisible
+            ? appColors.transparentBackground
+            : appColors.light
         }
         barStyle={'dark-content'}
       />
@@ -221,7 +224,10 @@ const SignUp = () => {
               </View>
             </TouchableWithoutFeedback>
             <View style={{flex: 1, marginLeft: 5}}>
-              <CommonText style={{color: appColors.dark}} content={undefined}>
+              <CommonText
+                style={{color: appColors.dark}}
+                content={undefined}
+                onPress={() => setTermsModalVisible(true)}>
                 {t('bySigningUp')}{' '}
                 <CommonText
                   content={undefined}
@@ -272,6 +278,17 @@ const SignUp = () => {
       <Modal visible={isLoading} animationType="fade" transparent={true}>
         <CommonLoader />
       </Modal>
+      <LegalDocumentsModal
+        visible={termsModalVisible}
+        onAccept={() => {
+          formik.setFieldValue('terms', true);
+          setTermsModalVisible(false);
+        }}
+        onDecline={() => {
+          formik.setFieldValue('terms', false);
+          setTermsModalVisible(false);
+        }}
+      />
     </KeyboardAvoidingView>
   );
 };
