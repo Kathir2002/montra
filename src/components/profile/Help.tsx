@@ -177,7 +177,7 @@ const Help = () => {
               borderRadius: 8,
             }}>
             <CommonText
-              content={String(userDetails?.activeContactRequestCount)}
+              content={String(userDetails?.activeContactRequestCount ?? 0)}
             />
           </View>
           <CommonText content="Active Service Request" />
@@ -188,64 +188,6 @@ const Help = () => {
         style={{flex: 1, paddingHorizontal: 15}}
         contentContainerStyle={{flexGrow: 1, gap: 5, paddingBottom: 20}}>
         <View style={{flex: 1, justifyContent: 'center'}}>
-          {/* <View
-            style={{
-              marginTop: 15,
-            }}>
-            <CommonInput
-              leftIcon={{
-                name: 'user-o',
-                type: 'font-awesome',
-                color: appColors.placeholderColor,
-                size: 20,
-                style: {marginLeft: 8},
-              }}
-              value={formik.values.name!}
-              onChangeText={text => formik.setFieldValue('name', text)}
-              placeholder="Full Name"
-              inputContainerStyle={{
-                paddingHorizontal: 0,
-              }}
-              onBlur={formik.handleBlur('name')}
-              containerStyle={{height: 50}}
-              inputStyle={{
-                fontSize: 14,
-              }}
-              error={
-                formik?.errors?.name && formik.touched.name
-                  ? formik.errors?.name
-                  : ''
-              }
-            />
-          </View> */}
-          {/* <View
-            style={{
-              marginTop: 15,
-              paddingTop: formik.errors.name && formik.touched.name ? 15 : 0,
-            }}>
-            <CommonInput
-              leftIcon={{
-                name: 'email',
-                type: 'fontisto',
-                color: appColors.placeholderColor,
-                size: 20,
-                style: {marginLeft: 8},
-              }}
-              placeholder="Email"
-              autoCapitalize="none"
-              value={formik?.values?.email!}
-              onChangeText={text => formik.setFieldValue('email', text)}
-              inputStyle={{fontSize: 14}}
-              onBlur={formik.handleBlur('email')}
-              containerStyle={{height: 40}}
-              inputContainerStyle={{paddingHorizontal: 0}}
-              error={
-                formik?.errors?.email && formik.touched.email
-                  ? formik.errors?.email
-                  : ''
-              }
-            />
-          </View> */}
           <View
             style={{
               marginTop: 15,

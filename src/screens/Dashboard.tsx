@@ -233,18 +233,6 @@ const Dashboard = () => {
     }
   }, [filterData.filterMonth, chartDropdownValue]);
 
-  // useEffect(() => {
-  //   if (isFocused) {
-  //     accountBalance();
-  //   }
-  // }, [filterData.filterMonth]);
-
-  // useEffect(() => {
-  //   if (isFocused && isUpdated) {
-  //     accountBalance(true);
-  //   }
-  // }, [chartDropdownValue]);
-
   // useEffect which is used to initialize the service call when the transaction entry is modified
   useEffect(() => {
     if (isFocused && isTransactionAdded) {

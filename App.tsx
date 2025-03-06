@@ -175,6 +175,8 @@ const App = () => {
       })
       .catch(err => {
         setIsLoading(false);
+        navigationRef.current && navigationRef.current?.navigate('SignIn');
+        SplashScreen.hide();
         Toast({message: err?.response?.data?.message, type: 'error'});
       })
       .finally(() => {});

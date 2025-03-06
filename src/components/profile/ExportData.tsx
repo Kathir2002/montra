@@ -4,7 +4,6 @@ import {
   Modal,
   Platform,
   StatusBar,
-  StyleSheet,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -118,7 +117,7 @@ const ExportData = () => {
               description: t('DOWNLOAD_FILE'),
               mime: generateMimeType(filename),
             },
-            timeout: 20000,
+            timeout: 2000,
           };
           const token = await CommonDataService.getToken();
           const queryString = Object.keys(data)
@@ -129,6 +128,7 @@ const ExportData = () => {
                 )}`,
             )
             .join('&');
+
           await ReactNativeBlobUtil.config(configOptions)
             .fetch(
               'GET',

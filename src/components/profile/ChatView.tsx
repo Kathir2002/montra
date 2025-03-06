@@ -448,7 +448,6 @@ const ChatView: FC = () => {
       }, 100);
     };
     const handleReceiveMessageStatus = (messageIDs: string[]) => {
-      console.log(messageIDs, userDetails?.name);
       setMessages(prev => {
         return prev.map(item => {
           if (messageIDs?.includes(item?.id)) {
