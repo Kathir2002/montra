@@ -123,7 +123,7 @@ const Account = () => {
           />
           <CommonText
             content={
-              walletData?.totalAccountBalance
+              walletData?.totalAccountBalance >= 0
                 ? getCurrencySymbol(walletData?.totalAccountBalance)
                 : `☹️`
             }

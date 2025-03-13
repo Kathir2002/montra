@@ -8,6 +8,7 @@ import {
   Modal,
   ScrollView,
   StatusBar,
+  TextInput,
   TouchableOpacity,
   Vibration,
   View,
@@ -68,7 +69,6 @@ import BudgetService from '@services/setup/budgetSerice';
 import DeleteDocumetSvg from '@assets/svg/delete-document.svg';
 import {updateIsTransactionAdded} from '@store/slice/appSlice';
 import {useDispatch} from 'react-redux';
-import {Mode} from 'react-native-popover-view/dist/Types';
 import {useTranslation} from 'react-i18next';
 import CommonConfirmation from '@shared/components/CommonConfirmation';
 interface FormValues {

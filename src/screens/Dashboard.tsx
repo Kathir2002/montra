@@ -362,7 +362,7 @@ const Dashboard = () => {
   const HeaderComponent = () => {
     return (
       <View style={{flex: 1}}>
-        {accountBalanceData?.balance > 0 ? (
+        {accountBalanceData?.balance >= 0 ? (
           <View>
             <CommonText
               style={{textAlign: 'center'}}
@@ -699,58 +699,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-// import notifee, {AndroidImportance, EventType} from '@notifee/react-native';
-// import React from 'react';
-// import {View} from 'react-native';
-// import CommonButton from '@shared/components/commonButton/CommonButton'; // Replace with your button component path
-
-// const Dashboard = () => {
-//   const setupNotificationChannel = async () => {
-//     await notifee.createChannel({
-//       id: 'default',
-//       name: 'Default Channel',
-//       importance: AndroidImportance.HIGH,
-//     });
-//   };
-
-//   React.useEffect(() => {
-//     setupNotificationChannel();
-
-//     // Listener for quick actions
-//     const unsubscribe = notifee.onForegroundEvent(({type, detail}) => {
-//       if (type === EventType.ACTION_PRESS && detail.pressAction.id === 'stop') {
-//         console.log('Stop action pressed');
-//         // Additional logic to stop your service
-//       }
-//     });
-
-//     return () => unsubscribe();
-//   }, []);
-
-//   const handlePress = async () => {
-//     await notifee.displayNotification({
-//       title: 'Foreground Service Notification',
-//       body: 'Press the Quick Action to stop the service',
-//       android: {
-//         channelId: 'default',
-//         actions: [
-//           {
-//             title: 'Stop',
-//             pressAction: {
-//               id: 'stop',
-//             },
-//           },
-//         ],
-//       },
-//     });
-//   };
-
-//   return (
-//     <View>
-//       <CommonButton onPress={handlePress} title="Press" />
-//     </View>
-//   );
-// };
-
-// export default Dashboard;
