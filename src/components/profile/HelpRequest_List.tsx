@@ -17,6 +17,7 @@ import {getRelativeTime} from '@src/lib/functions';
 import {RootState} from '@store/store';
 import LottieView from 'lottie-react-native';
 import React, {useEffect, useRef, useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import {
   FlatList,
   KeyboardAvoidingView,
@@ -58,6 +59,7 @@ export interface RequestTicketInterface {
 }
 
 const HelpRequest_List = () => {
+  const {t} = useTranslation('finaceReport');
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const [search, setSearch] = useState('');
   const isFirstRender = useRef(true);
@@ -244,7 +246,13 @@ const HelpRequest_List = () => {
             }}>
             <CommonText
               size={'error'}
-              content={item?.status}
+              content={
+                item?.status === 'New'
+                  ? t('NEW')
+                  : item.status === 'Progress'
+                  ? t('PROGRESS')
+                  : t('RESOLVED')
+              }
               color={
                 item?.status === 'New'
                   ? appColors.light
@@ -292,7 +300,13 @@ const HelpRequest_List = () => {
                 ? appColors.priority.high
                 : undefined
             }
-            content={item?.priority}
+            content={
+              item?.priority === 'Low'
+                ? t('LOW')
+                : item.priority === 'Medium'
+                ? t('MEDIUM')
+                : t('HIGH')
+            }
           />
           {item?.replies?.length ? (
             <>
@@ -346,7 +360,7 @@ const HelpRequest_List = () => {
         <CommonHeader
           theme="dark"
           headerContainerStyle={{backgroundColor: appColors.primary}}
-          title="Support Tickets"
+          title={t('SUPPORT_TICKETS')}
           leftIconPressBack={() => navigation.goBack()}
         />
         <StatusBar
@@ -356,7 +370,9 @@ const HelpRequest_List = () => {
           barStyle={'light-content'}
         />
         <CommonText
-          content={`${userDetails?.activeContactRequestCount} active tickets`}
+          content={`${userDetails?.activeContactRequestCount} ${t(
+            'ACTIVE_TICKETS',
+          )}`}
           color={appColors.lightGrey}
           size={'large'}
           style={{marginHorizontal: 15}}
@@ -365,7 +381,7 @@ const HelpRequest_List = () => {
       <View style={{top: -20}}>
         <CommonSearchBar
           search={search}
-          placeholder="Search tickets..."
+          placeholder={`${t('SEARCH_TICKETS')}...`}
           setSearch={setSearch}
           searchContainerStyle={{
             marginHorizontal: 15,
@@ -407,7 +423,7 @@ const HelpRequest_List = () => {
             />
             <CommonText
               style={{textAlign: 'center'}}
-              content={'No Support Tickets Found!'}
+              content={t('NO_SUPPORT_TICKET_FOUNND')}
             />
           </View>
         }

@@ -133,7 +133,7 @@ const Help = () => {
     <KeyboardAvoidingView style={{flex: 1, backgroundColor: appColors.light}}>
       <CommonHeader
         leftIcon
-        title="Help Center"
+        title={t('HELP_CENTER')}
         leftIconPressBack={() => navigation.goBack()}
       />
       <StatusBar
@@ -180,7 +180,7 @@ const Help = () => {
               content={String(userDetails?.activeContactRequestCount ?? 0)}
             />
           </View>
-          <CommonText content="Active Service Request" />
+          <CommonText content={t('ACTIVE_SERVICE_REQUEST')} />
         </View>
         <Arrow height={30} width={30} stroke={appColors.transferBg} />
       </TouchableOpacity>
@@ -209,7 +209,7 @@ const Help = () => {
               }}
               inputStyle={{fontSize: 14}}
               containerStyle={{height: 40}}
-              placeholder="Phone Number"
+              placeholder={t('PHONE_NO')}
               onBlur={formik.handleBlur('phoneNumber')}
               inputContainerStyle={{paddingHorizontal: 0}}
               error={
@@ -241,7 +241,7 @@ const Help = () => {
               }}
               inputStyle={{fontSize: 14}}
               containerStyle={{height: 40}}
-              placeholder="Subject"
+              placeholder={t('SUBJECT')}
               onBlur={formik.handleBlur('subject')}
               inputContainerStyle={{paddingHorizontal: 0}}
               error={
@@ -276,7 +276,7 @@ const Help = () => {
               containerStyle={{
                 height: 150,
               }}
-              placeholder="Message"
+              placeholder={t('MESSAGE')}
               onBlur={formik.handleBlur('message')}
               inputContainerStyle={{paddingHorizontal: 0, height: 150}}
               error={
@@ -291,7 +291,7 @@ const Help = () => {
               onPress={() => rbSheetRef.current?.open()}
               activeOpacity={0.7}
               style={{
-                marginTop: 10,
+                marginTop: 20,
                 flexDirection: 'row',
                 gap: 10,
                 justifyContent: 'center',
@@ -417,7 +417,10 @@ const Help = () => {
           )}
         </View>
         <View>
-          <CommonButton title="Submit" onPress={() => formik.handleSubmit()} />
+          <CommonButton
+            title={t('SUBMIT')}
+            onPress={() => formik.handleSubmit()}
+          />
         </View>
       </ScrollView>
       <CommonConfirmation
@@ -516,7 +519,7 @@ const Help = () => {
             />
           </TouchableOpacity>
           <CommonText
-            content="Thank you for reaching out! We've received your message and will respond shortly."
+            content={t('THANKYOU_FOR_REACHING')}
             size={'label'}
             style={{textAlign: 'center', paddingHorizontal: 20}}
           />

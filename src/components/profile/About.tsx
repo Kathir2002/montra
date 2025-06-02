@@ -10,22 +10,24 @@ import {
 import {Avatar, Icon} from '@rneui/base';
 import CommonText from '@shared/components/commonText/CommonText';
 import DeviceInfo from 'react-native-device-info';
+import {useTranslation} from 'react-i18next';
 
 const About = () => {
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const appVersion = DeviceInfo.getVersion();
+  const {t} = useTranslation('finaceReport');
   const appFeatures = [
-    'Expense Tracking',
-    'Income Management',
-    'Budget Planning',
-    'Financial Reports',
-    'Export Reports',
+    t('EXPENSE_TRACKING'),
+    t('INCOME_MANAGEMENT'),
+    t('BUDGET_PLANNING'),
+    t('FINACIAL_REPORTS'),
+    t('EXPORT_REPORTS'),
   ];
   return (
     <View style={{flex: 1, backgroundColor: appColors.light}}>
       <CommonHeader
         leftIconPressBack={() => navigation.goBack()}
-        title="About"
+        title={t('ABOUT')}
       />
       <ScrollView
         style={{flex: 1, paddingHorizontal: 15}}
@@ -40,7 +42,7 @@ const About = () => {
           />
           <CommonText content="Montra" bold size={'appHeader'} />
           <CommonText
-            content={`Version ${appVersion}`}
+            content={`${t('VERSION')} ${appVersion}`}
             color={appColors.placeholderColor}
           />
         </View>
@@ -55,11 +57,9 @@ const About = () => {
             borderWidth: 1,
             borderColor: appColors.formBorderColor,
           }}>
-          <CommonText content={'About Montra'} bold size={'label'} />
+          <CommonText content={t('ABOUT_MONTRA')} bold size={'label'} />
           <CommonText
-            content={
-              'Montra is your personal expense tracking companion, helping you manage your finances with ease and clarity. Track expenses, set budgets, and achieve your financial goals.'
-            }
+            content={t('MONTRA_DESCRIPTION')}
             color={appColors.placeholderColor}
           />
         </View>
@@ -106,7 +106,7 @@ const About = () => {
             borderWidth: 1,
             borderColor: appColors.formBorderColor,
           }}>
-          <CommonText content="Contact Us" bold size={'label'} />
+          <CommonText content={t('CONTACT_US')} bold size={'label'} />
           <CommonText
             content="montra.service@gmail.com"
             onPress={() => Linking.openURL('mailto:montra.service@gmail.com')}

@@ -58,14 +58,13 @@ import Animated, {
 import {useSelector} from 'react-redux';
 import {RBSheetRef} from '@shared/components/commonRBSheet/CommonRBSheet';
 import {
-  Gesture,
-  GestureDetector,
   GestureHandlerRootView,
   PanGestureHandler,
 } from 'react-native-gesture-handler';
 import {Pressable} from 'react-native';
 import CommonConfirmation from '@shared/components/CommonConfirmation';
 import Popover from 'react-native-popover-view';
+import {useTranslation} from 'react-i18next';
 
 export interface Message {
   id: string;
@@ -104,6 +103,8 @@ interface MessageBubbleProps {
 }
 
 const ReplyPreview: FC<ReplyPreviewProps> = ({replyTo, onCancel, isOwn}) => {
+  const {t} = useTranslation('profile');
+
   if (!replyTo) return null;
   return (
     <View style={styles.replyPreview}>
@@ -123,7 +124,7 @@ const ReplyPreview: FC<ReplyPreviewProps> = ({replyTo, onCancel, isOwn}) => {
               size="error"
               // numberOfLines={1}
               ellipsizeMode="clip"
-              content={isOwn ? 'You' : replyTo.senderName}
+              content={isOwn ? t('YOU') : replyTo.senderName}
             />
             <TouchableOpacity onPress={onCancel} activeOpacity={0.7}>
               <Icon
@@ -156,6 +157,8 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
   setHighLightMessageIndex,
   isFocus,
 }) => {
+  const {t} = useTranslation('profile');
+
   const translateX = useSharedValue(0);
   const bubbleRef = useRef<View>(null);
 
@@ -253,7 +256,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
                       ]}
                       numberOfLines={1}
                       ellipsizeMode="clip">
-                      {isOwn ? 'You' : message.replyTo.senderName}
+                      {isOwn ? t('YOU') : message.replyTo.senderName}
                     </Text>
                     <Text style={styles.replyText} numberOfLines={1}>
                       {message.replyTo.text}
@@ -290,18 +293,28 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
   );
 };
 
-const DateSeparator: FC<{date: Date}> = ({date}) => (
-  <View style={styles.dateSeparator}>
-    <View style={styles.dateLine} />
-    <CommonText
-      style={styles.dateText}
-      bold
-      color={'#8E8E93'}
-      content={getDateLabel(date)}
-    />
-    <View style={styles.dateLine} />
-  </View>
-);
+const DateSeparator: FC<{date: Date}> = ({date}) => {
+  const {t} = useTranslation('profile');
+
+  return (
+    <View style={styles.dateSeparator}>
+      <View style={styles.dateLine} />
+      <CommonText
+        style={styles.dateText}
+        bold
+        color={'#8E8E93'}
+        content={
+          getDateLabel(date) === 'Today'
+            ? t('TODAY')
+            : getDateLabel(date) === 'Yesterday'
+            ? t('YESTERDAY')
+            : getDateLabel(date)
+        }
+      />
+      <View style={styles.dateLine} />
+    </View>
+  );
+};
 
 const TypingAnimation = () => {
   return (
@@ -336,6 +349,8 @@ const TypingAnimation = () => {
 };
 
 const ChatView: FC = () => {
+  const {t} = useTranslation('profile');
+
   const isFocused = useIsFocused();
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const [isLoading, setIsLoading] = useState(true);
@@ -673,7 +688,7 @@ const ChatView: FC = () => {
         <CommonHeader
           leftIcon
           leftIconPressBack={() => navigation.goBack()}
-          title="Chat"
+          title={t('CHAT')}
           customRightHeaderComponent={
             showMenuOption?.visible ? (
               <View
@@ -759,7 +774,7 @@ const ChatView: FC = () => {
                 setNewMessage(text);
                 handleTyping();
               }}
-              placeholder="Type a message..."
+              placeholder={`${t('TYPE_A_MESSAGE')}...`}
               multiline
             />
             <TouchableOpacity
@@ -788,8 +803,8 @@ const ChatView: FC = () => {
         </Modal>
       </KeyboardAvoidingView>
       <CommonConfirmation
-        titleText={'Remove this message?'}
-        subText={'Are you sure do you wanna remove this transaction?'}
+        titleText={t('REMOVE_MESSAGE_CONFIRMATION')}
+        subText={t('REMOVE_MESSAGE_SUBTEXT')}
         handleCancelBtn={() => {
           deleteRBSheetRef.current?.close();
           setRbSheetOpen(false);
@@ -819,7 +834,7 @@ const ChatView: FC = () => {
         isVisible={isSocketReconnecting}>
         <View style={{gap: 10}}>
           <ActivityIndicator size={'small'} color={appColors.primary} />
-          <CommonText content="Reconnecting..." />
+          <CommonText content={`${t('RECONNECTING')}...`} />
         </View>
       </Popover>
     </GestureHandlerRootView>

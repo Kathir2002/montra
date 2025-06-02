@@ -39,6 +39,7 @@ import CommonButton from '@shared/components/commonButton/CommonButton';
 
 const HelpRequest_Details = () => {
   const isFocused = useIsFocused();
+
   const [isLoading, setIsLoading] = useState(true);
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const [ticketDetails, setTicketDetails] = useState<RequestTicketInterface>();
@@ -53,29 +54,29 @@ const HelpRequest_Details = () => {
 
   const priorityData = [
     {
-      label: 'High Priority',
+      label: t('HIGH_PRIORITY'),
       value: 'High',
     },
     {
-      label: 'Medium Priority',
+      label: t('MEDIUM_PRIORITY'),
       value: 'Medium',
     },
     {
-      label: 'Low Priority',
+      label: t('LOW_PRIORITY'),
       value: 'Low',
     },
   ];
   const statusData = [
     {
-      label: 'New',
+      label: t('finaceReport:NEW'),
       value: 'New',
     },
     {
-      label: 'Progress',
+      label: t('finaceReport:PROGRESS'),
       value: 'Progress',
     },
     {
-      label: 'Resolved',
+      label: t('finaceReport:RESOLVED'),
       value: 'Resolved',
     },
   ];
@@ -169,7 +170,7 @@ const HelpRequest_Details = () => {
         <CommonHeader
           theme="dark"
           headerContainerStyle={{backgroundColor: appColors.primary}}
-          title="Tickets Details"
+          title={t('TICKET_DETAILS')}
           leftIconPressBack={() => navigation.goBack()}
         />
         <StatusBar
@@ -230,7 +231,7 @@ const HelpRequest_Details = () => {
             <View style={{flex: 0.45}}>
               <CommonDropDown
                 disabled={!userDetails.isAdmin}
-                placeholder="Status"
+                placeholder={t('STATUS')}
                 items={statusData}
                 open={statusDropdownOpen}
                 setOpen={setStatusDropdownOpen}
@@ -244,7 +245,7 @@ const HelpRequest_Details = () => {
             </View>
             <View style={{flex: 0.45}}>
               <CommonDropDown
-                placeholder="Priority"
+                placeholder={t('PRIORITY')}
                 disabled={!userDetails.isAdmin}
                 items={priorityData}
                 open={priorityDropdownOpen}
@@ -265,7 +266,7 @@ const HelpRequest_Details = () => {
                 alignItems: 'center',
                 gap: 5,
               }}>
-              <CommonText bold content="Name: " />
+              <CommonText bold content={`${t('NAME')}: `} />
               <CommonText content={ticketDetails?.name} />
             </View>
             <View
@@ -275,7 +276,7 @@ const HelpRequest_Details = () => {
                 gap: 5,
                 zIndex: 1,
               }}>
-              <CommonText bold content="Email: " />
+              <CommonText bold content={`${t('EMAIL')}: `} />
               <CommonText content={ticketDetails?.email} />
             </View>
             <View
@@ -285,7 +286,7 @@ const HelpRequest_Details = () => {
                 gap: 5,
                 zIndex: 1,
               }}>
-              <CommonText bold content="Phone Number: " />
+              <CommonText bold content={`${t('PHONE_NUMBER')}: `} />
               <CommonText content={String(ticketDetails?.phoneNumber)} />
             </View>
             <View
@@ -295,7 +296,7 @@ const HelpRequest_Details = () => {
                 gap: 5,
                 zIndex: 1,
               }}>
-              <CommonText bold content="Subject: " />
+              <CommonText bold content={`${t('SUBJECT')}: `} />
               <CommonText content={ticketDetails?.subject} />
             </View>
           </View>
@@ -309,7 +310,7 @@ const HelpRequest_Details = () => {
               paddingVertical: 5,
               zIndex: 1,
             }}>
-            <CommonText bold content="Message" />
+            <CommonText bold content={t('MESSAGE')} />
             <CommonText
               content={ticketDetails?.message}
               color={appColors.placeholderColor}
@@ -409,7 +410,7 @@ const HelpRequest_Details = () => {
         {userDetails?.isAdmin || ticketDetails?.replies?.length! > 0 ? (
           <View style={{flex: 1, justifyContent: 'flex-end'}}>
             <CommonButton
-              title="Send Reply"
+              title={t('SEND_REPLY')}
               onPress={() => {
                 navigation.navigate('ChatView', {
                   id: route?.params?.id,

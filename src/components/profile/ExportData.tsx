@@ -2,11 +2,13 @@ import {
   KeyboardAvoidingView,
   Linking,
   Modal,
+  PermissionsAndroid,
   Platform,
   StatusBar,
   TouchableOpacity,
   View,
 } from 'react-native';
+import {Buffer} from 'buffer';
 import React, {useState} from 'react';
 import ReactNativeBlobUtil, {
   FS,
@@ -30,6 +32,8 @@ import CommonDataService from '@shared/commonDataServices';
 import TransactionService from '@services/transactionService';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
 import {useTranslation} from 'react-i18next';
+import axiosInstance from '@services/interceptor';
+import axios from 'axios';
 
 interface PayloadData {
   transactionType: string;
@@ -76,6 +80,24 @@ const ExportData = () => {
         return 'text/csv';
     }
   };
+
+  const requestStoragePermission = async () => {
+    if (Platform.OS === 'android' && Platform.Version < 33) {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        {
+          title: 'Storage Permission',
+          message: 'App needs access to storage to save the file.',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },
+      );
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    }
+    return true; // Android 13+ doesn't require it for DownloadDir
+  };
+
   let isFetching = false;
 
   const exportTransactionData = async () => {
@@ -116,10 +138,12 @@ const ExportData = () => {
               path: filePath,
               description: t('DOWNLOAD_FILE'),
               mime: generateMimeType(filename),
+              storeInDownloads: true,
             },
-            timeout: 2000,
+            timeout: 6000,
           };
           const token = await CommonDataService.getToken();
+
           const queryString = Object.keys(data)
             .map(
               (key: string) =>
@@ -128,41 +152,62 @@ const ExportData = () => {
                 )}`,
             )
             .join('&');
-
-          await ReactNativeBlobUtil.config(configOptions)
-            .fetch(
-              'GET',
+          await axios
+            .get(
               `${config.apiUrldb}api/transaction/export-transction?${queryString}`,
               {
-                'Content-Type': 'application/json',
-                Accept:
-                  formatValue === 'CSV'
-                    ? 'text/csv'
-                    : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                Authorization: `Bearer ${token}`,
-                'Access-Control-Allow-Origin': '*',
+                responseType: 'arraybuffer',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Accept:
+                    formatValue === 'CSV'
+                      ? 'text/csv'
+                      : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                  Authorization: `Bearer ${token}`,
+                },
               },
             )
-            .then(async res => {
-              setLoading(false);
-              setModalVisible(true);
-              Toast({
-                message: t('FILE_DOWNLOAD_SUCCESS'),
-                type: 'success',
-              });
-              if (Platform.OS === 'android') {
-                await ReactNativeBlobUtil.android.actionViewIntent(
+            .then(async response => {
+              if (response?.data) {
+                const buffer = Buffer.from(response.data); // You don’t need 'binary' here
+                const base64Data = buffer.toString('base64');
+
+                await ReactNativeBlobUtil.fs.writeFile(
                   filePath,
-                  generateMimeType(filename)!,
+                  base64Data,
+                  'base64',
                 );
-              }
-              // Handle iOS
-              else if (Platform.OS === 'ios') {
-                if (filePath.startsWith('file://')) {
-                  await Linking.openURL(filePath);
-                } else {
-                  await Linking.openURL(`file://${filePath}`);
+                setLoading(false);
+                setModalVisible(true);
+                Toast({
+                  message: t('FILE_DOWNLOAD_SUCCESS'),
+                  type: 'success',
+                });
+                if (Platform.OS === 'android') {
+                  await ReactNativeBlobUtil.android.actionViewIntent(
+                    filePath,
+                    generateMimeType(filename)!,
+                  );
                 }
+                // Handle iOS
+                else if (Platform.OS === 'ios') {
+                  if (filePath.startsWith('file://')) {
+                    await Linking.openURL(filePath);
+                  } else {
+                    await Linking.openURL(`file://${filePath}`);
+                  }
+                }
+                if (Platform.OS === 'android') {
+                  ReactNativeBlobUtil.android.addCompleteDownload({
+                    title: filename,
+                    description: t('DOWNLOAD_FILE'),
+                    mime: generateMimeType(filename)!,
+                    path: filePath,
+                    showNotification: true,
+                  });
+                }
+
+                console.log('✅ File downloaded to:', filePath);
               }
             })
             .catch(err => {
@@ -181,7 +226,6 @@ const ExportData = () => {
       .catch(err => {
         setLoading(false);
         console.log('Error in exporting data:', err?.response?.data?.message);
-
         Toast({message: err?.response?.data?.message, type: 'error'});
       })
       .finally(() => {

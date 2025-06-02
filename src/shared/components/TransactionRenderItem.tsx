@@ -37,14 +37,14 @@ const TransactionRenderItem = ({
         case 'Transportation':
           return <TransportationIcon width={30} height={30} />;
         default:
-          return <TransportationIcon width={30} height={30} />;
+          return <ShoppingIcon width={30} height={30} />;
       }
     } else if (item?.transactionType === 'Income') {
       switch (item?.transactionFor) {
         case 'Salary':
           return <SalaryIcon width={30} height={30} />;
         default:
-          return <TransportationIcon width={30} height={30} />;
+          return <SalaryIcon width={30} height={30} />;
       }
     } else {
       return <TransferIcon width={30} height={30} />;
