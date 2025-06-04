@@ -101,16 +101,19 @@ const ChangePassword = () => {
   };
 
   const resetPasswordMailHandler = async () => {
+    setIsLoading(true);
     const data = {
       email: userDetails.email,
     };
     AuthService.forgotPassword({data})
       .then((res: any) => {
         if (res?.success) {
+          setIsLoading(false);
           setEmailModalVisible(true);
         }
       })
       .catch(err => {
+        setIsLoading(false);
         Toast({message: err?.response?.data?.message, type: 'error'});
       });
   };
@@ -340,16 +343,11 @@ const ChangePassword = () => {
           />
         </View>
       </ScrollView>
-      <Modal
-        visible={emailModalVisible}
-        animationType="fade"
-        onRequestClose={() => {
-          setEmailModalVisible(false);
-        }}>
-        <CommonHeader
+      <Modal visible={emailModalVisible} animationType="fade">
+        {/* <CommonHeader
           leftIconPressBack={() => setEmailModalVisible(false)}
           title=""
-        />
+        /> */}
         <ScrollView
           contentContainerStyle={{
             flexGrow: 1,

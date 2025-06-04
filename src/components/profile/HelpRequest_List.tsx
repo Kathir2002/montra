@@ -97,7 +97,8 @@ const HelpRequest_List = () => {
       isFirstRender.current = false; // Mark as rendered
       return; // Skip the first effect execution
     }
-    if (search.trim().length > 0) {
+
+    if (search.trim().length >= 0) {
       const searchDebounceFunction = setTimeout(() => {
         setIsLoading(true);
         getRequsetList();

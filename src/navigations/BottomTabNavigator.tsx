@@ -30,7 +30,11 @@ const BottomTabNavigator = () => {
     <Tab.Navigator
       tabBar={CustomBottomTabs}
       screenOptions={{headerShown: false, tabBarHideOnKeyboard: true}}>
-      <Tab.Screen name="Dashboard" component={Dashboard} />
+      <Tab.Screen
+        name="Dashboard"
+        options={{unmountOnBlur: true}}
+        component={Dashboard}
+      />
       <Tab.Screen name="Transaction" component={Transaction} />
       <Tab.Screen name="Add" component={FABComponent} />
       <Tab.Screen name="Budget" component={Budget} />

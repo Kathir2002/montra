@@ -8,6 +8,7 @@ import {
 import React, {FC} from 'react';
 import {Button, IconNode} from '@rneui/base';
 import {appColors} from '@shared/appColors';
+import {appFonts} from '@shared/appFonts';
 
 interface CommonButtonInterface {
   title: string;
@@ -69,6 +70,7 @@ const commonButtonStyle = StyleSheet.create({
     color: appColors.light,
     textAlign: 'center',
     paddingVertical: 5,
+    fontFamily: appFonts.medium,
   },
   clearButtonStyle: {
     backgroundColor: appColors.buttonClear,
@@ -78,5 +80,6 @@ const commonButtonStyle = StyleSheet.create({
     color: appColors.primary,
     textAlign: 'center',
     paddingVertical: 5,
+    fontFamily: appFonts.medium,
   },
 });
