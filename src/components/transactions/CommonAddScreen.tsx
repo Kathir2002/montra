@@ -1149,6 +1149,7 @@ const CommonAddScreen: FC<{
                       setFromOpen(false);
                       setToOpen(false);
                     }}
+                    disabled={Boolean(route?.params?.category)}
                     open={categoryOpen}
                     setOpen={setCategoryOpen}
                     zIndex={4}

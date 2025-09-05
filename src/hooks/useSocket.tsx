@@ -169,7 +169,7 @@ import React, {
   useCallback,
   ReactNode,
 } from 'react';
-import {Socket, io} from 'socket.io-client';
+import { Socket, io } from 'socket.io-client';
 
 interface SocketContextType {
   socket: Socket | null;
@@ -204,8 +204,8 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
   const initializeSocket = useCallback(
     () =>
       io(serverUrl, {
-        auth: {userId, username},
-        transports: ['websocket'],
+        auth: { userId, username },
+        transports: ['websocket', "polling"],
         reconnection: true,
         reconnectionAttempts: 5,
         reconnectionDelay: 1000,
@@ -218,7 +218,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
       const handleConnect = () => {
         console.log('Socket connected');
         setIsConnected(true);
-        socketInstance.emit('user:join', {userId, username});
+        socketInstance.emit('user:join', { userId, username });
       };
 
       const handleDisconnect = () => {
@@ -293,7 +293,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
   const joinRoom = useCallback(
     (roomId: string): void => {
       if (socket && isConnected) {
-        socket.emit('room:join', {roomId, userId});
+        socket.emit('room:join', { roomId, userId });
       }
     },
     [socket, isConnected, userId],
@@ -302,7 +302,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
   const leaveRoom = useCallback(
     (roomId: string): void => {
       if (socket && isConnected) {
-        socket.emit('room:leave', {roomId, userId});
+        socket.emit('room:leave', { roomId, userId });
       }
     },
     [socket, isConnected, userId],
@@ -311,7 +311,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
   const sendTypingStatus = useCallback(
     (isTyping: boolean, roomId: string): void => {
       if (socket && isConnected) {
-        socket.emit('user:typing', {isTyping, roomId, userId});
+        socket.emit('user:typing', { isTyping, roomId, userId });
       }
     },
     [socket, isConnected, userId],

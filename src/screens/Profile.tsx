@@ -6,6 +6,7 @@ import {
   StatusBarProps,
   StyleSheet,
   TouchableOpacity,
+  Vibration,
   View,
 } from 'react-native';
 import React, {useRef, useState} from 'react';
@@ -257,6 +258,7 @@ const Profile = () => {
         }}>
         <TouchableOpacity
           onPress={() => {
+            Vibration.vibrate(50)
             StatusBar.setBarStyle('light-content');
             setIsFinanceStoryVisible(true);
           }}
@@ -373,7 +375,9 @@ const Profile = () => {
         <CommonLoader />
       </Modal>
       <Modal
+        transparent={true}
         visible={isFinanceStoryVisible}
+        animationType='slide'
         onRequestClose={() => setIsFinanceStoryVisible(false)}>
         <FinanceStory closeHandler={() => setIsFinanceStoryVisible(false)} />
       </Modal>

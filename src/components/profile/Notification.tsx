@@ -150,7 +150,7 @@ const Notification = () => {
   return (
     <KeyboardAvoidingView style={{flex: 1, backgroundColor: appColors.light}}>
       <CommonHeader
-        title={'NOTIFICATION'}
+        title={t('NOTIFICATION')}
         leftIcon
         leftIconPressBack={() => navigation.goBack()}
       />

@@ -1,4 +1,4 @@
-import React, {useEffect, useLayoutEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   FlatList,
   KeyboardAvoidingView,
@@ -10,6 +10,7 @@ import {
   StatusBarProps,
   StyleSheet,
   TouchableOpacity,
+  Vibration,
   View,
 } from 'react-native';
 import {
@@ -18,21 +19,21 @@ import {
   useIsFocused,
   useNavigation,
 } from '@react-navigation/native';
-import {Avatar, Icon} from '@rneui/base';
-import MonthPicker, {EventTypes} from 'react-native-month-year-picker';
-import {appColors} from '@shared/appColors';
+import { Avatar, Icon } from '@rneui/base';
+import MonthPicker, { EventTypes } from 'react-native-month-year-picker';
+import { appColors } from '@shared/appColors';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
-import {useDispatch, useSelector} from 'react-redux';
-import {RootState} from '@store/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '@store/store';
 import CommonText from '@shared/components/commonText/CommonText';
 import IncomeIcon from '@assets/svg/income.svg';
 import ExpenseIcon from '@assets/svg/expense.svg';
-import Animated, {FadeIn, FadeOut} from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import TransactionRenderItem from '@shared/components/TransactionRenderItem';
 import TransactionService from '@services/transactionService';
-import {Toast} from '@shared/ToastConfig';
+import { Toast } from '@shared/ToastConfig';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
-import moment, {Moment, utc} from 'moment';
+import moment, { Moment, utc } from 'moment';
 import NotificationIcon from '@assets/svg/notification.svg';
 import LottieView from 'lottie-react-native';
 import AccountService from '@services/setup/accountService';
@@ -43,11 +44,11 @@ import {
   updateIsFabToggleOpen,
   updateIsTransactionAdded,
 } from '@store/slice/appSlice';
-import {getCurrencySymbol} from '@src/lib/functions';
+import { getCurrencySymbol } from '@src/lib/functions';
 import callPermission from '@services/permission';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {navigationStore} from '@services/setup/navigationStore';
-import {useTranslation} from 'react-i18next';
+import { navigationStore } from '@services/setup/navigationStore';
+import { useTranslation } from 'react-i18next';
 
 export interface TransactionListInterface {
   _id: string;
@@ -79,7 +80,7 @@ export interface TransactionListInterface {
   };
   to: {
     paymentMode: string;
-    wallet: {walletName: string; id: string};
+    wallet: { walletName: string; id: string };
   };
   transactionType: 'Expense' | 'Income' | 'Transfer' | 'Budget';
   wallet: {
@@ -94,7 +95,7 @@ const Dashboard = () => {
   useEffect(() => {
     checkPendingDeepLink();
   }, []);
-  const {t} = useTranslation('transaction');
+  const { t } = useTranslation('transaction');
 
   const checkPendingDeepLink = async () => {
     const pendingUrl = await navigationStore.getPendingDeepLink();
@@ -163,7 +164,7 @@ const Dashboard = () => {
   const [isUpdated, setIsUpdated] = useState(true);
   const [filterData, setFilterData] = useState<{
     filterMonth: Date;
-  }>({filterMonth: new Date()});
+  }>({ filterMonth: new Date() });
 
   const monthFirstdate = moment(filterData.filterMonth).startOf('month');
   const monthLastdate = moment(filterData.filterMonth).endOf('month');
@@ -171,7 +172,7 @@ const Dashboard = () => {
   const monthRange = splitMonthIntoWeeks(monthFirstdate, monthLastdate);
 
   const [chartDropdownData, setChartDropdownData] =
-    useState<{label: string; value: string}[]>(monthRange);
+    useState<{ label: string; value: string }[]>(monthRange);
 
   useEffect(() => {
     if (isFocused) {
@@ -220,7 +221,7 @@ const Dashboard = () => {
   const isTransactionAdded = useSelector(
     (state: RootState) => state.auth.isTransactionAdded,
   );
-  const days = {Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0, Sun: 0};
+  const days = { Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0, Sun: 0 };
 
   // useEffect which is used to initialize the service call functionality
   useEffect(() => {
@@ -269,7 +270,7 @@ const Dashboard = () => {
       const version: number = Number(await Platform.constants?.Release);
       if (version > 12 && !data) {
         callPermission('PUSH_NOTIFICATION')
-          .then(res => {})
+          .then(res => { })
           .catch(async err => {
             await AsyncStorage.setItem(
               'isPushNotification',
@@ -284,7 +285,7 @@ const Dashboard = () => {
   const onValueChange = (event: EventTypes, newDate: Date) => {
     setShow(false);
     if (newDate) {
-      setFilterData(prev => ({...prev, filterMonth: newDate}));
+      setFilterData(prev => ({ ...prev, filterMonth: newDate }));
     }
   };
 
@@ -314,7 +315,7 @@ const Dashboard = () => {
               if (item?.success) {
                 if (item?.transactionData?.length > 0) {
                   item?.transactionData.forEach(
-                    (item: {totalAmount: number; day: string}) => {
+                    (item: { totalAmount: number; day: string }) => {
                       days[item.day as keyof typeof days] = item?.totalAmount;
                     },
                   );
@@ -361,11 +362,11 @@ const Dashboard = () => {
 
   const HeaderComponent = () => {
     return (
-      <View style={{flex: 1}}>
+      <View style={{ flex: 1 }}>
         {accountBalanceData?.balance >= 0 ? (
           <View>
             <CommonText
-              style={{textAlign: 'center'}}
+              style={{ textAlign: 'center' }}
               color={appColors.placeholderColor}
               content={t('ACCOUNT_BALANCE')}
             />
@@ -374,7 +375,7 @@ const Dashboard = () => {
               content={getCurrencySymbol(accountBalanceData?.balance, false)}
               color={appColors.dark}
               size={22}
-              style={{textAlign: 'center'}}
+              style={{ textAlign: 'center' }}
             />
           </View>
         ) : (
@@ -384,14 +385,14 @@ const Dashboard = () => {
               content={t('ADD_WALLET_DETAILS')}
               color={appColors.dark}
               size={'large'}
-              style={{textAlign: 'center'}}
+              style={{ textAlign: 'center' }}
             />
             <CommonText
               bold
               content={'🤑'}
               color={appColors.dark}
               size={'appHeader'}
-              style={{textAlign: 'center'}}
+              style={{ textAlign: 'center' }}
             />
           </View>
         )}
@@ -421,7 +422,7 @@ const Dashboard = () => {
                 borderRadius: 15,
               }}>
               <IncomeIcon
-                style={{color: appColors.incomeBg}}
+                style={{ color: appColors.incomeBg }}
                 height={30}
                 width={30}
               />
@@ -456,7 +457,7 @@ const Dashboard = () => {
                 borderRadius: 15,
               }}>
               <ExpenseIcon
-                style={{color: appColors.expenseBg}}
+                style={{ color: appColors.expenseBg }}
                 height={30}
                 width={30}
               />
@@ -474,7 +475,7 @@ const Dashboard = () => {
             </View>
           </Pressable>
         </View>
-        <View style={{flex: 1}}>
+        <View style={{ flex: 1 }}>
           <View
             style={{
               flex: 1,
@@ -489,14 +490,14 @@ const Dashboard = () => {
               bold
             />
 
-            <View style={{width: '55%'}}>
+            <View style={{ width: '55%' }}>
               <CommonDropDown
                 dropDownStyle={{
                   height: 45,
                   minHeight: 45,
                   width: '100%',
                 }}
-                dropDownContainerStyle={{width: '100%'}}
+                dropDownContainerStyle={{ width: '100%' }}
                 placeholder=""
                 maxHeight={150}
                 zIndex={14}
@@ -511,7 +512,7 @@ const Dashboard = () => {
               />
             </View>
           </View>
-          <View style={{minHeight: 250, zIndex: 3}}>
+          <View style={{ minHeight: 250, zIndex: 3 }}>
             <DashBoardBarChart chartData={chartData} />
           </View>
         </View>
@@ -525,7 +526,7 @@ const Dashboard = () => {
           <CommonText bold size={'large'} content={t('RECENT_TRANSACTION')} />
           <TouchableOpacity
             onPress={() =>
-              navigation.navigate('BottomTab', {screen: 'Transaction'})
+              navigation.navigate('BottomTab', { screen: 'Transaction' })
             }
             activeOpacity={0.7}
             style={{
@@ -551,16 +552,17 @@ const Dashboard = () => {
         setChartDropdownOpen(false);
         return false;
       }}
-      style={{flex: 1, backgroundColor: appColors.light}}>
+      style={{ flex: 1, backgroundColor: appColors.dark }}>
       <CommonHeader
         leftIcon
-        leftIconPressBack={() => {}}
+        leftIconPressBack={() => { }}
         title=""
         customLeftHeaderComponent={
           <TouchableOpacity
             onPress={() => {
               StatusBar.setBarStyle('light-content');
               setIsFinanceStoryVisible(true);
+              Vibration.vibrate(50)
             }}
             activeOpacity={0.7}
             style={{
@@ -574,9 +576,9 @@ const Dashboard = () => {
               justifyContent: 'center',
             }}>
             <Avatar
-              source={{uri: userDetails.picture}}
+              source={{ uri: userDetails.picture }}
               size={40}
-              avatarStyle={{borderRadius: 25}}
+              avatarStyle={{ borderRadius: 25 }}
             />
           </TouchableOpacity>
         }
@@ -605,11 +607,11 @@ const Dashboard = () => {
             />
           </TouchableOpacity>
         }
-        // customRightHeaderComponent={
-        //   <TouchableOpacity activeOpacity={0.7} onPress={() => {}}>
-        //     <NotificationIcon height={30} width={30} />
-        //   </TouchableOpacity>
-        // }
+      // customRightHeaderComponent={
+      //   <TouchableOpacity activeOpacity={0.7} onPress={() => {}}>
+      //     <NotificationIcon height={30} width={30} />
+      //   </TouchableOpacity>
+      // }
       />
 
       <FocusAwareStatusBar
@@ -622,9 +624,9 @@ const Dashboard = () => {
       />
       <View>
         <FlatList
-          style={{paddingHorizontal: 15}}
+          style={{ paddingHorizontal: 15 }}
           ListHeaderComponent={HeaderComponent}
-          renderItem={({item}) => (
+          renderItem={({ item }) => (
             <TransactionRenderItem item={item} navigation={navigation} />
           )}
           refreshControl={
@@ -649,10 +651,10 @@ const Dashboard = () => {
                 source={require('@assets/lottie/list-empty-lottie.json')}
                 autoPlay
                 loop
-                style={{height: 200, width: 200}}
+                style={{ height: 200, width: 200 }}
               />
               <CommonText
-                style={{textAlign: 'center'}}
+                style={{ textAlign: 'center' }}
                 content={t('TRANSACTION_EMPTY')}
               />
             </View>
@@ -690,7 +692,9 @@ const Dashboard = () => {
         />
       )}
       <Modal
+        transparent={true}
         visible={isFinanceStoryVisible}
+        animationType='slide'
         onRequestClose={() => setIsFinanceStoryVisible(false)}>
         <FinanceStory closeHandler={() => setIsFinanceStoryVisible(false)} />
       </Modal>

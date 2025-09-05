@@ -2,6 +2,13 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 	<dict>
+
+		<key>StallionProjectId</key>
+    <string>68b67b967aafc2f98149f621</string>
+    <!-- make sure app token starts with spb_... and is 46 characters long -->
+    <key>StallionAppToken</key>
+    <string>spb_yga6GM1742I4dvhigi89hanNjTZbKxLo6c2s40S91-</string>
+
 		<key>CFBundleDevelopmentRegion</key>
 		<string>en</string>
 		<key>CFBundleDisplayName</key>

@@ -7,12 +7,13 @@ import {
   TouchableOpacity,
   View,
   ScrollView,
+  Vibration,
 } from 'react-native';
-import React, {useEffect, useRef, useState} from 'react';
-import Animated, {FadeIn, FadeOut} from 'react-native-reanimated';
-import {RootState} from '@store/store';
-import {appColors} from '@shared/appColors';
-import {useDispatch, useSelector} from 'react-redux';
+import React, { useEffect, useRef, useState } from 'react';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import { RootState } from '@store/store';
+import { appColors } from '@shared/appColors';
+import { useDispatch, useSelector } from 'react-redux';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 import CommonText from '@shared/components/commonText/CommonText';
 import ArrowRightIcon from '@assets/svg/arrow-right.svg';
@@ -23,9 +24,9 @@ import CommonRBSheet, {
 } from '@shared/components/commonRBSheet/CommonRBSheet';
 import CommonButton from '@shared/components/commonButton/CommonButton';
 import Popover from 'react-native-popover-view';
-import moment, {max} from 'moment';
+import moment, { max } from 'moment';
 import TransactionService from '@services/transactionService';
-import {Toast} from '@shared/ToastConfig';
+import { Toast } from '@shared/ToastConfig';
 import {
   NavigationProp,
   ParamListBase,
@@ -34,20 +35,20 @@ import {
 } from '@react-navigation/native';
 import TransactionRenderItem from '@shared/components/TransactionRenderItem';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
-import {TransactionListInterface} from './Dashboard';
-import {Icon} from '@rneui/base';
-import MonthPicker, {EventTypes} from 'react-native-month-year-picker';
+import { TransactionListInterface } from './Dashboard';
+import { Icon } from '@rneui/base';
+import MonthPicker, { EventTypes } from 'react-native-month-year-picker';
 import LottieView from 'lottie-react-native';
-import {RefreshControl} from 'react-native';
+import { RefreshControl } from 'react-native';
 import FinanceStory from '@components/financeReport/FinanceStory';
-import {updateIsFabToggleOpen} from '@store/slice/appSlice';
-import {useTranslation} from 'react-i18next';
+import { updateIsFabToggleOpen } from '@store/slice/appSlice';
+import { useTranslation } from 'react-i18next';
 
 const Transaction = () => {
   const isFocused = useIsFocused();
   const dispatch = useDispatch();
   const flatListRef = useRef<FlatList>(null);
-  const {t} = useTranslation('transaction');
+  const { t } = useTranslation('transaction');
   const rbSheetRef = useRef<RBSheetRef>(null);
   const CONTENT_OFFSET_THRESHOLD = 100;
   const navigation: NavigationProp<ParamListBase> = useNavigation();
@@ -58,7 +59,7 @@ const Transaction = () => {
   const [categoryData, setCategoryData] = useState<{
     income: string[];
     expense: string[];
-  }>({income: [], expense: []});
+  }>({ income: [], expense: [] });
 
   const isToggleOpen = useSelector(
     (state: RootState) => state.auth.isFabToggleOpen,
@@ -122,14 +123,14 @@ const Transaction = () => {
       .catch(err => {
         setIsLoading(false);
         setRefreshing(false);
-        Toast({message: err?.response?.data?.message, type: 'error'});
+        Toast({ message: err?.response?.data?.message, type: 'error' });
       });
   };
 
   const onValueChange = (event: EventTypes, newDate: Date) => {
     setShow(false);
     if (newDate) {
-      setFilterData(prev => ({...prev, filterByMonth: newDate}));
+      setFilterData(prev => ({ ...prev, filterByMonth: newDate }));
     }
   };
 
@@ -142,7 +143,7 @@ const Transaction = () => {
         }
       })
       .catch(err => {
-        Toast({message: err?.response?.data?.message, type: 'error'});
+        Toast({ message: err?.response?.data?.message, type: 'error' });
       });
   };
 
@@ -158,7 +159,7 @@ const Transaction = () => {
         paddingHorizontal: 15,
       }}>
       <CommonHeader
-        leftIconPressBack={() => {}}
+        leftIconPressBack={() => { }}
         customRightHeaderComponent={
           <TouchableOpacity
             activeOpacity={0.7}
@@ -170,29 +171,29 @@ const Transaction = () => {
             {(filterData.category.length > 0 ||
               filterData?.filterBy !== '' ||
               filterData?.sortBy !== '') && (
-              <View
-                style={{
-                  borderRadius: 15,
-                  backgroundColor: appColors.primary,
-                  height: 22,
-                  width: 22,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  position: 'absolute',
-                  bottom: 10,
-                  left: 10,
-                }}>
-                <CommonText
-                  content={String(
-                    filterData?.category?.length +
+                <View
+                  style={{
+                    borderRadius: 15,
+                    backgroundColor: appColors.primary,
+                    height: 22,
+                    width: 22,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'absolute',
+                    bottom: 10,
+                    left: 10,
+                  }}>
+                  <CommonText
+                    content={String(
+                      filterData?.category?.length +
                       (filterData.filterBy !== '' ? 1 : 0) +
                       (filterData?.sortBy !== '' ? 1 : 0),
-                  )}
-                  size={'error'}
-                  color={appColors.light}
-                />
-              </View>
-            )}
+                    )}
+                    size={'error'}
+                    color={appColors.light}
+                  />
+                </View>
+              )}
           </TouchableOpacity>
         }
         title=""
@@ -234,6 +235,7 @@ const Transaction = () => {
       />
       <TouchableOpacity
         onPress={() => {
+          Vibration.vibrate(50)
           StatusBar.setBarStyle('light-content');
           setIsFinanceStoryVisible(true);
         }}
@@ -251,7 +253,7 @@ const Transaction = () => {
         <ArrowRightIcon height={15} width={15} />
       </TouchableOpacity>
       <FlatList
-        renderItem={({item}) => (
+        renderItem={({ item }) => (
           <TransactionRenderItem item={item} navigation={navigation} />
         )}
         data={transactionDetails}
@@ -280,10 +282,10 @@ const Transaction = () => {
               source={require('@assets/lottie/list-empty-lottie.json')}
               autoPlay
               loop
-              style={{height: 200, width: 200}}
+              style={{ height: 200, width: 200 }}
             />
             <CommonText
-              style={{textAlign: 'center'}}
+              style={{ textAlign: 'center' }}
               content={t('NO_TRANSACTION')}
             />
           </View>
@@ -316,10 +318,10 @@ const Transaction = () => {
         closeOnPressMask={true}
         draggable={true}
         customStyles={{
-          container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
+          container: { borderTopLeftRadius: 20, borderTopRightRadius: 20 },
         }}>
         <ScrollView
-          style={{backgroundColor: appColors.light, padding: 15, flex: 1}}
+          style={{ backgroundColor: appColors.light, padding: 15, flex: 1 }}
           contentContainerStyle={{
             flexGrow: 1,
             paddingBottom: 40,
@@ -352,7 +354,7 @@ const Transaction = () => {
               <CommonText content={t('RESET')} color={appColors.primary} />
             </TouchableOpacity>
           </View>
-          <View style={{marginVertical: 10}}>
+          <View style={{ marginVertical: 10 }}>
             <CommonText content={t('FILTER_BY')} bold />
             <View
               style={{
@@ -366,7 +368,7 @@ const Transaction = () => {
                   <TouchableOpacity
                     accessibilityRole="button"
                     onPress={() => {
-                      setFilterData(prev => ({...prev, filterBy: item}));
+                      setFilterData(prev => ({ ...prev, filterBy: item }));
                     }}
                     activeOpacity={0.7}
                     key={index}
@@ -386,8 +388,8 @@ const Transaction = () => {
                         item === 'Expense'
                           ? t('EXPENSE')
                           : item === 'Income'
-                          ? t('INCOME')
-                          : t('TRANSFER')
+                            ? t('INCOME')
+                            : t('TRANSFER')
                       }
                       color={
                         filterData.filterBy === item
@@ -416,7 +418,7 @@ const Transaction = () => {
                   <TouchableOpacity
                     accessibilityRole="button"
                     onPress={() => {
-                      setFilterData(prev => ({...prev, sortBy: item}));
+                      setFilterData(prev => ({ ...prev, sortBy: item }));
                     }}
                     activeOpacity={0.7}
                     key={index}
@@ -437,10 +439,10 @@ const Transaction = () => {
                         item === 'Highest'
                           ? t('HIGHEST')
                           : item === 'Lowest'
-                          ? t('LOWEST')
-                          : item === 'Newest'
-                          ? t('NEWEST')
-                          : t('OLDEST')
+                            ? t('LOWEST')
+                            : item === 'Newest'
+                              ? t('NEWEST')
+                              : t('OLDEST')
                       }
                       color={
                         filterData.sortBy === item
@@ -454,7 +456,7 @@ const Transaction = () => {
             </View>
           </View>
           {/* Category */}
-          <View style={{marginVertical: 10}}>
+          <View style={{ marginVertical: 10 }}>
             <CommonText content={t('CATEGORY')} bold />
             <View
               style={{
@@ -516,7 +518,7 @@ const Transaction = () => {
                             }));
                           } else {
                             setFilterData(prev => {
-                              let data = {...prev};
+                              let data = { ...prev };
                               data.category.splice(
                                 data.category.indexOf(item),
                                 1,
@@ -575,7 +577,7 @@ const Transaction = () => {
                             }));
                           } else {
                             setFilterData(prev => {
-                              let data = {...prev};
+                              let data = { ...prev };
                               data.category.splice(
                                 data.category.indexOf(item),
                                 1,
@@ -650,7 +652,7 @@ const Transaction = () => {
           }}>
           <TouchableOpacity
             onPress={() => {
-              flatListRef?.current?.scrollToOffset({offset: 0, animated: true});
+              flatListRef?.current?.scrollToOffset({ offset: 0, animated: true });
             }}>
             <Icon
               name="keyboard-double-arrow-up"
@@ -662,7 +664,9 @@ const Transaction = () => {
         </Animated.View>
       )}
       <Modal
+        transparent={true}
         visible={isFinanceStoryVisible}
+        animationType='slide'
         onRequestClose={() => setIsFinanceStoryVisible(false)}>
         <FinanceStory closeHandler={() => setIsFinanceStoryVisible(false)} />
       </Modal>

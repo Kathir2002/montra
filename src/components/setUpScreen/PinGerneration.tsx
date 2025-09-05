@@ -40,8 +40,6 @@ interface ItemType {
   value: React.JSX.Element;
 }
 
-interface Props {}
-
 const PinGerneration = () => {
   // Shared value for shake animation
   const shakeValue = useSharedValue(0);
@@ -55,7 +53,7 @@ const PinGerneration = () => {
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const [isPinSetupDone, setIsPinSetupDone] = useState(false);
   const isFocused = useIsFocused();
-  const {t, i18n} = useTranslation('auth');
+  const {t} = useTranslation('auth');
 
   useEffect(() => {
     AsyncStorage.getItem('securityPin').then(value => {
@@ -270,8 +268,15 @@ const PinGerneration = () => {
       contentContainerStyle={{flexGrow: 1, backgroundColor: appColors.primary}}>
       <CommonHeader
         title=""
-        leftIcon={false}
-        leftIconPressBack={() => {}}
+        leftIcon={isRetype}
+        theme='dark'
+        leftIconPressBack={() => {
+          if(isRetype) {
+            setIsRetype(false)
+            setPinValue("")
+            setRetypePinValue("")
+          }
+        }}
         headerBgc={appColors.primary}
       />
       <StatusBar backgroundColor={appColors.primary} />

@@ -8,6 +8,8 @@ import {
   StatusBar,
   SafeAreaView,
   Modal,
+  PanResponder,
+  Dimensions,
 } from 'react-native';
 import styles from './financeStory.styles';
 import {appColors} from '@shared/appColors';
@@ -34,6 +36,8 @@ import AccountService from '@services/setup/accountService';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
 import BudgetService from '@services/setup/budgetSerice';
 import {useTranslation} from 'react-i18next';
+
+const {height: screenHeight} = Dimensions.get('window');
 
 interface BudgetInterface {
   _id: string;
@@ -67,6 +71,7 @@ interface MonthlyReportInterface {
     author: string;
   };
 }
+
 const getIcon = (story: {transactionFor: string; transactionType: string}) => {
   if (story?.transactionType === 'Expense') {
     switch (story?.transactionFor) {
@@ -100,6 +105,10 @@ const FinanceStory = ({closeHandler}: {closeHandler: () => void}) => {
   const progressAnim = useRef(new Animated.Value(0)).current;
   const [isLoading, setIsLoading] = useState(true);
 
+  // Pull-to-close animation values
+  const translateY = useRef(new Animated.Value(0)).current;
+  const opacity = useRef(new Animated.Value(1)).current;
+
   const [monthlyReportData, setMonthlyReportData] =
     useState<MonthlyReportInterface>();
   const navigation: NavigationProp<ParamListBase> = useNavigation();
@@ -118,20 +127,88 @@ const FinanceStory = ({closeHandler}: {closeHandler: () => void}) => {
     ): item is
       | {budget: BudgetInterface[]; totalQuantity: number}
       | {quote: string; author: string} => {
-      if (!item) return false; // Exclude null or undefined
-
-      if ('budget' in item && item.budget.length === 0) return false; // Exclude empty budget
-      if ('quote' in item && !item.author) return false; // Exclude incomplete quotes
-
-      return true; // Include valid items
+      if (!item) return false;
+      if ('budget' in item && item.budget.length === 0) return false;
+      if ('quote' in item && !item.author) return false;
+      return true;
     },
   );
 
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
-
   const [isPaused, setIsPaused] = useState(false);
   const currentStory = availableStories[currentStoryIndex];
   const [wentBack, setWentBack] = useState(0);
+
+  // Pan responder for pull-to-close functionality
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        // // Only respond to vertical gestures that start from the top 20% of the screen
+        // return (
+        //   Math.abs(gestureState.dy) > Math.abs(gestureState.dx) &&
+        //   evt.nativeEvent.pageY < screenHeight * 0.2 &&
+        //   gestureState.dy > 0
+        // );
+         return (
+    Math.abs(gestureState.dy) > Math.abs(gestureState.dx) &&
+    gestureState.dy > 0
+  );
+      },
+      onPanResponderGrant: () => {
+        // Pause the story when starting to drag
+        setIsPaused(true);
+      },
+      onPanResponderMove: (evt, gestureState) => {
+        // Update the translateY value based on the drag distance
+        if (gestureState.dy > 0) {
+          translateY.setValue(gestureState.dy);
+          // Also update opacity for fade effect
+            const opacityValue = Math.max(0.3, 1 - gestureState.dy / (screenHeight * 2.5));            
+            opacity.setValue(opacityValue);          
+        }
+      },
+      
+      onPanResponderRelease: (evt, gestureState) => {
+        // Resume the story
+        setIsPaused(false);
+        
+        // If dragged down more than 150 pixels, close the modal
+        if (gestureState.dy > 150) {
+          Animated.parallel([
+            Animated.timing(translateY, {
+              toValue: screenHeight,
+              duration: 300,
+              useNativeDriver: true,
+            }),
+            Animated.timing(opacity, {
+              toValue: 0,
+              duration: 300,
+              useNativeDriver: true,
+            }),
+          ]).start(() => {
+            closeHandler();
+          });
+        } else {
+          // Spring back to original position
+          Animated.parallel([
+            Animated.spring(translateY, {
+              toValue: 0,
+              useNativeDriver: true,
+              tension: 100,
+              friction: 8,
+            }),
+            Animated.spring(opacity, {
+              toValue: 1,
+              useNativeDriver: true,
+              tension: 100,
+              friction: 8,
+            }),
+          ]).start();
+        }
+      },
+      
+    }),
+  ).current;
 
   useEffect(() => {
     getFinanceStoryData();
@@ -141,7 +218,7 @@ const FinanceStory = ({closeHandler}: {closeHandler: () => void}) => {
     transactions: TransactionListInterface[],
     type: 'Income' | 'Expense',
   ): TransactionListInterface | null => {
-    const currentMonth = moment().month(); // 0-indexed (e.g., 7 for August)
+    const currentMonth = moment().month();
     const currentYear = moment().year();
 
     const filteredTransactions = transactions.filter(
@@ -226,11 +303,6 @@ const FinanceStory = ({closeHandler}: {closeHandler: () => void}) => {
       });
   };
 
-  /**
-   * method to get the currency symbol
-   * @param amount, currencyCode
-   */
-
   const goToNextStory = () => {
     if (currentStoryIndex < availableStories.length - 1) {
       Animated.timing(progressAnim, {
@@ -242,22 +314,18 @@ const FinanceStory = ({closeHandler}: {closeHandler: () => void}) => {
         setCurrentStoryIndex(currentStoryIndex + 1);
         progressAnim.setValue(0);
       });
-    } else {
-      // setWentBack(0);
-      // setCurrentStoryIndex(0);
     }
   };
 
   const runProgressAnimation = () => {
-    // this will run the animations at the top for the story
-    progressAnim.setValue(pausedProgress.current); //set the value of the progress of the story
+    progressAnim.setValue(pausedProgress.current);
     Animated.timing(progressAnim, {
       toValue: 1,
-      duration: (1 - pausedProgress.current) * 6000, //for how long each story currently 6 seconds
+      duration: (1 - pausedProgress.current) * 6000,
       useNativeDriver: false,
     }).start(({finished}) => {
       if (finished) {
-        goToNextStory(); //once finished goes to nextStory()
+        goToNextStory();
       }
     });
   };
@@ -265,14 +333,14 @@ const FinanceStory = ({closeHandler}: {closeHandler: () => void}) => {
   const getProgressBarWidth = (storyIndex: number, currentIndex: number) => {
     if (currentIndex > storyIndex) {
       return '100%';
-    } // this is when the Story has been viewed
+    }
     if (currentIndex === storyIndex) {
       return progressAnim.interpolate({
         inputRange: [0, 1],
-        outputRange: ['0%', '100%'], // this is when the story is being viewed
+        outputRange: ['0%', '100%'],
       });
     }
-    return '0%'; // this is when the Story has not been viewed yet
+    return '0%';
   };
 
   const goToPreviousStory = () => {
@@ -290,17 +358,14 @@ const FinanceStory = ({closeHandler}: {closeHandler: () => void}) => {
   };
 
   const handlePressIn = () => {
-    //for pause if user holds the screen
     setIsPaused(true);
   };
 
   const handlePressOut = () => {
-    //for pause if user releases the holded screen
     setIsPaused(false);
   };
 
   const handleScreenTouch = (evt: GestureResponderEvent) => {
-    //this function takes the width and decided where the click was pressed if left or right
     const touchX = evt.nativeEvent.locationX;
     if (touchX < width / 2) {
       goToPreviousStory();
@@ -533,9 +598,9 @@ const FinanceStory = ({closeHandler}: {closeHandler: () => void}) => {
   ): story is TransactionListInterface => {
     return (
       story &&
-      typeof story.amount === 'number' && // Adjust based on the type of `amount`
+      typeof story.amount === 'number' &&
       '_id' in story &&
-      'transactionDate' in story // Add other necessary properties to validate
+      'transactionDate' in story
     );
   };
 
@@ -554,7 +619,7 @@ const FinanceStory = ({closeHandler}: {closeHandler: () => void}) => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea,{backgroundColor: "transparent"}]}>
       <StatusBar
         backgroundColor={
           isLoading
@@ -569,99 +634,121 @@ const FinanceStory = ({closeHandler}: {closeHandler: () => void}) => {
         }
         barStyle={'light-content'}
       />
-      <Pressable
-        onPress={handleScreenTouch}
-        onLongPress={handlePressIn}
-        onPressOut={handlePressOut}
-        style={({pressed}) => [
-          {
-            opacity: pressed ? 0.9 : 1, //when clicked shows the user screen a little dimmed for feedback
-          },
-          styles.container,
-          {
-            backgroundColor: isLoading
-              ? appColors?.transparentBackground
-              : getCurrentStoryName() == 'Expense'
-              ? appColors?.expenseBg
-              : getCurrentStoryName() == 'Income'
-              ? appColors?.incomeBg
-              : getCurrentStoryName() == 'Budget'
-              ? appColors?.transferBg
-              : appColors.primary,
-          },
-        ]}>
-        {isLoading ? (
-          <CommonLoader />
-        ) : (
-          <View style={styles.container}>
-            <View style={styles.progressBarContainer}>
-              {availableStories?.map((story, index) => (
-                <View key={index} style={styles.progressBarBackground}>
-                  <Animated.View
-                    style={[
-                      styles.progressBar,
-                      {
-                        width: getProgressBarWidth(index, currentStoryIndex),
-                      },
-                    ]}
-                  />
-                </View>
-              ))}
-            </View>
-            {getCurrentStoryName() === 'Expense' ||
-            getCurrentStoryName() === 'Income' ? (
-              currentStory &&
-              isTransactionListInterface(currentStory) &&
-              renderStoryContent(currentStory)
-            ) : getCurrentStoryName() === 'Budget' ? (
-              currentStory &&
-              'budget' in currentStory &&
-              renderBudetStory(currentStory!)
-            ) : (
+      <Animated.View
+        style={{
+          flex: 1,
+          transform: [{translateY}],
+          opacity,
+          backgroundColor: isLoading
+            ? appColors?.transparentBackground
+            : getCurrentStoryName() == 'Expense'
+            ? appColors?.expenseBg
+            : getCurrentStoryName() == 'Income'
+            ? appColors?.incomeBg
+            : getCurrentStoryName() == 'Budget'
+            ? appColors?.transferBg
+            : appColors.primary,
+        }}
+        {...panResponder.panHandlers}>
+        <Pressable
+          onPress={handleScreenTouch}
+          onLongPress={handlePressIn}
+          onPressOut={handlePressOut}
+          style={({pressed}) => [
+            {
+              opacity: pressed ? 0.9 : 1,
+            },
+            styles.container,
+             {
+      backgroundColor: 'transparent', 
+    },
+          ]}>
+          {isLoading ? (
+            <CommonLoader />
+          ) : (
+            <View style={styles.container}>
+              {/* Pull indicator */}
               <View
                 style={{
-                  paddingHorizontal: 15,
-                  marginTop: 20,
-                  flex: 1,
-                  justifyContent: 'space-evenly',
-                }}>
-                <View style={{justifyContent: 'center', gap: 10}}>
-                  <CommonText
-                    content={`"${
-                      currentStory &&
-                      'quote' in currentStory &&
-                      currentStory?.quote
-                    }"`}
-                    color={appColors.lightBg}
-                    bold
-                    size={'appHeader'}
-                  />
-                  <CommonText
-                    content={`-${
-                      currentStory &&
-                      'author' in currentStory &&
-                      currentStory?.author
-                    }`}
-                    color={appColors.light}
-                    size={'header'}
-                  />
-                </View>
-                {currentStoryIndex === 0 &&
-                getCurrentStoryName() === 'Quote' ? undefined : (
-                  <CommonButton
-                    buttonType="clear"
-                    title={t('SEE_FULL_DETAIL')}
-                    onPress={() => {
-                      navigation.navigate('FinanceReport');
-                      closeHandler();
-                    }}
-                  />
-                )}
+                  width: 40,
+                  height: 4,
+                  backgroundColor: appColors.light,
+                  borderRadius: 2,
+                  alignSelf: 'center',
+                  marginTop: 10,
+                  opacity: 0.7,
+                }}
+              />
+              
+              <View style={styles.progressBarContainer}>
+                {availableStories?.map((story, index) => (
+                  <View key={index} style={styles.progressBarBackground}>
+                    <Animated.View
+                      style={[
+                        styles.progressBar,
+                        {
+                          width: getProgressBarWidth(index, currentStoryIndex),
+                        },
+                      ]}
+                    />
+                  </View>
+                ))}
               </View>
-            )}
-          </View>
-        )}
-      </Pressable>
+              {getCurrentStoryName() === 'Expense' ||
+              getCurrentStoryName() === 'Income' ? (
+                currentStory &&
+                isTransactionListInterface(currentStory) &&
+                renderStoryContent(currentStory)
+              ) : getCurrentStoryName() === 'Budget' ? (
+                currentStory &&
+                'budget' in currentStory &&
+                renderBudetStory(currentStory!)
+              ) : (
+                <View
+                  style={{
+                    paddingHorizontal: 15,
+                    marginTop: 20,
+                    flex: 1,
+                    justifyContent: 'space-evenly',
+                  }}>
+                  <View style={{justifyContent: 'center', gap: 10}}>
+                    <CommonText
+                      content={`"${
+                        currentStory &&
+                        'quote' in currentStory &&
+                        currentStory?.quote
+                      }"`}
+                      color={appColors.lightBg}
+                      bold
+                      size={'appHeader'}
+                    />
+                    <CommonText
+                      content={`-${
+                        currentStory &&
+                        'author' in currentStory &&
+                        currentStory?.author
+                      }`}
+                      color={appColors.light}
+                      size={'header'}
+                    />
+                  </View>
+                  {currentStoryIndex === 0 &&
+                  getCurrentStoryName() === 'Quote' ? undefined : (
+                    <CommonButton
+                      buttonType="clear"
+                      title={t('SEE_FULL_DETAIL')}
+                      onPress={() => {
+                        navigation.navigate('FinanceReport');
+                        closeHandler();
+                      }}
+                    />
+                  )}
+                </View>
+              )}
+            </View>
+          )}
+        </Pressable>
+      </Animated.View>
     </SafeAreaView>
   );
 };

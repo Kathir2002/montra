@@ -149,7 +149,7 @@ const useNotificationChannels = () => {
       try {
         // Determine appropriate channel
         const channelId = await determineChannelForMessage(message);
-        // Display notification
+        // Display notification        
         await notifee.displayNotification({
           title: message.title,
           body: message.body,

@@ -35,7 +35,6 @@ const LoginWithGoogle = (props: LoginWithGoogleProps) => {
   const {i18n} = useTranslation();
   const dispatch = useDispatch();
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
-  console.log(buttonText);
   
   const getDeviceDetails = async () => {
     const platform = DeviceInfo.getSystemName(); // e.g., "iOS" or "Android"

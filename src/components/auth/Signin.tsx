@@ -11,19 +11,19 @@ import {
   View,
 } from 'react-native';
 import * as yup from 'yup';
-import React, {useEffect, useRef, useState} from 'react';
-import {appColors} from '@shared/appColors';
+import React, { useEffect, useRef, useState } from 'react';
+import { appColors } from '@shared/appColors';
 import {
   NavigationProp,
   ParamListBase,
   useNavigation,
 } from '@react-navigation/native';
 import CommonInput from '@shared/components/commonInput/CommonInput';
-import {useFormik} from 'formik';
+import { useFormik } from 'formik';
 import CommonButton from '@shared/components/commonButton/CommonButton';
 import CommonText from '@shared/components/commonText/CommonText';
-import {useDispatch} from 'react-redux';
-import {Icon} from '@rneui/base';
+import { useDispatch } from 'react-redux';
+import { Icon } from '@rneui/base';
 import {
   DEV_ANDROID_CLIENTID,
   DEV_IOS_CLIENTID,
@@ -38,11 +38,11 @@ import {
 } from '@react-native-google-signin/google-signin';
 import AuthService from '@services/authService';
 import CommonDataService from '@shared/commonDataServices';
-import {updateCurrentUser, updateIsLoggedin} from '@store/slice/appSlice';
-import {Toast} from '@shared/ToastConfig';
+import { updateCurrentUser, updateIsLoggedin } from '@store/slice/appSlice';
+import { Toast } from '@shared/ToastConfig';
 import LoginWithGoogle from '@shared/components/auth/LoginWithGoogle';
-import Rive, {Alignment, Fit, RiveRef} from 'rive-react-native';
-import {useTranslation} from 'react-i18next';
+import Rive, { Alignment, Fit, RiveRef } from 'rive-react-native';
+import { useTranslation } from 'react-i18next';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -54,7 +54,7 @@ const Signin = () => {
 
   const riveRef = useRef<RiveRef>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const {t, i18n} = useTranslation(['auth']);
+  const { t, i18n } = useTranslation(['auth']);
   const [btnLoader, setBtnLoader] = useState(false);
   const navigation: NavigationProp<ParamListBase> = useNavigation();
 
@@ -104,7 +104,7 @@ const Signin = () => {
       ...deviceInfo,
     };
 
-    await AuthService.signin({data})
+    await AuthService.signin({ data })
       .then(async (res: any) => {
         if (res?.success) {
           if (Platform.OS === 'android') {
@@ -146,7 +146,7 @@ const Signin = () => {
       })
       .catch(err => {
         setBtnLoader(false);
-        Toast({message: err?.response?.data?.message, type: 'error'});
+        Toast({ message: err?.response?.data?.message, type: 'error' });
         console.log('Error in signin', err);
       });
   };
@@ -178,11 +178,24 @@ const Signin = () => {
 
   return (
     <KeyboardAvoidingView
+      onStartShouldSetResponder={() => {
+        riveRef.current?.setInputState(
+          'Login Machine',
+          'isChecking',
+          false,
+        );
+        riveRef.current?.setInputState(
+          'Login Machine',
+          'isHandsUp',
+          false,
+        );
+        return false
+      }}
       style={{
         flex: 1,
         backgroundColor: appColors.light,
       }}>
-      <CommonHeader title="" leftIconPressBack={() => {}} leftIcon={false} />
+      <CommonHeader title="" leftIconPressBack={() => { }} leftIcon={false} />
       <StatusBar
         backgroundColor={isLoading ? appColors.transferBg : appColors.light}
         barStyle={isLoading ? 'light-content' : 'dark-content'}
@@ -276,6 +289,19 @@ const Signin = () => {
                 true,
               );
             }}
+            onBlur={() => {
+              riveRef.current?.setInputState(
+                'Login Machine',
+                'isChecking',
+                false,
+              );
+              riveRef.current?.setInputState(
+                'Login Machine',
+                'isHandsUp',
+                false,
+              );
+              formik.handleBlur('password');
+            }}
             placeholder={t('password')}
             autoCapitalize="none"
             secureTextEntry={!passwordVisible}
@@ -286,6 +312,11 @@ const Signin = () => {
             rightIcon={
               <TouchableOpacity
                 onPress={() => {
+                  riveRef.current?.setInputState(
+                    'Login Machine',
+                    'isHandsUp',
+                    true,
+                  );
                   setPasswordVisible(!passwordVisible);
                   if (passwordVisible) {
                     riveRef.current?.setInputState(
@@ -313,16 +344,8 @@ const Signin = () => {
                 ? formik.errors.password
                 : ''
             }
-            onBlur={() => {
-              // riveRef.current?.setInputState(
-              //   'Login Machine',
-              //   'isHandsUp',
-              //   false,
-              // );
-              formik.handleBlur('password');
-            }}
           />
-          <View style={{gap: 15}}>
+          <View style={{ gap: 15 }}>
             <CommonButton
               loading={btnLoader}
               title={t('login')}
@@ -339,7 +362,7 @@ const Signin = () => {
             />
             <CommonText
               content={t('orWith')}
-              style={{textAlign: 'center'}}
+              style={{ textAlign: 'center' }}
               color={appColors.placeholderColor}
             />
             {/* Login with google button */}
@@ -352,11 +375,11 @@ const Signin = () => {
               content={t('forgotPassword')}
               size={'large'}
               color={appColors.primary}
-              style={{textAlign: 'center'}}
+              style={{ textAlign: 'center' }}
             />
             <CommonText
               content={undefined}
-              style={{color: appColors.placeholderColor, textAlign: 'center'}}
+              style={{ color: appColors.placeholderColor, textAlign: 'center' }}
               size={'medium'}>
               {t('dontHaveAccount')}
               <CommonText
