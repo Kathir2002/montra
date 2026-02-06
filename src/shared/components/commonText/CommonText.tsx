@@ -1,23 +1,22 @@
-import React, {FC, useEffect, useState} from 'react';
+import React, { FC } from 'react';
 import {
   StyleProp,
   Text,
   TextProps,
   TextStyle,
-  useWindowDimensions,
 } from 'react-native';
-import {appFonts} from '../../appFonts';
+import { appFonts } from '../../appFonts';
 // interface to define the expected properties
 interface Props extends TextProps {
   content: string | undefined;
   size?:
-    | 'medium'
-    | 'error'
-    | 'large'
-    | 'header'
-    | 'label'
-    | 'appHeader'
-    | number;
+  | 'medium'
+  | 'error'
+  | 'large'
+  | 'header'
+  | 'label'
+  | 'appHeader'
+  | number;
   bold?: true | false;
   color?: string;
   style?: TextStyle | TextStyle[] | StyleProp<TextStyle>;
@@ -50,16 +49,16 @@ const CommonText: FC<Props> = ({
             size == 'medium'
               ? medium
               : size == 'error'
-              ? error
-              : size == 'large'
-              ? large
-              : size == 'label'
-              ? medium
-              : size == 'header'
-              ? header
-              : size == 'appHeader'
-              ? appHeader
-              : size,
+                ? error
+                : size == 'large'
+                  ? large
+                  : size == 'label'
+                    ? medium
+                    : size == 'header'
+                      ? header
+                      : size == 'appHeader'
+                        ? appHeader
+                        : size,
         },
         style,
       ]}

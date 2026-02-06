@@ -215,8 +215,8 @@
 //   },
 // });
 
-import React, {FC} from 'react';
-import {StyleSheet, View, Dimensions} from 'react-native';
+import React, { FC } from 'react';
+import { StyleSheet, View, Dimensions } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -224,13 +224,12 @@ import Animated, {
   runOnJS,
   useAnimatedReaction,
   useDerivedValue,
-  useAnimatedGestureHandler,
 } from 'react-native-reanimated';
-import {PanGestureHandler} from 'react-native-gesture-handler';
-import {appColors} from '@shared/appColors';
-import {appFonts} from '@shared/appFonts';
+import { Gesture, GestureDetector, PanGestureHandler } from 'react-native-gesture-handler';
+import { appColors } from '@shared/appColors';
+import { appFonts } from '@shared/appFonts';
 
-const {width: SCREEN_WIDTH} = Dimensions.get('window');
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 export type NormalSliderOnChangeValue = (value: number) => void;
 
 export interface SliderInterface {
@@ -291,31 +290,35 @@ const AnimatedSlider: FC<SliderInterface> = ({
     },
     [min, max, step],
   );
+  const startX = useSharedValue(0);
 
-  const panGestureHandler = useAnimatedGestureHandler({
-    onStart: (_, context: {startX: number}) => {
+  const panGesture = Gesture.Pan()
+    .enabled(!disabled)
+    .onBegin(() => {
       if (disabled) return;
-      context.startX = translateX.value;
-    },
-    onActive: (event, context) => {
+      startX.value = translateX.value;
+    })
+    .onUpdate((event) => {
       if (disabled) return;
 
-      let newValue = context.startX + event.translationX;
+      let newValue = startX.value + event.translationX;
       newValue = Math.min(Math.max(newValue, 0), MAX_TRANSLATION);
+
       translateX.value = newValue;
-    },
-    onEnd: () => {
+    })
+    .onEnd(() => {
       if (disabled) return;
+
       const snappedValue = snapToStep(translateX.value);
       translateX.value = withSpring(valueToPosition(snappedValue), {
         damping: 15,
         stiffness: 150,
       });
-    },
-  });
+    });
+
 
   const knobStyle = useAnimatedStyle(() => ({
-    transform: [{translateX: translateX.value}],
+    transform: [{ translateX: translateX.value }],
     opacity: disabled ? 0.5 : 1,
   }));
 
@@ -333,18 +336,18 @@ const AnimatedSlider: FC<SliderInterface> = ({
   });
 
   return (
-    <View style={[styles.container, {width: sliderWidth}]}>
-      <View style={[styles.track, {backgroundColor: sliderColor}]}>
+    <View style={[styles.container, { width: sliderWidth }]}>
+      <View style={[styles.track, { backgroundColor: sliderColor }]}>
         <Animated.View
           style={[
             styles.activeTrack,
-            {backgroundColor: thumpColor},
+            { backgroundColor: thumpColor },
             activeTrackStyle,
           ]}
         />
       </View>
 
-      <PanGestureHandler enabled={!disabled} onGestureEvent={panGestureHandler}>
+      <GestureDetector gesture={panGesture}>
         <Animated.View
           style={[
             styles.knob,
@@ -359,7 +362,7 @@ const AnimatedSlider: FC<SliderInterface> = ({
             {displayValue?.value}
           </Animated.Text>
         </Animated.View>
-      </PanGestureHandler>
+      </GestureDetector>
     </View>
   );
 };

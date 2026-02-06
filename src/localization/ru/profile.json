@@ -68,7 +68,7 @@
   "BIOMETRIC_NOT_SUPPORTED_TITLE": "Биометрия не поддерживается",
   "BIOMETRIC_AUTHENTICATION_FAILED_TITLE": "Аутентификация не удалась",
   "BIOMETRIC_AUTHENTICATION_FAILED": "Биометрическая аутентификация не удалась",
-  "AUTHENTICATE_TO_CONTINUE": "Аутентификация, чтобы продолжить",
+  "HELLO": "Здравствуйте",
   "ERROR": "Ошибка",
   "ERROR_OCCURED": "Произошла ошибка при проверке доступности биометрии.",
   "PIN_CHANGED_SUCCESS": "PIN -код успешно изменился",

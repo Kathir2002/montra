@@ -10,21 +10,21 @@ import {
   View,
 } from 'react-native';
 import * as yup from 'yup';
-import React, {useEffect, useRef, useState} from 'react';
-import {appColors} from '@shared/appColors';
+import React, { useEffect, useRef, useState } from 'react';
+import { appColors } from '@shared/appColors';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 import {
   NavigationProp,
   ParamListBase,
   useNavigation,
 } from '@react-navigation/native';
-import {RootState} from '@store/store';
-import {useDispatch, useSelector} from 'react-redux';
-import {Avatar} from '@rneui/base';
+import { RootState } from '@store/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { Avatar } from '@rneui/base';
 import CommonText from '@shared/components/commonText/CommonText';
 import CommonInput from '@shared/components/commonInput/CommonInput';
-import {useFormik} from 'formik';
-import {appFonts} from '@shared/appFonts';
+import { useFormik } from 'formik';
+import { appFonts } from '@shared/appFonts';
 import CommonRBSheet, {
   RBSheetRef,
 } from '@shared/components/commonRBSheet/CommonRBSheet';
@@ -32,17 +32,18 @@ import FileUploadRbSheet, {
   DocumentInterface,
 } from '@shared/components/fileUploadRbSheet';
 import CommonButton from '@shared/components/commonButton/CommonButton';
-import {useTranslation} from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import AccountService from '@services/setup/accountService';
-import {Toast} from '@shared/ToastConfig';
+import { Toast } from '@shared/ToastConfig';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
-import {updateCurrentUser} from '@store/slice/appSlice';
+import { updateCurrentUser } from '@store/slice/appSlice';
 import EditIcon from '@assets/svg/change-profile.svg';
 import CommonConfirmation from '@shared/components/CommonConfirmation';
+import { CustomModal } from '@shared/components/CustomModal';
 
 const EditProfile = () => {
   const dispatch = useDispatch();
-  const {t} = useTranslation('profile');
+  const { t } = useTranslation('profile');
   const dirtyRBSheetRef = useRef<RBSheetRef>(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigation: NavigationProp<ParamListBase> = useNavigation();
@@ -77,7 +78,7 @@ const EditProfile = () => {
     validateOnBlur: true,
     onSubmit: () => {
       if (!formik.dirty && !image?.url) {
-        Toast({type: 'error', message: t('NO_CHANGES')});
+        Toast({ type: 'error', message: t('NO_CHANGES') });
       } else {
         updateUserDetails();
       }
@@ -131,19 +132,19 @@ const EditProfile = () => {
             }),
           );
           navigation.goBack();
-          Toast({message: res?.message, type: 'success'});
+          Toast({ message: res?.message, type: 'success' });
         }
       })
       .catch(err => {
         console.log(err);
 
         setIsLoading(false);
-        Toast({message: err?.response?.data?.message, type: 'error'});
+        Toast({ message: err?.response?.data?.message, type: 'error' });
       });
   };
 
   return (
-    <KeyboardAvoidingView style={{flex: 1, backgroundColor: appColors.light}}>
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: appColors.light }}>
       <CommonHeader
         title={t('EDIT_PROFILE')}
         leftIconPressBack={() => {
@@ -167,7 +168,7 @@ const EditProfile = () => {
           gap: 5,
           paddingBottom: 20,
         }}>
-        <View style={{flex: 1}}>
+        <View style={{ flex: 1 }}>
           <View
             style={{
               flexDirection: 'row',
@@ -197,9 +198,9 @@ const EditProfile = () => {
                   justifyContent: 'center',
                 }}>
                 <Avatar
-                  source={{uri: image ? image?.url : userDetails.picture}}
+                  source={{ uri: image ? image?.url : userDetails.picture }}
                   size={70}
-                  avatarStyle={{borderRadius: 35}}
+                  avatarStyle={{ borderRadius: 35 }}
                 />
               </TouchableOpacity>
               <TouchableOpacity
@@ -247,7 +248,7 @@ const EditProfile = () => {
                   height: 50,
                   paddingHorizontal: 0,
                 }}
-                containerStyle={{height: 50}}
+                containerStyle={{ height: 50 }}
                 inputStyle={{
                   fontSize: 18,
                   fontFamily: appFonts.bold,
@@ -255,7 +256,7 @@ const EditProfile = () => {
               />
             </View>
           </View>
-          <View style={{marginVertical: 15}}>
+          <View style={{ marginVertical: 15 }}>
             <CommonText
               content={t('auth:EMAIL')}
               color={appColors.placeholderColor}
@@ -266,19 +267,19 @@ const EditProfile = () => {
                 type: 'fontisto',
                 color: appColors.placeholderColor,
                 size: 20,
-                style: {marginLeft: 8},
+                style: { marginLeft: 8 },
               }}
               disabled={true}
               editable={false}
               labelVisible={false}
               value={formik?.values?.email!}
               onChangeText={text => formik.setFieldValue('email', text)}
-              inputStyle={{fontSize: 14}}
-              containerStyle={{height: 40}}
-              inputContainerStyle={{height: 40, paddingHorizontal: 0}}
+              inputStyle={{ fontSize: 14 }}
+              containerStyle={{ height: 40 }}
+              inputContainerStyle={{ height: 40, paddingHorizontal: 0 }}
             />
           </View>
-          <View style={{marginVertical: 15}}>
+          <View style={{ marginVertical: 15 }}>
             <CommonText
               content={t('PHONE_NO')}
               color={appColors.placeholderColor}
@@ -289,7 +290,7 @@ const EditProfile = () => {
                 type: 'feather',
                 color: appColors.placeholderColor,
                 size: 20,
-                style: {marginLeft: 8},
+                style: { marginLeft: 8 },
               }}
               keyboardType="numeric"
               labelVisible={false}
@@ -298,11 +299,11 @@ const EditProfile = () => {
                 const numericValue = text.replace(/[^0-9]/g, '');
                 formik.setFieldValue('phoneNumber', numericValue);
               }}
-              inputStyle={{fontSize: 14}}
-              containerStyle={{height: 40}}
+              inputStyle={{ fontSize: 14 }}
+              containerStyle={{ height: 40 }}
               placeholder=""
               onBlur={formik.handleBlur('phoneNumber')}
-              inputContainerStyle={{height: 40, paddingHorizontal: 0}}
+              inputContainerStyle={{ height: 40, paddingHorizontal: 0 }}
               error={
                 formik?.errors?.phoneNumber && formik.touched.phoneNumber
                   ? formik.errors?.phoneNumber
@@ -311,7 +312,7 @@ const EditProfile = () => {
             />
           </View>
         </View>
-        <View style={{flex: 0.1}}>
+        <View style={{ flex: 0.1 }}>
           <CommonButton
             title={t('UPDATE_PROFILE')}
             onPress={() => {
@@ -333,7 +334,7 @@ const EditProfile = () => {
         closeOnPressMask={true}
         draggable={true}
         customStyles={{
-          container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
+          container: { borderTopLeftRadius: 20, borderTopRightRadius: 20 },
         }}>
         <FileUploadRbSheet
           isUploadDocumentVisible={false}
@@ -341,9 +342,9 @@ const EditProfile = () => {
           closeHandler={() => rbSheetRef.current?.close()}
         />
       </CommonRBSheet>
-      <Modal visible={isLoading} transparent={true} animationType="fade">
+      <CustomModal visible={isLoading} transparent={true} animationType="fade">
         <CommonLoader />
-      </Modal>
+      </CustomModal>
       <CommonConfirmation
         titleText={t('transaction:EXIT_CONFIRM_TITLE')}
         subText={t('transaction:EXIT_MESSAGE')}
@@ -369,7 +370,7 @@ const EditProfile = () => {
         draggable={true}
         dragNotClose={true}
         customStyles={{
-          container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
+          container: { borderTopLeftRadius: 20, borderTopRightRadius: 20 },
         }}
       />
     </KeyboardAvoidingView>

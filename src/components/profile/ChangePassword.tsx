@@ -8,8 +8,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
-import {appColors} from '@shared/appColors';
+import React, { useState } from 'react';
+import { appColors } from '@shared/appColors';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 import {
   NavigationProp,
@@ -17,27 +17,29 @@ import {
   useNavigation,
 } from '@react-navigation/native';
 import * as yup from 'yup';
-import messaging from '@react-native-firebase/messaging';
+import { getMessaging, getToken } from '@react-native-firebase/messaging';
 
 import CommonButton from '@shared/components/commonButton/CommonButton';
 import CommonText from '@shared/components/commonText/CommonText';
 import CommonInput from '@shared/components/commonInput/CommonInput';
 import AuthService from '@services/authService';
-import {useFormik} from 'formik';
-import {Toast} from '@shared/ToastConfig';
-import {KeyboardAvoidingView} from 'react-native';
-import {Icon} from '@rneui/base';
-import {useDispatch, useSelector} from 'react-redux';
-import {RootState} from '@store/store';
-import {useTranslation} from 'react-i18next';
+import { useFormik } from 'formik';
+import { Toast } from '@shared/ToastConfig';
+import { KeyboardAvoidingView } from 'react-native';
+import { Icon } from '@rneui/base';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '@store/store';
+import { useTranslation } from 'react-i18next';
 import AccountService from '@services/setup/accountService';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {GoogleSignin} from '@react-native-google-signin/google-signin';
-import {updateCurrentUser, updateIsLoggedin} from '@store/slice/appSlice';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { updateCurrentUser, updateIsLoggedin } from '@store/slice/appSlice';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
+import { CustomModal } from '@shared/components/CustomModal';
 
 const ChangePassword = () => {
+  const messagingInstance = getMessaging();
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const [emailModalVisible, setEmailModalVisible] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -46,7 +48,7 @@ const ChangePassword = () => {
     newPassword: false,
     confirmPassword: false,
   });
-  const {t} = useTranslation('auth');
+  const { t } = useTranslation('auth');
   const dispatch = useDispatch();
 
   const userDetails = useSelector((state: RootState) => state.auth.userDetails);
@@ -82,7 +84,7 @@ const ChangePassword = () => {
 
   const changePassword = async () => {
     setIsLoading(true);
-    const {currentPassword, newPassword, rePassword} = formik.values;
+    const { currentPassword, newPassword, rePassword } = formik.values;
     const data = {
       currentPassword,
       newPassword,
@@ -91,12 +93,12 @@ const ChangePassword = () => {
       .then((res: any) => {
         setIsLoading(false);
         if (res?.success) {
-          Toast({type: 'success', message: res?.message});
+          Toast({ type: 'success', message: res?.message });
         }
       })
       .catch(err => {
         setIsLoading(false);
-        Toast({message: err?.response?.data?.message, type: 'error'});
+        Toast({ message: err?.response?.data?.message, type: 'error' });
       });
   };
 
@@ -105,7 +107,7 @@ const ChangePassword = () => {
     const data = {
       email: userDetails.email,
     };
-    AuthService.forgotPassword({data})
+    AuthService.forgotPassword({ data })
       .then((res: any) => {
         if (res?.success) {
           setIsLoading(false);
@@ -114,16 +116,16 @@ const ChangePassword = () => {
       })
       .catch(err => {
         setIsLoading(false);
-        Toast({message: err?.response?.data?.message, type: 'error'});
+        Toast({ message: err?.response?.data?.message, type: 'error' });
       });
   };
 
   const logoutHandler = async () => {
     setIsLoading(true);
     try {
-      const fcmToken = await messaging().getToken();
+      const fcmToken = await getToken(messagingInstance);
 
-      const data = {fcmToken};
+      const data = { fcmToken };
       await AccountService.logoutUser(data)
         .then(async (res: any) => {
           if (res?.success) {
@@ -138,7 +140,7 @@ const ChangePassword = () => {
             });
             dispatch(updateIsLoggedin(false));
             dispatch(
-              updateCurrentUser({activeContactRequestCount: 0, isAdmin: false}),
+              updateCurrentUser({ activeContactRequestCount: 0, isAdmin: false }),
             );
             setIsLoading(false);
             navigation.navigate('SignIn');
@@ -146,17 +148,17 @@ const ChangePassword = () => {
         })
         .catch(err => {
           setIsLoading(false);
-          Toast({type: 'error', message: err?.response?.data?.message});
+          Toast({ type: 'error', message: err?.response?.data?.message });
         });
     } catch (error: any) {
       setIsLoading(false);
       console.log('Google Sign-Out Error: ', error);
-      Toast({message: error?.message, type: 'error'});
+      Toast({ message: error?.message, type: 'error' });
     }
   };
 
   return (
-    <KeyboardAvoidingView style={{flex: 1, backgroundColor: appColors.light}}>
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: appColors.light }}>
       <CommonHeader
         title={t('CHANGE_PASSWORD')}
         leftIconPressBack={() => navigation.goBack()}
@@ -174,7 +176,7 @@ const ChangePassword = () => {
           paddingBottom: 15,
         }}>
         <CommonText content={t('CHANGE_PASSWORD_DESCRIPTION')} />
-        <View style={{marginTop: 15}}>
+        <View style={{ marginTop: 15 }}>
           <CommonInput
             secureTextEntry={!eyeIconVisible?.oldPassword}
             rightIcon={
@@ -216,7 +218,7 @@ const ChangePassword = () => {
             }
           />
         </View>
-        <View style={{marginTop: 15}}>
+        <View style={{ marginTop: 15 }}>
           <CommonInput
             secureTextEntry={!eyeIconVisible?.newPassword}
             rightIcon={
@@ -258,7 +260,7 @@ const ChangePassword = () => {
             }
           />
         </View>
-        <View style={{marginVertical: 15}}>
+        <View style={{ marginVertical: 15 }}>
           <CommonInput
             secureTextEntry={!eyeIconVisible?.confirmPassword}
             rightIcon={
@@ -300,7 +302,7 @@ const ChangePassword = () => {
             }
           />
         </View>
-        <View style={{flex: 1, justifyContent: 'center'}}>
+        <View style={{ flex: 1, justifyContent: 'center' }}>
           <CommonText
             content={t('CANT_REMEMBER_PASSWORD')}
             size={'medium'}
@@ -343,7 +345,7 @@ const ChangePassword = () => {
           />
         </View>
       </ScrollView>
-      <Modal visible={emailModalVisible} animationType="fade">
+      <CustomModal visible={emailModalVisible} animationType="fade">
         {/* <CommonHeader
           leftIconPressBack={() => setEmailModalVisible(false)}
           title=""
@@ -374,7 +376,7 @@ const ChangePassword = () => {
               content={t('mailOnWay')}
               color={appColors.dark}
               bold
-              style={{textAlign: 'center', letterSpacing: 0.5}}
+              style={{ textAlign: 'center', letterSpacing: 0.5 }}
               size={'header'}
             />
             <CommonText
@@ -382,7 +384,7 @@ const ChangePassword = () => {
                 'andFollowIns',
               )}`}
               size={'large'}
-              style={{textAlign: 'center'}}
+              style={{ textAlign: 'center' }}
             />
           </View>
           <View
@@ -428,10 +430,10 @@ const ChangePassword = () => {
             />
           </View>
         </ScrollView>
-      </Modal>
-      <Modal visible={isLoading} animationType="fade" transparent={true}>
+      </CustomModal>
+      <CustomModal visible={isLoading} animationType="fade" transparent={true}>
         <CommonLoader />
-      </Modal>
+      </CustomModal>
     </KeyboardAvoidingView>
   );
 };

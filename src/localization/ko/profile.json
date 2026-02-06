@@ -68,7 +68,7 @@
   "BIOMETRIC_NOT_SUPPORTED_TITLE": "생체 인식은 지원되지 않습니다",
   "BIOMETRIC_AUTHENTICATION_FAILED_TITLE": "인증이 실패했습니다",
   "BIOMETRIC_AUTHENTICATION_FAILED": "생체 인증이 실패했습니다",
-  "AUTHENTICATE_TO_CONTINUE": "계속해서 인증하십시오",
+  "HELLO": "안녕하세요",
   "ERROR": "오류",
   "ERROR_OCCURED": "생체 인식 가용성을 확인하는 동안 오류가 발생했습니다.",
   "PIN_CHANGED_SUCCESS": "핀이 성공적으로 변경되었습니다",

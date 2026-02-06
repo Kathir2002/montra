@@ -68,7 +68,7 @@
   "BIOMETRIC_NOT_SUPPORTED_TITLE": "生体認証はサポートされていません",
   "BIOMETRIC_AUTHENTICATION_FAILED_TITLE": "認証に失敗しました",
   "BIOMETRIC_AUTHENTICATION_FAILED": "生体認証に失敗しました",
-  "AUTHENTICATE_TO_CONTINUE": "継続するために認証",
+  "HELLO": "こんにちは",
   "ERROR": "エラー",
   "ERROR_OCCURED": "生体認証の可用性をチェックしているときにエラーが発生しました。",
   "PIN_CHANGED_SUCCESS": "ピンは正常に変更されました",

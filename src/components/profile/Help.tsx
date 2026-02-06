@@ -9,12 +9,12 @@ import {
   Image,
   Modal,
 } from 'react-native';
-import React, {useRef, useState} from 'react';
+import React, { useRef, useState } from 'react';
 import * as yup from 'yup';
-import {appColors} from '@shared/appColors';
+import { appColors } from '@shared/appColors';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
-import {useTranslation} from 'react-i18next';
-import DocumentPicker from 'react-native-document-picker';
+import { useTranslation } from 'react-i18next';
+import DocumentPicker from '@react-native-documents/picker';
 import Clipboard from '@react-native-clipboard/clipboard';
 
 import {
@@ -23,7 +23,7 @@ import {
   useNavigation,
 } from '@react-navigation/native';
 import CommonInput from '@shared/components/commonInput/CommonInput';
-import {useFormik} from 'formik';
+import { useFormik } from 'formik';
 import CommonButton from '@shared/components/commonButton/CommonButton';
 import CommonConfirmation from '@shared/components/CommonConfirmation';
 import CommonRBSheet, {
@@ -40,19 +40,20 @@ import CloseIcon from '@assets/svg/close.svg';
 import ExcelIcon from '@assets/svg/fileFormats/excel.svg';
 import PDFIcon from '@assets/svg/fileFormats/pdf.svg';
 import WordIcon from '@assets/svg/fileFormats/word.svg';
-import {formatBytes, openFileFromUrl} from '@src/lib/functions';
+import { formatBytes, openFileFromUrl } from '@src/lib/functions';
 import Arrow from '@assets/svg/Arrow.svg';
 import AccountService from '@services/setup/accountService';
-import {Toast} from '@shared/ToastConfig';
-import {Icon} from '@rneui/base';
-import {useDispatch, useSelector} from 'react-redux';
-import {RootState} from '@store/store';
+import { Toast } from '@shared/ToastConfig';
+import { Icon } from '@rneui/base';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '@store/store';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
-import {updateCurrentUser} from '@store/slice/appSlice';
+import { updateCurrentUser } from '@store/slice/appSlice';
 import ContactService from '@services/contactSupportService';
+import { CustomModal } from '@shared/components/CustomModal';
 
 const Help = () => {
-  const {t} = useTranslation('profile');
+  const { t } = useTranslation('profile');
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const [rbSheetOpen, setRbSheetOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -120,21 +121,27 @@ const Help = () => {
                 userDetails.activeContactRequestCount + 1,
             }),
           );
-          Toast({message: res?.message, type: 'success'});
+          Toast({ message: res?.message, type: 'success' });
         }
       })
       .catch(err => {
         setIsLoading(false);
-        Toast({message: err?.response?.data?.message, type: 'error'});
+        Toast({ message: err?.response?.data?.message, type: 'error' });
       });
   };
 
   return (
-    <KeyboardAvoidingView style={{flex: 1, backgroundColor: appColors.light}}>
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: appColors.light }}>
       <CommonHeader
         leftIcon
         title={t('HELP_CENTER')}
-        leftIconPressBack={() => navigation.goBack()}
+        leftIconPressBack={() => {
+          if (navigation.canGoBack()) {
+            navigation.goBack();
+          } else {
+            navigation.navigate('BottomTab', { screen: 'Dashboard' }); // fallback screen
+          }
+        }}
       />
       <StatusBar
         barStyle={
@@ -185,9 +192,9 @@ const Help = () => {
         <Arrow height={30} width={30} stroke={appColors.transferBg} />
       </TouchableOpacity>
       <ScrollView
-        style={{flex: 1, paddingHorizontal: 15}}
-        contentContainerStyle={{flexGrow: 1, gap: 5, paddingBottom: 20}}>
-        <View style={{flex: 1, justifyContent: 'center'}}>
+        style={{ flex: 1, paddingHorizontal: 15 }}
+        contentContainerStyle={{ flexGrow: 1, gap: 5, paddingBottom: 20 }}>
+        <View style={{ flex: 1, justifyContent: 'center' }}>
           <View
             style={{
               marginTop: 15,
@@ -199,7 +206,7 @@ const Help = () => {
                 type: 'feather',
                 color: appColors.placeholderColor,
                 size: 20,
-                style: {marginLeft: 8},
+                style: { marginLeft: 8 },
               }}
               keyboardType="numeric"
               value={formik?.values?.phoneNumber!}
@@ -207,11 +214,11 @@ const Help = () => {
                 const numericValue = text.replace(/[^0-9]/g, '');
                 formik.setFieldValue('phoneNumber', numericValue);
               }}
-              inputStyle={{fontSize: 14}}
-              containerStyle={{height: 40}}
+              inputStyle={{ fontSize: 14 }}
+              containerStyle={{ height: 40 }}
               placeholder={t('PHONE_NO')}
               onBlur={formik.handleBlur('phoneNumber')}
-              inputContainerStyle={{paddingHorizontal: 0}}
+              inputContainerStyle={{ paddingHorizontal: 0 }}
               error={
                 formik?.errors?.phoneNumber && formik.touched.phoneNumber
                   ? formik.errors?.phoneNumber
@@ -233,17 +240,17 @@ const Help = () => {
                 type: 'ionicon',
                 color: appColors.placeholderColor,
                 size: 20,
-                style: {marginLeft: 8},
+                style: { marginLeft: 8 },
               }}
               value={formik?.values?.subject!}
               onChangeText={text => {
                 formik.setFieldValue('subject', text);
               }}
-              inputStyle={{fontSize: 14}}
-              containerStyle={{height: 40}}
+              inputStyle={{ fontSize: 14 }}
+              containerStyle={{ height: 40 }}
               placeholder={t('SUBJECT')}
               onBlur={formik.handleBlur('subject')}
-              inputContainerStyle={{paddingHorizontal: 0}}
+              inputContainerStyle={{ paddingHorizontal: 0 }}
               error={
                 formik?.errors?.subject && formik.touched.subject
                   ? formik.errors?.subject
@@ -264,7 +271,7 @@ const Help = () => {
                 type: 'antdesign',
                 color: appColors.placeholderColor,
                 size: 20,
-                style: {marginLeft: 8},
+                style: { marginLeft: 8 },
               }}
               numberOfLines={5}
               multiline={true}
@@ -272,13 +279,13 @@ const Help = () => {
               onChangeText={text => {
                 formik.setFieldValue('message', text);
               }}
-              inputStyle={{fontSize: 14}}
+              inputStyle={{ fontSize: 14 }}
               containerStyle={{
                 height: 150,
               }}
               placeholder={t('MESSAGE')}
               onBlur={formik.handleBlur('message')}
-              inputContainerStyle={{paddingHorizontal: 0, height: 150}}
+              inputContainerStyle={{ paddingHorizontal: 0, height: 150 }}
               error={
                 formik?.errors?.message && formik.touched.message
                   ? formik.errors?.message
@@ -360,7 +367,7 @@ const Help = () => {
                   !document?.url?.includes('https://')!,
                 );
               }}
-              style={{maxWidth: 210}}>
+              style={{ maxWidth: 210 }}>
               <View
                 style={{
                   gap: 5,
@@ -381,7 +388,7 @@ const Help = () => {
                 ) : (
                   <ExcelIcon width={35} height={35} />
                 )}
-                <View style={{flex: 1, gap: 5}}>
+                <View style={{ flex: 1, gap: 5 }}>
                   <CommonText
                     size={'medium'}
                     content={document?.name}
@@ -446,7 +453,7 @@ const Help = () => {
         draggable={true}
         dragNotClose={true}
         customStyles={{
-          container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
+          container: { borderTopLeftRadius: 20, borderTopRightRadius: 20 },
         }}
       />
       <CommonRBSheet
@@ -460,7 +467,7 @@ const Help = () => {
         closeOnPressMask={true}
         draggable={true}
         customStyles={{
-          container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
+          container: { borderTopLeftRadius: 20, borderTopRightRadius: 20 },
         }}>
         <FileUploadRbSheet
           setDocument={setDocument}
@@ -489,7 +496,7 @@ const Help = () => {
             source={require('@assets/lottie/contact-us-success.json')}
             loop
             autoPlay
-            style={{height: 80, width: 80}}
+            style={{ height: 80, width: 80 }}
           />
           <TouchableOpacity
             activeOpacity={0.7}
@@ -521,12 +528,12 @@ const Help = () => {
           <CommonText
             content={t('THANKYOU_FOR_REACHING')}
             size={'label'}
-            style={{textAlign: 'center', paddingHorizontal: 20}}
+            style={{ textAlign: 'center', paddingHorizontal: 20 }}
           />
           <CommonButton
             title="Close"
             buttonType="clear"
-            titleStyle={{paddingVertical: 2}}
+            titleStyle={{ paddingVertical: 2 }}
             onPress={() => {
               setIsSuccessPopoverVisible(false);
               navigation.navigate('HelpRequest_List');
@@ -534,9 +541,9 @@ const Help = () => {
           />
         </View>
       </Popover>
-      <Modal visible={isLoading} animationType="fade" transparent={true}>
+      <CustomModal visible={isLoading} animationType="fade" transparent={true}>
         <CommonLoader />
-      </Modal>
+      </CustomModal>
     </KeyboardAvoidingView>
   );
 };

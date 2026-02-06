@@ -69,7 +69,7 @@
   "BIOMETRIC_NOT_SUPPORTED_TITLE": "பயோமெட்ரிக்ஸ் ஆதரிக்கப்படவில்லை",
   "BIOMETRIC_AUTHENTICATION_FAILED_TITLE": "அங்கீகாரம் தோல்வியடைந்தது",
   "BIOMETRIC_AUTHENTICATION_FAILED": "பயோமெட்ரிக் அங்கீகாரம் தோல்வியடைந்தது",
-  "AUTHENTICATE_TO_CONTINUE": "தொடர அங்கீகரிக்கவும்",
+  "HELLO": "வணக்கம்",
   "ERROR": "பிழை",
   "ERROR_OCCURED": "பயோமெட்ரிக்ஸ் கிடைக்கும் தன்மையை சரிபார்க்கும்போது பிழை ஏற்பட்டது.",
   "PIN_CHANGED_SUCCESS": "பின் வெற்றிகரமாக மாற்றப்பட்டது",

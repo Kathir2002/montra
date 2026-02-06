@@ -1,6 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
-import {StatusBar, StyleSheet, View, useWindowDimensions} from 'react-native';
-import React, {Dispatch, SetStateAction, useEffect, useState} from 'react';
+import { StatusBar, StyleSheet, View, useWindowDimensions } from 'react-native';
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import data from './src/data/data';
 import RenderItem from './src/components/RenderItem';
 import Animated, {
@@ -26,19 +26,14 @@ const GetStarted = ({
   setIsGetStartedVisible: Dispatch<SetStateAction<boolean | null>>;
 }) => {
   const x = useSharedValue(0);
+
   const context = useSharedValue(0);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const {width: SCREEN_WIDTH} = useWindowDimensions();
-
-  // useEffect(() => {
-  //   StatusBar.setBarStyle(
-  //     currentIndex === 1 ? 'dark-content' : 'light-content',
-  //   );
-  // }, [currentIndex]);
+  const { width: SCREEN_WIDTH } = useWindowDimensions();
 
   const translateXStyle = useAnimatedStyle(() => {
     return {
-      transform: [{translateX: x.value}],
+      transform: [{ translateX: x.value }],
     };
   });
 
@@ -95,7 +90,7 @@ const GetStarted = ({
     });
 
   return (
-    <GestureHandlerRootView style={{flex: 1}}>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={styles.container}>
         <StatusBar
           barStyle={data[currentIndex]?.barStyle}

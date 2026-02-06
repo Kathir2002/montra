@@ -1,11 +1,11 @@
-import {StyleSheet} from 'react-native';
+import { StyleSheet } from 'react-native';
 import React from 'react';
 import Animated, {
   SharedValue,
   interpolateColor,
   useAnimatedStyle,
 } from 'react-native-reanimated';
-import {OnboardingData} from '../data/data';
+import { OnboardingData } from '../data/data';
 
 type Props = {
   x: SharedValue<number>;
@@ -13,7 +13,7 @@ type Props = {
   data: OnboardingData[];
 };
 
-const Background = ({x, screenWidth, data}: Props) => {
+const Background = ({ x, screenWidth, data }: Props) => {
   const animatedBackgroundColor = useAnimatedStyle(() => {
     const backgroundColor = interpolateColor(
       Math.abs(x.value),
@@ -43,7 +43,7 @@ export default Background;
 
 const styles = StyleSheet.create({
   bg: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     zIndex: -9999999,
   },
 });

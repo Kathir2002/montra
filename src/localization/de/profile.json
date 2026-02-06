@@ -68,7 +68,7 @@
   "BIOMETRIC_NOT_SUPPORTED_TITLE": "Biometrie wird nicht unterstützt",
   "BIOMETRIC_AUTHENTICATION_FAILED_TITLE": "Authentifizierung fehlgeschlagen",
   "BIOMETRIC_AUTHENTICATION_FAILED": "Biometrische Authentifizierung fehlgeschlagen",
-  "AUTHENTICATE_TO_CONTINUE": "Authentifizieren, um fortzufahren",
+  "HELLO": "Hallo",
   "ERROR": "Fehler",
   "ERROR_OCCURED": "Beim Prüfen der Biometrieverfügbarkeit ist ein Fehler aufgetreten.",
   "PIN_CHANGED_SUCCESS": "PIN erfolgreich geändert",

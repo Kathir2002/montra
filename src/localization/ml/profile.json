@@ -68,7 +68,7 @@
   "BIOMETRIC_NOT_SUPPORTED_TITLE": "ബയോമെട്രിക്സ് പിന്തുണയ്ക്കുന്നില്ല",
   "BIOMETRIC_AUTHENTICATION_FAILED_TITLE": "പ്രാമാണീകരണം പരാജയപ്പെട്ടു",
   "BIOMETRIC_AUTHENTICATION_FAILED": "ബയോമെട്രിക് പ്രാമാണീകരണം പരാജയപ്പെട്ടു",
-  "AUTHENTICATE_TO_CONTINUE": "തുടരാൻ പ്രാമാണീകരിക്കുക",
+  "HELLO": "ഹലോ",
   "ERROR": "പിശക്",
   "ERROR_OCCURED": "ബയോമെട്രിക്സ് ലഭ്യത പരിശോധിക്കുമ്പോൾ ഒരു പിശക് സംഭവിച്ചു.",
   "PIN_CHANGED_SUCCESS": "പിൻ വിജയകരമായി മാറ്റി",

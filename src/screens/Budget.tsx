@@ -9,16 +9,16 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
-import Animated, {FadeIn, FadeOut} from 'react-native-reanimated';
-import {RootState} from '@store/store';
-import {appColors} from '@shared/appColors';
-import {useDispatch, useSelector} from 'react-redux';
-import {updateIsFabToggleOpen} from '@store/slice/appSlice';
+import React, { useEffect, useState } from 'react';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import { RootState } from '@store/store';
+import { appColors } from '@shared/appColors';
+import { useDispatch, useSelector } from 'react-redux';
+import { updateIsFabToggleOpen } from '@store/slice/appSlice';
 import CommonText from '@shared/components/commonText/CommonText';
-import MonthPicker, {EventTypes} from 'react-native-month-year-picker';
+import MonthPicker, { EventTypes } from 'react-native-month-year-picker';
 import moment from 'moment';
-import {Icon} from '@rneui/base';
+import { Icon } from '@rneui/base';
 import Arrow from '@assets/svg/Arrow.svg';
 import WarningIcon from '@assets/svg/warning.svg';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
@@ -29,17 +29,18 @@ import {
   useNavigation,
 } from '@react-navigation/native';
 import BudgetService from '@services/setup/budgetSerice';
-import {Toast} from '@shared/ToastConfig';
+import { Toast } from '@shared/ToastConfig';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
-import {generateUniqueColors, getCurrencySymbol} from '@src/lib/functions';
-import {useTranslation} from 'react-i18next';
+import { generateUniqueColors, getCurrencySymbol } from '@src/lib/functions';
+import { useTranslation } from 'react-i18next';
+import { CustomModal } from '@shared/components/CustomModal';
 
 const Budget = () => {
   const dispatch = useDispatch();
   const isToggleOpen = useSelector(
     (state: RootState) => state.auth.isFabToggleOpen,
   );
-  const {t} = useTranslation('transaction');
+  const { t } = useTranslation('transaction');
   const isFocused = useIsFocused();
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const [show, setShow] = useState(false);
@@ -61,7 +62,7 @@ const Budget = () => {
 
   const getBudgetList = async () => {
     setIsLoading(true);
-    const data = {filterDate};
+    const data = { filterDate };
     await BudgetService.getBudgetList(data)
       .then((res: any) => {
         if (res?.success) {
@@ -77,8 +78,8 @@ const Budget = () => {
       })
       .catch(err => {
         setIsLoading(false);
-        console.log('Error in getting budget list');
-        Toast({message: err?.response?.data?.message, type: 'error'});
+        console.log('Error in getting budget list', err);
+        Toast({ message: err?.response?.data?.message, type: 'error' });
       });
   };
 
@@ -96,7 +97,7 @@ const Budget = () => {
     setFilterDate(nextDate);
   };
 
-  const renderItem = ({item, index}: any) => {
+  const renderItem = ({ item, index }: any) => {
     return (
       <TouchableOpacity
         onPress={() => {
@@ -144,11 +145,10 @@ const Budget = () => {
         </View>
 
         <CommonText
-          content={`${t('REMAINING')} ${
-            Math.sign(item?.remaining) == -1
-              ? getCurrencySymbol(0)
-              : getCurrencySymbol(item?.remaining)
-          }`}
+          content={`${t('REMAINING')} ${Math.sign(item?.remaining) == -1
+            ? getCurrencySymbol(0)
+            : getCurrencySymbol(item?.remaining)
+            }`}
           bold
           size={'large'}
         />
@@ -211,9 +211,9 @@ const Budget = () => {
           title=""
           leftIcon={false}
           headerBgc={appColors.primary}
-          leftIconPressBack={() => {}}
+          leftIconPressBack={() => { }}
         />
-        <View style={{paddingHorizontal: 15, paddingBottom: 20}}>
+        <View style={{ paddingHorizontal: 15, paddingBottom: 20 }}>
           <View
             style={{
               flexDirection: 'row',
@@ -221,14 +221,14 @@ const Budget = () => {
               justifyContent: 'space-between',
             }}>
             <TouchableOpacity
-              hitSlop={{bottom: 20, top: 20, left: 20, right: 20}}
+              hitSlop={{ bottom: 20, top: 20, left: 20, right: 20 }}
               onPress={() => handlePreviousButton()}
               style={{
-                transform: [{rotate: I18nManager.isRTL ? '0deg' : '180deg'}],
+                transform: [{ rotate: I18nManager.isRTL ? '0deg' : '180deg' }],
               }}>
               <Arrow stroke={appColors.light} height={35} width={35} />
             </TouchableOpacity>
-            <View style={{flexDirection: 'row', alignItems: 'center', gap: 10}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
               <CommonText
                 color={appColors.light}
                 size={'large'}
@@ -244,10 +244,10 @@ const Budget = () => {
               />
             </View>
             <TouchableOpacity
-              hitSlop={{bottom: 20, top: 20, left: 20, right: 20}}
+              hitSlop={{ bottom: 20, top: 20, left: 20, right: 20 }}
               onPress={() => handleNextButton()}
               style={{
-                transform: [{rotate: I18nManager.isRTL ? '180deg' : '0deg'}],
+                transform: [{ rotate: I18nManager.isRTL ? '180deg' : '0deg' }],
               }}>
               <Arrow stroke={appColors.light} height={35} width={35} />
             </TouchableOpacity>
@@ -306,7 +306,7 @@ const Budget = () => {
                   alignItems: 'center',
                 }}>
                 <CommonText
-                  style={{textAlign: 'center', paddingHorizontal: 30}}
+                  style={{ textAlign: 'center', paddingHorizontal: 30 }}
                   content={t('NO_BUDGET_FOUND')}
                 />
               </View>
@@ -324,16 +324,16 @@ const Budget = () => {
           exiting={FadeOut}
           style={{
             backgroundColor: appColors.transparentBackground,
-            ...StyleSheet.absoluteFillObject,
+            ...StyleSheet.absoluteFill,
           }}
         />
       ) : undefined}
       {show && (
         <MonthPicker onChange={onValueChange} value={filterDate} locale="en" />
       )}
-      <Modal animationType="fade" visible={isLoading} transparent={true}>
+      <CustomModal animationType="fade" visible={isLoading} transparent={true}>
         <CommonLoader />
-      </Modal>
+      </CustomModal>
     </KeyboardAvoidingView>
   );
 };

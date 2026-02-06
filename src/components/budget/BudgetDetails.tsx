@@ -7,8 +7,8 @@ import {
   Vibration,
   View,
 } from 'react-native';
-import React, {useRef, useState} from 'react';
-import {appColors} from '@shared/appColors';
+import React, { useRef, useState } from 'react';
+import { appColors } from '@shared/appColors';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 import DeleteIcon from '@assets/svg/delete.svg';
 import ShoppingIcon from '@assets/svg/expense/shopping.svg';
@@ -32,14 +32,15 @@ import CommonRBSheet, {
   RBSheetRef,
 } from '@shared/components/commonRBSheet/CommonRBSheet';
 import BudgetService from '@services/setup/budgetSerice';
-import {Toast} from '@shared/ToastConfig';
+import { Toast } from '@shared/ToastConfig';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
-import {getCurrencySymbol} from '@src/lib/functions';
-import {useTranslation} from 'react-i18next';
+import { getCurrencySymbol } from '@src/lib/functions';
+import { useTranslation } from 'react-i18next';
 import CommonConfirmation from '@shared/components/CommonConfirmation';
+import { CustomModal } from '@shared/components/CustomModal';
 
 const BudgetDetails = () => {
-  const {t} = useTranslation('transaction');
+  const { t } = useTranslation('transaction');
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const route: RouteProp<{
     params: {
@@ -94,7 +95,7 @@ const BudgetDetails = () => {
         deleteRBSheetRef.current?.close();
         setRbSheetOpen(false);
         setIsLoading(false);
-        Toast({message: err?.response?.data?.message, type: 'error'});
+        Toast({ message: err?.response?.data?.message, type: 'error' });
       });
   };
   return (
@@ -125,7 +126,7 @@ const BudgetDetails = () => {
             : appColors?.light
         }
       />
-      <View style={{flex: 1, paddingHorizontal: 15, gap: 10}}>
+      <View style={{ flex: 1, paddingHorizontal: 15, gap: 10 }}>
         <View
           style={{
             alignSelf: 'center',
@@ -188,7 +189,7 @@ const BudgetDetails = () => {
             justifyContent: 'space-between',
             marginVertical: 10,
           }}>
-          <View style={{gap: 3}}>
+          <View style={{ gap: 3 }}>
             <CommonText
               color={appColors.placeholderColor}
               size={'large'}
@@ -200,7 +201,7 @@ const BudgetDetails = () => {
               content={getCurrencySymbol(route?.params?.spent)}
             />
           </View>
-          <View style={{gap: 3}}>
+          <View style={{ gap: 3 }}>
             <CommonText
               color={appColors.placeholderColor}
               size={'large'}
@@ -242,9 +243,9 @@ const BudgetDetails = () => {
           </View>
         )}
       </View>
-      <Modal visible={isLoading} transparent animationType="fade">
+      <CustomModal visible={isLoading} transparent animationType="fade">
         <CommonLoader />
-      </Modal>
+      </CustomModal>
       <CommonConfirmation
         titleText={t('REMOVE_BUDGET')}
         subText={t('REMOVE_BUDGET_DESCRIPTION')}
@@ -262,7 +263,7 @@ const BudgetDetails = () => {
         closeOnPressMask={true}
         draggable={true}
         customStyles={{
-          container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
+          container: { borderTopLeftRadius: 20, borderTopRightRadius: 20 },
         }}
       />
 
@@ -278,12 +279,12 @@ const BudgetDetails = () => {
           source={require('@assets/lottie/sucess-lottie.json')}
           loop
           autoPlay
-          style={{height: 80, width: 80}}
+          style={{ height: 80, width: 80 }}
         />
         <CommonText
           content="Transaction has been successfully removed"
           size={'label'}
-          style={{textAlign: 'center', paddingHorizontal: 20}}
+          style={{ textAlign: 'center', paddingHorizontal: 20 }}
         />
       </Popover>
     </KeyboardAvoidingView>

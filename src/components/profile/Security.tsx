@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   FlatList,
   KeyboardAvoidingView,
@@ -10,7 +10,7 @@ import {
   Vibration,
   View,
 } from 'react-native';
-import {appColors} from '@shared/appColors';
+import { appColors } from '@shared/appColors';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 import {
   NavigationProp,
@@ -25,26 +25,27 @@ import CommonRBSheet, {
 } from '@shared/components/commonRBSheet/CommonRBSheet';
 import LottieView from 'lottie-react-native';
 import AccountService from '@services/setup/accountService';
-import {Toast} from '@shared/ToastConfig';
+import { Toast } from '@shared/ToastConfig';
 import Popover from 'react-native-popover-view/dist/Popover';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
-import {useDispatch, useSelector} from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   SecurityType,
   updateCurrentUser,
   updateIsModalOpen,
 } from '@store/slice/appSlice';
-import {RootState} from '@store/store';
-import {useTranslation} from 'react-i18next';
+import { RootState } from '@store/store';
+import { useTranslation } from 'react-i18next';
 import ReactNativeBiometrics from 'react-native-biometrics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import OTPInput from '@components/auth/OTPInput';
 import FlashMessage from 'react-native-flash-message';
 import CommonConfirmation from '@shared/components/CommonConfirmation';
+import { CustomModal } from '@shared/components/CustomModal';
 
 const Security = () => {
   const dispatch = useDispatch();
-  const {t} = useTranslation('profile');
+  const { t } = useTranslation('profile');
   const rbSheetRef = useRef<RBSheetRef>(null);
   const [pin, setPin] = useState(new Array(6).fill(null));
 
@@ -55,8 +56,8 @@ const Security = () => {
   const [loading, setLoading] = useState(false);
   const [isSuccessPopoverVisible, setIsSuccessPopoverVisible] = useState(false);
   const securityData = [
-    {label: t('PIN'), value: 'PIN'},
-    {label: t('FINGERPRINT'), value: 'FINGERPRINT'},
+    { label: t('PIN'), value: 'PIN' },
+    { label: t('FINGERPRINT'), value: 'FINGERPRINT' },
   ];
   const [rbSheetOpen, setRbSheetOpen] = useState(false);
   const navigation: NavigationProp<ParamListBase> = useNavigation();
@@ -108,10 +109,10 @@ const Security = () => {
     rnBiometrics
       .isSensorAvailable()
       .then(async resultObject => {
-        const {available} = resultObject;
+        const { available } = resultObject;
         if (available) {
           try {
-            const {success, error} = await rnBiometrics.simplePrompt({
+            const { success, error } = await rnBiometrics.simplePrompt({
               promptMessage: t('ACTIVATE_BIOMETRIC'),
             });
 
@@ -152,7 +153,7 @@ const Security = () => {
           setIsSuccessPopoverVisible(true);
           Vibration.vibrate(50);
           dispatch(
-            updateCurrentUser({...userDetails, securityMethod: securityType}),
+            updateCurrentUser({ ...userDetails, securityMethod: securityType }),
           );
           setTimeout(() => {
             setIsSuccessPopoverVisible(false);
@@ -162,7 +163,7 @@ const Security = () => {
       })
       .catch(err => {
         setLoading(false);
-        Toast({message: err?.response?.data?.message, type: 'error'});
+        Toast({ message: err?.response?.data?.message, type: 'error' });
       });
   };
 
@@ -170,7 +171,7 @@ const Security = () => {
     if (pin.length === 6 && !pin.includes(null)) {
       await AsyncStorage.setItem('securityPin', JSON.stringify(pin?.join('')))
         .then(() => {
-          Toast({message: t('PIN_CHANGED_SUCCESS'), type: 'success'});
+          Toast({ message: t('PIN_CHANGED_SUCCESS'), type: 'success' });
           Vibration.vibrate(100);
           navigation.goBack();
         })
@@ -178,16 +179,22 @@ const Security = () => {
           console.log('Error in updating user PIN', err);
         });
     } else {
-      Toast({message: t('ENTER_PIN'), type: 'error'});
+      Toast({ message: t('ENTER_PIN'), type: 'error' });
     }
   };
 
   return (
-    <KeyboardAvoidingView style={{flex: 1, backgroundColor: appColors.light}}>
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: appColors.light }}>
       <CommonHeader
         title={t('SECURITY')}
         leftIcon
-        leftIconPressBack={() => navigation.goBack()}
+        leftIconPressBack={() => {
+          if (navigation.canGoBack()) {
+            navigation.goBack();
+          } else {
+            navigation.navigate('BottomTab', { screen: 'Dashboard' });// fallback screen
+          }
+        }}
       />
       <StatusBar
         backgroundColor={
@@ -205,7 +212,7 @@ const Security = () => {
         <FlatList
           scrollEnabled={false}
           initialNumToRender={25}
-          contentContainerStyle={{paddingHorizontal: 15}}
+          contentContainerStyle={{ paddingHorizontal: 15 }}
           data={securityData}
           renderItem={renderItem}
           showsVerticalScrollIndicator={false}
@@ -213,18 +220,18 @@ const Security = () => {
           keyExtractor={(_, index) => index.toString()}
         />
       </View>
-      <View style={{paddingHorizontal: 15, marginTop: 150}}>
+      <View style={{ paddingHorizontal: 15, marginTop: 150 }}>
         <CommonText
           content={t('CHANGE_PIN')}
           size={'large'}
           bold
-          style={{marginBottom: 5}}
+          style={{ marginBottom: 5 }}
         />
         <OTPInput otp={pin} setOtp={setPin} isFromSettings={true} />
         <CommonButton
           title={t('UPDATE')}
           onPress={updateSecurityPin}
-          buttonStyle={{marginTop: 25}}
+          buttonStyle={{ marginTop: 25 }}
         />
       </View>
       <CommonConfirmation
@@ -253,7 +260,7 @@ const Security = () => {
         closeOnPressMask={true}
         draggable={true}
         customStyles={{
-          container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
+          container: { borderTopLeftRadius: 20, borderTopRightRadius: 20 },
         }}>
         <FlashMessage
           duration={2000}
@@ -278,17 +285,17 @@ const Security = () => {
           source={require('@assets/lottie/sucess-lottie.json')}
           loop
           autoPlay
-          style={{height: 80, width: 80}}
+          style={{ height: 80, width: 80 }}
         />
         <CommonText
           content={t('SECURITY_METHOD_UPDATED')}
           size={'label'}
-          style={{textAlign: 'center', paddingHorizontal: 20}}
+          style={{ textAlign: 'center', paddingHorizontal: 20 }}
         />
       </Popover>
-      <Modal visible={loading} transparent={true} animationType="fade">
+      <CustomModal visible={loading} transparent={true} animationType="fade">
         <CommonLoader />
-      </Modal>
+      </CustomModal>
     </KeyboardAvoidingView>
   );
 };

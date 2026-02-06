@@ -68,7 +68,7 @@
   "BIOMETRIC_NOT_SUPPORTED_TITLE": "बायोमेट्रिक्स समर्थित नहीं है",
   "BIOMETRIC_AUTHENTICATION_FAILED_TITLE": "प्रमाणीकरण विफल होना",
   "BIOMETRIC_AUTHENTICATION_FAILED": "बायोमेट्रिक प्रमाणीकरण विफल",
-  "AUTHENTICATE_TO_CONTINUE": "जारी रखने के लिए प्रमाणित करें",
+  "HELLO": "नमस्ते",
   "ERROR": "गलती",
   "ERROR_OCCURED": "बायोमेट्रिक्स की उपलब्धता की जाँच करते समय एक त्रुटि हुई।",
   "PIN_CHANGED_SUCCESS": "पिन सफलतापूर्वक बदल गया",

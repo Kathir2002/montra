@@ -1,6 +1,6 @@
-import {StyleSheet} from 'react-native';
-import React, {Dispatch, SetStateAction} from 'react';
-import {createStackNavigator} from '@react-navigation/stack';
+import { StyleSheet } from 'react-native';
+import React, { Dispatch, SetStateAction } from 'react';
+import { createStackNavigator } from '@react-navigation/stack';
 import Signin from '@components/auth/Signin';
 import Signup from '@components/auth/Signup';
 import ForgotPassword from '@components/auth/ForgotPassword';
@@ -8,7 +8,7 @@ import GetStarted from '@components/auth/getStarted/GetStarted';
 import EmailVerification from '@components/auth/EmailVerification';
 import ResetPassword from '@components/auth/ResetPassword';
 import PinGerneration from '@components/setUpScreen/PinGerneration';
-import {forSlideFromLeftAnimation} from '@src/lib/functions';
+import { forSlideFromLeftAnimation } from '@src/lib/functions';
 
 const AuthStack = ({
   isGetStartedVisible,
@@ -27,7 +27,7 @@ const AuthStack = ({
 
   return (
     <AuthStack.Navigator
-      initialRouteName={isNavigateToLogin ? 'SignIn' : 'PinGerneration'}
+      initialRouteName={isNavigateToLogin || isNavigateToLogin == null ? 'SignIn' : 'PinGerneration'}
       screenOptions={{
         headerShown: false,
         cardStyleInterpolator: forSlideFromLeftAnimation,

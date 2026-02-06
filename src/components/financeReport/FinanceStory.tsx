@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated,
   GestureResponderEvent,
@@ -6,13 +6,11 @@ import {
   useWindowDimensions,
   View,
   StatusBar,
-  SafeAreaView,
-  Modal,
   PanResponder,
   Dimensions,
 } from 'react-native';
 import styles from './financeStory.styles';
-import {appColors} from '@shared/appColors';
+import { appColors } from '@shared/appColors';
 import CommonText from '@shared/components/commonText/CommonText';
 import ShoppingIcon from '@assets/svg/expense/shopping.svg';
 import FoodIcon from '@assets/svg/expense/food.svg';
@@ -25,19 +23,20 @@ import {
   ParamListBase,
   useNavigation,
 } from '@react-navigation/native';
-import {TransactionListInterface} from '@screens/Dashboard';
+import { TransactionListInterface } from '@screens/Dashboard';
 import LottieView from 'lottie-react-native';
 import CommonButton from '@shared/components/commonButton/CommonButton';
-import {getCurrencySymbol} from '@src/lib/functions';
+import { getCurrencySymbol } from '@src/lib/functions';
 import TransactionService from '@services/transactionService';
-import {Toast} from '@shared/ToastConfig';
+import { Toast } from '@shared/ToastConfig';
 import moment from 'moment';
 import AccountService from '@services/setup/accountService';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
 import BudgetService from '@services/setup/budgetSerice';
-import {useTranslation} from 'react-i18next';
+import { useTranslation } from 'react-i18next';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-const {height: screenHeight} = Dimensions.get('window');
+const { height: screenHeight } = Dimensions.get('window');
 
 interface BudgetInterface {
   _id: string;
@@ -53,8 +52,8 @@ interface BudgetInterface {
 
 type StoriesItem =
   | TransactionListInterface
-  | {budget: BudgetInterface[]; totalQuantity: number}
-  | {quote: string; author: string}
+  | { budget: BudgetInterface[]; totalQuantity: number }
+  | { quote: string; author: string }
   | undefined;
 
 interface MonthlyReportInterface {
@@ -72,7 +71,7 @@ interface MonthlyReportInterface {
   };
 }
 
-const getIcon = (story: {transactionFor: string; transactionType: string}) => {
+const getIcon = (story: { transactionFor: string; transactionType: string }) => {
   if (story?.transactionType === 'Expense') {
     switch (story?.transactionFor) {
       case 'Shopping':
@@ -98,9 +97,9 @@ const getIcon = (story: {transactionFor: string; transactionType: string}) => {
   }
 };
 
-const FinanceStory = ({closeHandler}: {closeHandler: () => void}) => {
-  const {t} = useTranslation('finaceReport');
-  const {width} = useWindowDimensions();
+const FinanceStory = ({ closeHandler }: { closeHandler: () => void }) => {
+  const { t } = useTranslation('finaceReport');
+  const { width } = useWindowDimensions();
   const pausedProgress = useRef(0);
   const progressAnim = useRef(new Animated.Value(0)).current;
   const [isLoading, setIsLoading] = useState(true);
@@ -125,8 +124,8 @@ const FinanceStory = ({closeHandler}: {closeHandler: () => void}) => {
     (
       item,
     ): item is
-      | {budget: BudgetInterface[]; totalQuantity: number}
-      | {quote: string; author: string} => {
+      | { budget: BudgetInterface[]; totalQuantity: number }
+      | { quote: string; author: string } => {
       if (!item) return false;
       if ('budget' in item && item.budget.length === 0) return false;
       if ('quote' in item && !item.author) return false;
@@ -149,10 +148,10 @@ const FinanceStory = ({closeHandler}: {closeHandler: () => void}) => {
         //   evt.nativeEvent.pageY < screenHeight * 0.2 &&
         //   gestureState.dy > 0
         // );
-         return (
-    Math.abs(gestureState.dy) > Math.abs(gestureState.dx) &&
-    gestureState.dy > 0
-  );
+        return (
+          Math.abs(gestureState.dy) > Math.abs(gestureState.dx) &&
+          gestureState.dy > 0
+        );
       },
       onPanResponderGrant: () => {
         // Pause the story when starting to drag
@@ -163,36 +162,42 @@ const FinanceStory = ({closeHandler}: {closeHandler: () => void}) => {
         if (gestureState.dy > 0) {
           translateY.setValue(gestureState.dy);
           // Also update opacity for fade effect
-            const opacityValue = Math.max(0.3, 1 - gestureState.dy / (screenHeight * 2.5));            
-            opacity.setValue(opacityValue);          
+          const opacityValue = Math.max(0.3, 1 - gestureState.dy / (screenHeight * 2.5));
+          opacity.setValue(opacityValue);
         }
       },
-      
+
       onPanResponderRelease: (evt, gestureState) => {
-        // Resume the story
-        setIsPaused(false);
-        
-        // If dragged down more than 150 pixels, close the modal
+        // Resume the story logic only if we are NOT closing
+        // (See previous advice about moving this inside the else block)
+
         if (gestureState.dy > 150) {
+          // CLOSE ACTION
           Animated.parallel([
             Animated.timing(translateY, {
               toValue: screenHeight,
               duration: 300,
-              useNativeDriver: true,
+              // IMPORTANT: Change this to false so it knows the exact JS value
+              useNativeDriver: false,
             }),
             Animated.timing(opacity, {
               toValue: 0,
               duration: 300,
-              useNativeDriver: true,
+              // Keep this consistent with the above
+              useNativeDriver: false,
             }),
           ]).start(() => {
             closeHandler();
           });
         } else {
-          // Spring back to original position
+          // CANCEL ACTION (Snap back)
+          setIsPaused(false); // Resume story here
+
           Animated.parallel([
             Animated.spring(translateY, {
               toValue: 0,
+              // Spring works better with native driver usually, but 
+              // if it still glitches, switch this to false too.
               useNativeDriver: true,
               tension: 100,
               friction: 8,
@@ -206,13 +211,41 @@ const FinanceStory = ({closeHandler}: {closeHandler: () => void}) => {
           ]).start();
         }
       },
-      
+
     }),
   ).current;
+
+  const isTransactionListInterface = (
+    story: any,
+  ): story is TransactionListInterface => {
+    return (
+      story &&
+      typeof story.amount === 'number' &&
+      '_id' in story &&
+      'transactionDate' in story
+    );
+  };
+
+
+
+  const getCurrentStoryName: 'Income' | 'Expense' | 'Budget' | 'Quote' = useMemo(() => {
+    return currentStory &&
+      isTransactionListInterface(currentStory) &&
+      currentStory?.transactionType == 'Expense'
+      ? 'Expense'
+      : currentStory &&
+        isTransactionListInterface(currentStory) &&
+        currentStory?.transactionType == 'Income'
+        ? 'Income'
+        : currentStory && 'budget' in currentStory
+          ? 'Budget'
+          : 'Quote';
+  }, [currentStory]);
 
   useEffect(() => {
     getFinanceStoryData();
   }, []);
+
 
   const getMaxTransaction = (
     transactions: TransactionListInterface[],
@@ -253,7 +286,7 @@ const FinanceStory = ({closeHandler}: {closeHandler: () => void}) => {
                 async (quoteResponse: any) => {
                   if (quoteResponse?.success) {
                   }
-                  const data = {filterDate: new Date()};
+                  const data = { filterDate: new Date() };
                   await BudgetService.getBudgetList(data)
                     .then((budgetResponse: any) => {
                       setIsLoading(false);
@@ -323,7 +356,7 @@ const FinanceStory = ({closeHandler}: {closeHandler: () => void}) => {
       toValue: 1,
       duration: (1 - pausedProgress.current) * 6000,
       useNativeDriver: false,
-    }).start(({finished}) => {
+    }).start(({ finished }) => {
       if (finished) {
         goToNextStory();
       }
@@ -395,10 +428,10 @@ const FinanceStory = ({closeHandler}: {closeHandler: () => void}) => {
           content={t('THIS_MONTH')}
           color={appColors.light}
           size={'large'}
-          style={{textAlign: 'center', marginTop: 10}}
+          style={{ textAlign: 'center', marginTop: 10 }}
         />
         <CommonText
-          style={{paddingTop: 150, textAlign: 'center'}}
+          style={{ paddingTop: 150, textAlign: 'center' }}
           content={
             story?.transactionType == 'Expense'
               ? t('YOU_SPEND')
@@ -410,7 +443,7 @@ const FinanceStory = ({closeHandler}: {closeHandler: () => void}) => {
         />
         {story?.transactionFor && (
           <CommonText
-            style={{paddingVertical: 15, textAlign: 'center'}}
+            style={{ paddingVertical: 15, textAlign: 'center' }}
             content={
               currentStoryIndex == 0
                 ? getCurrencySymbol(monthlyReportData?.totalExpenses!)
@@ -435,7 +468,7 @@ const FinanceStory = ({closeHandler}: {closeHandler: () => void}) => {
             }}>
             <View>
               <CommonText
-                style={{textAlign: 'center'}}
+                style={{ textAlign: 'center' }}
                 content={currentStoryIndex == 0 ? t('SPENDING') : t('INCOME')}
                 bold
                 size={'label'}
@@ -465,7 +498,7 @@ const FinanceStory = ({closeHandler}: {closeHandler: () => void}) => {
               <CommonText content={story?.transactionFor} />
             </View>
             <CommonText
-              style={{textAlign: 'center'}}
+              style={{ textAlign: 'center' }}
               content={getCurrencySymbol(story.amount)}
               bold
               size={'header'}
@@ -488,7 +521,7 @@ const FinanceStory = ({closeHandler}: {closeHandler: () => void}) => {
               source={require('@assets/lottie/list-empty-lottie.json')}
               autoPlay
               loop
-              style={{height: 200, width: 200}}
+              style={{ height: 200, width: 200 }}
             />
             <CommonText
               content={getCurrencySymbol(story?.amount)}
@@ -518,7 +551,7 @@ const FinanceStory = ({closeHandler}: {closeHandler: () => void}) => {
           content={t('THIS_MONTH')}
           color={appColors.light}
           size={'large'}
-          style={{textAlign: 'center', marginTop: 10}}
+          style={{ textAlign: 'center', marginTop: 10 }}
         />
         <View
           style={{
@@ -593,82 +626,46 @@ const FinanceStory = ({closeHandler}: {closeHandler: () => void}) => {
     );
   };
 
-  const isTransactionListInterface = (
-    story: any,
-  ): story is TransactionListInterface => {
-    return (
-      story &&
-      typeof story.amount === 'number' &&
-      '_id' in story &&
-      'transactionDate' in story
-    );
-  };
 
-  const getCurrentStoryName = (): 'Income' | 'Expense' | 'Budget' | 'Quote' => {
-    return currentStory &&
-      isTransactionListInterface(currentStory) &&
-      currentStory?.transactionType == 'Expense'
-      ? 'Expense'
-      : currentStory &&
-        isTransactionListInterface(currentStory) &&
-        currentStory?.transactionType == 'Income'
-      ? 'Income'
-      : currentStory && 'budget' in currentStory
-      ? 'Budget'
-      : 'Quote';
-  };
 
   return (
-    <SafeAreaView style={[styles.safeArea,{backgroundColor: "transparent"}]}>
-      <StatusBar
-        backgroundColor={
-          isLoading
-            ? appColors?.transparentBackground
-            : getCurrentStoryName() == 'Expense'
-            ? appColors?.expenseBg
-            : getCurrentStoryName() == 'Income'
-            ? appColors?.incomeBg
-            : getCurrentStoryName() == 'Budget'
-            ? appColors?.transferBg
-            : appColors.primary
-        }
-        barStyle={'light-content'}
-      />
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: "transparent" }]} edges={["left"]} >
+      <StatusBar barStyle={'light-content'} />
       <Animated.View
         style={{
           flex: 1,
-          transform: [{translateY}],
+          transform: [{ translateY }],
           opacity,
           backgroundColor: isLoading
             ? appColors?.transparentBackground
-            : getCurrentStoryName() == 'Expense'
-            ? appColors?.expenseBg
-            : getCurrentStoryName() == 'Income'
-            ? appColors?.incomeBg
-            : getCurrentStoryName() == 'Budget'
-            ? appColors?.transferBg
-            : appColors.primary,
+            : getCurrentStoryName == 'Expense'
+              ? appColors?.expenseBg
+              : getCurrentStoryName == 'Income'
+                ? appColors?.incomeBg
+                : getCurrentStoryName == 'Budget'
+                  ? appColors?.transferBg
+                  : appColors.primary,
         }}
         {...panResponder.panHandlers}>
         <Pressable
           onPress={handleScreenTouch}
           onLongPress={handlePressIn}
           onPressOut={handlePressOut}
-          style={({pressed}) => [
+          style={({ pressed }) => [
             {
               opacity: pressed ? 0.9 : 1,
             },
             styles.container,
-             {
-      backgroundColor: 'transparent', 
-    },
+            {
+              backgroundColor: 'transparent',
+            },
           ]}>
           {isLoading ? (
             <CommonLoader />
           ) : (
             <View style={styles.container}>
               {/* Pull indicator */}
-              <View
+              {/* <View
                 style={{
                   width: 40,
                   height: 4,
@@ -678,8 +675,8 @@ const FinanceStory = ({closeHandler}: {closeHandler: () => void}) => {
                   marginTop: 10,
                   opacity: 0.7,
                 }}
-              />
-              
+              /> */}
+
               <View style={styles.progressBarContainer}>
                 {availableStories?.map((story, index) => (
                   <View key={index} style={styles.progressBarBackground}>
@@ -694,12 +691,12 @@ const FinanceStory = ({closeHandler}: {closeHandler: () => void}) => {
                   </View>
                 ))}
               </View>
-              {getCurrentStoryName() === 'Expense' ||
-              getCurrentStoryName() === 'Income' ? (
+              {getCurrentStoryName === 'Expense' ||
+                getCurrentStoryName === 'Income' ? (
                 currentStory &&
                 isTransactionListInterface(currentStory) &&
                 renderStoryContent(currentStory)
-              ) : getCurrentStoryName() === 'Budget' ? (
+              ) : getCurrentStoryName === 'Budget' ? (
                 currentStory &&
                 'budget' in currentStory &&
                 renderBudetStory(currentStory!)
@@ -711,29 +708,27 @@ const FinanceStory = ({closeHandler}: {closeHandler: () => void}) => {
                     flex: 1,
                     justifyContent: 'space-evenly',
                   }}>
-                  <View style={{justifyContent: 'center', gap: 10}}>
+                  <View style={{ justifyContent: 'center', gap: 10 }}>
                     <CommonText
-                      content={`"${
-                        currentStory &&
+                      content={`"${currentStory &&
                         'quote' in currentStory &&
                         currentStory?.quote
-                      }"`}
+                        }"`}
                       color={appColors.lightBg}
                       bold
                       size={'appHeader'}
                     />
                     <CommonText
-                      content={`-${
-                        currentStory &&
+                      content={`-${currentStory &&
                         'author' in currentStory &&
                         currentStory?.author
-                      }`}
+                        }`}
                       color={appColors.light}
                       size={'header'}
                     />
                   </View>
                   {currentStoryIndex === 0 &&
-                  getCurrentStoryName() === 'Quote' ? undefined : (
+                    getCurrentStoryName === 'Quote' ? undefined : (
                     <CommonButton
                       buttonType="clear"
                       title={t('SEE_FULL_DETAIL')}

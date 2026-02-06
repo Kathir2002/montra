@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
-import {appColors} from '@shared/appColors';
+import React, { useEffect, useState } from 'react';
+import { appColors } from '@shared/appColors';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 import {
   NavigationProp,
@@ -18,19 +18,20 @@ import {
 } from '@react-navigation/native';
 import CommonText from '@shared/components/commonText/CommonText';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
-import {Toast} from '@shared/ToastConfig';
+import { Toast } from '@shared/ToastConfig';
 import AccountService from '@services/setup/accountService';
-import {paymentData, PaymentDataInterface} from '@assets/svg';
+import { paymentData, PaymentDataInterface } from '@assets/svg';
 import CommonButton from '@shared/components/commonButton/CommonButton';
-import {getCurrencySymbol} from '@src/lib/functions';
-import {useTranslation} from 'react-i18next';
+import { getCurrencySymbol } from '@src/lib/functions';
+import { useTranslation } from 'react-i18next';
+import { CustomModal } from '@shared/components/CustomModal';
 
 const Account = () => {
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
   const [walletData, setWalletData] = useState<any>({});
   const isFocused = useIsFocused();
-  const {t} = useTranslation('account');
+  const { t } = useTranslation('account');
   useEffect(() => {
     if (isFocused) {
       getWalletData();
@@ -48,14 +49,14 @@ const Account = () => {
       .catch(err => {
         console.log(err);
 
-        Toast({message: err?.response?.data?.message, type: 'error'});
+        Toast({ message: err?.response?.data?.message, type: 'error' });
       })
       .finally(() => {
         setIsLoading(false);
       });
   };
 
-  const renderItem = ({item, index}: {item: any; index: number}) => {
+  const renderItem = ({ item, index }: { item: any; index: number }) => {
     const CurrentImage = paymentData[
       item?.accountType as keyof PaymentDataInterface
     ].filter(ind => {
@@ -81,7 +82,7 @@ const Account = () => {
           borderRadius: 8,
           padding: 10,
         }}>
-        <View style={{flexDirection: 'row', alignItems: 'center', gap: 10}}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
           <View
             style={{
               backgroundColor: appColors.formBorderColor,
@@ -98,12 +99,12 @@ const Account = () => {
   };
 
   return (
-    <View style={{flex: 1, backgroundColor: appColors.light}}>
-      <View style={{flex: 1}}>
+    <View style={{ flex: 1, backgroundColor: appColors.light }}>
+      <View style={{ flex: 1 }}>
         <ImageBackground
           resizeMode="cover"
           source={require('@assets/images/accountBg.png')}
-          style={{flex: 0.3}}>
+          style={{ flex: 0.3 }}>
           <CommonHeader
             leftIconPressBack={() => navigation.goBack()}
             title={t('ACCOUNT')}
@@ -117,7 +118,7 @@ const Account = () => {
           />
           <CommonText
             content={t('ACCOUNT_BALANCE')}
-            style={{textAlign: 'center'}}
+            style={{ textAlign: 'center' }}
             color={appColors.placeholderColor}
             size={'large'}
           />
@@ -127,7 +128,7 @@ const Account = () => {
                 ? getCurrencySymbol(walletData?.totalAccountBalance)
                 : `☹️`
             }
-            style={{textAlign: 'center'}}
+            style={{ textAlign: 'center' }}
             bold
             size={'appHeader'}
           />
@@ -167,14 +168,14 @@ const Account = () => {
           <CommonButton
             title={t('ADD_NEW_WALLET')}
             onPress={() =>
-              navigation.navigate('AddNewBankAccount', {fromAccountPage: true})
+              navigation.navigate('AddNewBankAccount', { fromAccountPage: true })
             }
           />
         </View>
       </View>
-      <Modal visible={isLoading} transparent={true} animationType="fade">
+      <CustomModal visible={isLoading} transparent={true} animationType="fade">
         <CommonLoader />
-      </Modal>
+      </CustomModal>
     </View>
   );
 };

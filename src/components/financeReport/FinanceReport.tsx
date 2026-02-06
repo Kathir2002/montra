@@ -9,8 +9,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
-import {appColors} from '@shared/appColors';
+import React, { useEffect, useState } from 'react';
+import { appColors } from '@shared/appColors';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 import {
   NavigationProp,
@@ -18,7 +18,7 @@ import {
   useIsFocused,
   useNavigation,
 } from '@react-navigation/native';
-import {Icon} from '@rneui/base';
+import { Icon } from '@rneui/base';
 import LottieView from 'lottie-react-native';
 import CommonText from '@shared/components/commonText/CommonText';
 import PieChartIcon from '@assets/svg/pieChart.svg';
@@ -26,8 +26,8 @@ import LineChartIcon from '@assets/svg/lineChart.svg';
 import FinanceLineChart from '../charts/FinanceLineChart';
 import FinancePieChart from '../charts/FinancePieChart';
 import TransactionService from '@services/transactionService';
-import {Toast} from '@shared/ToastConfig';
-import {TransactionListInterface} from '@screens/Dashboard';
+import { Toast } from '@shared/ToastConfig';
+import { TransactionListInterface } from '@screens/Dashboard';
 import TransactionRenderItem from '@shared/components/TransactionRenderItem';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
 import SortIcon from '@assets/svg/sort.svg';
@@ -37,18 +37,19 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import AccountService from '@services/setup/accountService';
-import MonthPicker, {EventTypes} from 'react-native-month-year-picker';
+import MonthPicker, { EventTypes } from 'react-native-month-year-picker';
 import moment from 'moment';
-import {generateUniqueColors, getCurrencySymbol} from '@src/lib/functions';
-import {useTranslation} from 'react-i18next';
+import { generateUniqueColors, getCurrencySymbol } from '@src/lib/functions';
+import { useTranslation } from 'react-i18next';
+import { CustomModal } from '@shared/components/CustomModal';
 
 interface PieChartDataInterface {
   name: string;
   value: number;
-  itemStyle: {color: string};
+  itemStyle: { color: string };
 }
 const FinanceReport = () => {
-  const {t} = useTranslation('transaction');
+  const { t } = useTranslation('transaction');
   const isFocused = useIsFocused();
   const transactionTypes = ['Expense', 'Income'];
   const rotationValue = useSharedValue(0);
@@ -60,13 +61,13 @@ const FinanceReport = () => {
   const [monthlyBalanceData, setMonthlyBalanceData] = useState<{
     totalIncome: number;
     totalExpense: number;
-  }>({totalExpense: 0, totalIncome: 0});
+  }>({ totalExpense: 0, totalIncome: 0 });
 
   const [transactionDetails, setTransactionDetails] = useState<
     TransactionListInterface[]
   >([]);
   const [chartData, setChartData] = useState<{
-    lineChart: {date: Date; amount: number}[];
+    lineChart: { date: Date; amount: number }[];
     pieChart: PieChartDataInterface[];
   }>({
     lineChart: [],
@@ -156,7 +157,7 @@ const FinanceReport = () => {
       })
       .catch(err => {
         console.log(err.response?.data?.message);
-        Toast({message: err?.response?.data?.message, type: 'error'});
+        Toast({ message: err?.response?.data?.message, type: 'error' });
       });
   };
 
@@ -220,9 +221,8 @@ const FinanceReport = () => {
           </View>
           <CommonText
             style={{}}
-            content={`${
-              filterData?.filterBy == 'Expense' ? '-' : '+'
-            } ${getCurrencySymbol(item?.value)}`}
+            content={`${filterData?.filterBy == 'Expense' ? '-' : '+'
+              } ${getCurrencySymbol(item?.value)}`}
             bold
             size={'large'}
             color={
@@ -243,13 +243,12 @@ const FinanceReport = () => {
               backgroundColor: item?.itemStyle?.color,
               height: 10,
               borderRadius: 5,
-              width: `${
-                (item?.value /
-                  (filterData.filterBy == 'Expense'
-                    ? monthlyBalanceData.totalExpense
-                    : monthlyBalanceData.totalIncome)) *
+              width: `${(item?.value /
+                (filterData.filterBy == 'Expense'
+                  ? monthlyBalanceData.totalExpense
+                  : monthlyBalanceData.totalIncome)) *
                 100
-              }%`,
+                }%`,
             }}
           />
         </View>
@@ -260,7 +259,7 @@ const FinanceReport = () => {
   const onValueChange = (event: EventTypes, newDate: Date) => {
     setShow(false);
     if (newDate) {
-      setFilterData(prev => ({...prev, filterByMonth: newDate}));
+      setFilterData(prev => ({ ...prev, filterByMonth: newDate }));
     }
   };
 
@@ -271,7 +270,7 @@ const FinanceReport = () => {
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
-      transform: [{rotateZ: `${rotationValue.value}deg`}],
+      transform: [{ rotateZ: `${rotationValue.value}deg` }],
     };
   });
 
@@ -300,8 +299,8 @@ const FinanceReport = () => {
             refreshing={refreshing}
           />
         }
-        contentContainerStyle={{paddingHorizontal: 15, flexGrow: 1}}>
-        <View style={{flex: 1}}>
+        contentContainerStyle={{ paddingHorizontal: 15, flexGrow: 1 }}>
+        <View style={{ flex: 1 }}>
           <View
             style={{
               flexDirection: 'row',
@@ -341,7 +340,7 @@ const FinanceReport = () => {
                 borderRadius: 10,
               }}>
               <TouchableOpacity
-                hitSlop={{bottom: 20, top: 20, left: 20, right: 20}}
+                hitSlop={{ bottom: 20, top: 20, left: 20, right: 20 }}
                 activeOpacity={0.7}
                 onPress={() => {
                   setSelectedChart('Line');
@@ -418,6 +417,7 @@ const FinanceReport = () => {
               />
             </View>
           )}
+
           <View
             style={{
               marginVertical: 15,
@@ -432,7 +432,7 @@ const FinanceReport = () => {
             {transactionTypes.map((item, index) => (
               <TouchableOpacity
                 onPress={() => {
-                  setFilterData(prev => ({...prev, filterBy: item}));
+                  setFilterData(prev => ({ ...prev, filterBy: item }));
                 }}
                 activeOpacity={0.7}
                 key={index}
@@ -454,7 +454,7 @@ const FinanceReport = () => {
                 <CommonText
                   size={'large'}
                   content={item === 'Expense' ? t('EXPENSE') : t('INCOME')}
-                  style={{textAlign: 'center'}}
+                  style={{ textAlign: 'center' }}
                   bold
                   color={
                     filterData.filterBy === item
@@ -469,7 +469,7 @@ const FinanceReport = () => {
             activeOpacity={0.5}
             onPress={() => {
               setFilterData(prev => {
-                let temp = {...prev};
+                let temp = { ...prev };
                 if (temp.sortBy == 'Highest') {
                   temp.sortBy = 'Lowest';
                   rotationValue.value = withTiming(180, {
@@ -499,12 +499,12 @@ const FinanceReport = () => {
             renderItem={
               selectedChart === 'Pie'
                 ? CategoryRenderItem
-                : ({item}) => (
-                    <TransactionRenderItem
-                      item={item}
-                      navigation={navigation}
-                    />
-                  )
+                : ({ item }) => (
+                  <TransactionRenderItem
+                    item={item}
+                    navigation={navigation}
+                  />
+                )
             }
             data={
               selectedChart === 'Pie' ? chartData?.pieChart : transactionDetails
@@ -524,10 +524,10 @@ const FinanceReport = () => {
                   source={require('@assets/lottie/list-empty-lottie.json')}
                   autoPlay
                   loop
-                  style={{height: 200, width: 200}}
+                  style={{ height: 200, width: 200 }}
                 />
                 <CommonText
-                  style={{textAlign: 'center'}}
+                  style={{ textAlign: 'center' }}
                   content={t('NO_TRANSACTION')}
                 />
               </View>
@@ -539,9 +539,9 @@ const FinanceReport = () => {
           />
         </View>
       </ScrollView>
-      <Modal visible={isLoading} transparent animationType="fade">
+      <CustomModal visible={isLoading} transparent animationType="fade">
         <CommonLoader />
-      </Modal>
+      </CustomModal>
       {show && (
         <MonthPicker
           onChange={onValueChange}

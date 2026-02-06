@@ -68,7 +68,7 @@
   "BIOMETRIC_NOT_SUPPORTED_TITLE": "不支持生物识别技术",
   "BIOMETRIC_AUTHENTICATION_FAILED_TITLE": "身份验证失败",
   "BIOMETRIC_AUTHENTICATION_FAILED": "生物识别验证失败",
-  "AUTHENTICATE_TO_CONTINUE": "身份验证以继续",
+  "HELLO": "你好",
   "ERROR": "错误",
   "ERROR_OCCURED": "在检查生物识别技术可用性时发生了错误。",
   "PIN_CHANGED_SUCCESS": "PIN成功改变了",

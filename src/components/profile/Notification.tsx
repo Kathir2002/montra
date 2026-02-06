@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   FlatList,
   KeyboardAvoidingView,
@@ -6,7 +6,7 @@ import {
   StatusBar,
   View,
 } from 'react-native';
-import {appColors} from '@shared/appColors';
+import { appColors } from '@shared/appColors';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 import {
   NavigationProp,
@@ -16,10 +16,11 @@ import {
 } from '@react-navigation/native';
 import CommonText from '@shared/components/commonText/CommonText';
 import AccountService from '@services/setup/accountService';
-import {Toast} from '@shared/ToastConfig';
+import { Toast } from '@shared/ToastConfig';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
 import CommonSwitch from '@shared/components/commonSwitch/Switch';
-import {useTranslation} from 'react-i18next';
+import { useTranslation } from 'react-i18next';
+import { CustomModal } from '@shared/components/CustomModal';
 
 interface NotificationDataI {
   title: string;
@@ -29,7 +30,7 @@ interface NotificationDataI {
 }
 
 const Notification = () => {
-  const {t} = useTranslation('profile');
+  const { t } = useTranslation('profile');
   const isFocused = useIsFocused();
   const [loading, setLoading] = useState(false);
   const navigation: NavigationProp<ParamListBase> = useNavigation();
@@ -79,7 +80,7 @@ const Notification = () => {
       })
       .catch(err => {
         setLoading(false);
-        Toast({message: err?.response?.data?.message, type: 'error'});
+        Toast({ message: err?.response?.data?.message, type: 'error' });
       });
   };
 
@@ -89,7 +90,7 @@ const Notification = () => {
   ) => {
     setLoading(true);
     const data = {
-      notification: {[item['for']]: !item.isEnabled},
+      notification: { [item['for']]: !item.isEnabled },
     };
     await AccountService.changeAccountPreferences(data)
       .then((res: any) => {
@@ -108,7 +109,7 @@ const Notification = () => {
       })
       .catch(err => {
         setLoading(false);
-        Toast({message: err?.response?.data?.message, type: 'error'});
+        Toast({ message: err?.response?.data?.message, type: 'error' });
       });
   };
 
@@ -127,7 +128,7 @@ const Notification = () => {
           alignItems: 'center',
           marginVertical: 10,
         }}>
-        <View style={{gap: 5, flex: 0.7}}>
+        <View style={{ gap: 5, flex: 0.7 }}>
           <CommonText content={item?.title} bold />
           <CommonText
             content={item?.subTitle}
@@ -137,7 +138,7 @@ const Notification = () => {
         <CommonSwitch
           activeColor={appColors.primary}
           value={item.isEnabled}
-          style={{transform: [{scaleX: 0.8}, {scaleY: 0.8}]}}
+          style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }}
           onValueChange={() => {
             updateNotificationPreferences(item, index);
           }}
@@ -148,7 +149,7 @@ const Notification = () => {
   };
 
   return (
-    <KeyboardAvoidingView style={{flex: 1, backgroundColor: appColors.light}}>
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: appColors.light }}>
       <CommonHeader
         title={t('NOTIFICATION')}
         leftIcon
@@ -162,7 +163,7 @@ const Notification = () => {
       />
       <FlatList
         initialNumToRender={25}
-        contentContainerStyle={{paddingHorizontal: 15}}
+        contentContainerStyle={{ paddingHorizontal: 15 }}
         data={notificationData}
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
@@ -170,9 +171,9 @@ const Notification = () => {
         keyExtractor={(_, index) => index.toString()}
       />
 
-      <Modal visible={loading} transparent={true} animationType="fade">
+      <CustomModal visible={loading} transparent={true} animationType="fade">
         <CommonLoader />
-      </Modal>
+      </CustomModal>
     </KeyboardAvoidingView>
   );
 };

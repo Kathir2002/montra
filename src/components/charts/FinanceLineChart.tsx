@@ -1,25 +1,24 @@
-import {useWindowDimensions} from 'react-native';
-import SvgChart, {SVGRenderer} from '@wuba/react-native-echarts/svgChart';
+import { useWindowDimensions } from 'react-native';
+import SvgChart, { SVGRenderer } from '@wuba/react-native-echarts/svgChart';
 import * as echarts from 'echarts/core';
-import {LineChart} from 'echarts/charts';
+import { LineChart } from 'echarts/charts';
 import {
   TitleComponent,
   TooltipComponent,
   GridComponent,
 } from 'echarts/components';
 
-import React, {memo, useEffect, useRef} from 'react';
-import {appColors} from '@shared/appColors';
-import {ECharts, EChartsOption} from 'echarts';
+import React, { memo, useEffect, useRef } from 'react';
+import { appColors } from '@shared/appColors';
+import { ECharts, EChartsOption } from 'echarts';
 import moment from 'moment';
-import {gestureHandlerRootHOC} from 'react-native-gesture-handler';
-import {getCurrencySymbol} from '@src/lib/functions';
+import { getCurrencySymbol } from '@src/lib/functions';
 
 const FinanceLineChart = (props: {
-  chartData: {date: Date; amount: number}[];
+  chartData: { date: Date; amount: number }[];
 }) => {
-  const {chartData} = props;
-  const {width} = useWindowDimensions();
+  const { chartData } = props;
+  const { width } = useWindowDimensions();
 
   // register extensions
   echarts.use([
@@ -114,7 +113,8 @@ const FinanceLineChart = (props: {
     return () => chart?.dispose();
   }, [option]);
 
-  return <SvgChart ref={svgRef} useRNGH style={{marginTop: -40}} />;
+  // return <SvgChart ref={svgRef} useRNGH style={{ marginTop: -40 }} />;
+  return <></>
 };
 
-export default gestureHandlerRootHOC(FinanceLineChart);
+export default FinanceLineChart;

@@ -1,5 +1,5 @@
-import React, {useEffect} from 'react';
-import {createStackNavigator} from '@react-navigation/stack';
+import React, { useEffect, useRef } from 'react';
+import { createStackNavigator } from '@react-navigation/stack';
 import BottomTabNavigator from './BottomTabNavigator';
 import CommonAddScreen from '@components/transactions/CommonAddScreen';
 import AddNewAccount from '@components/setUpScreen/AddNewAccount';
@@ -15,8 +15,8 @@ import Help from '@components/profile/Help';
 import Currency from '@components/profile/Currency';
 import ExportData from '@components/profile/ExportData';
 import Security from '@components/profile/Security';
-import {NativeEventEmitter, NativeModules, Platform, View} from 'react-native';
-import {forSlideFromLeftAnimation} from '@src/lib/functions';
+import { Alert, EventSubscription, NativeEventEmitter, NativeModules, Platform, View } from 'react-native';
+import { forSlideFromLeftAnimation } from '@src/lib/functions';
 import EditProfile from '@components/profile/EditProfile';
 import ChangePassword from '@components/profile/ChangePassword';
 import {
@@ -27,6 +27,7 @@ import {
 import HelpRequest_Details from '@components/profile/HelpRequest_Details';
 import HelpRequest_List from '@components/profile/HelpRequest_List';
 import ChatView from '@components/profile/ChatView';
+import { addOnShortcutUsedListener, getInitialShortcutId } from '@src/lib/shortcutHandler';
 
 const AppStack = () => {
   const AppStack = createStackNavigator();
@@ -53,31 +54,23 @@ const AppStack = () => {
     return <CommonDetailsScreen screenName="Transfer" />;
   };
 
+  const listenerSubscription = useRef<null | EventSubscription>(null);
+
   useEffect(() => {
-    if (Platform.OS === 'android') {
-      NativeModules.InitialRoute.getInitialRoute()
-        .then((route: string | null) => {
-          if (route) {
-            handleNavigation(route);
-          }
-        })
-        .catch((err: any) => {
-          console.log('Error in handling shortcut navigation', err);
-        });
+    const callback = (id: string) => {
+      if (id) {
+        handleNavigation(id);
+      }
+    };
 
-      // Listen for shortcut events (app is running)
-      const eventEmitter = new NativeEventEmitter(NativeModules.ShortcutModule);
-      const subscription = eventEmitter.addListener('handleShortcut', event => {
-        if (event.route) {
-          handleNavigation(event.route);
-        }
-      });
+    listenerSubscription.current = addOnShortcutUsedListener(callback);
+    getInitialShortcutId().then(callback);
 
-      return () => {
-        subscription.remove();
-      };
+    return () => {
+      listenerSubscription.current?.remove();
+      listenerSubscription.current = null;
     }
-  }, []);
+  }, [])
 
   const handleNavigation = (route: string) => {
     switch (route) {
@@ -91,13 +84,9 @@ const AppStack = () => {
   };
 
   return (
-    <View style={{flex: 1}}>
+    <View style={{ flex: 1, }}>
       <AppStack.Navigator
-        initialRouteName="BottomTab"
-        screenOptions={{
-          headerShown: false,
-          cardStyleInterpolator: forSlideFromLeftAnimation,
-        }}>
+        initialRouteName="BottomTab" screenOptions={{ headerShown: false, cardStyleInterpolator: forSlideFromLeftAnimation, }}>
         <AppStack.Screen name="BottomTab" component={BottomTabNavigator} />
         <AppStack.Screen name="AddExpense" component={AddExpense} />
         <AppStack.Screen name="AddIncome" component={AddIncome} />
@@ -121,10 +110,7 @@ const AppStack = () => {
         <AppStack.Screen name="EditProfile" component={EditProfile} />
         <AppStack.Screen name="ChangePassword" component={ChangePassword} />
         <AppStack.Screen name="HelpRequest_List" component={HelpRequest_List} />
-        <AppStack.Screen
-          name="HelpRequest_Details"
-          component={HelpRequest_Details}
-        />
+        <AppStack.Screen name="HelpRequest_Details" component={HelpRequest_Details} />
         <AppStack.Screen name="ChatView" component={ChatView} />
       </AppStack.Navigator>
     </View>

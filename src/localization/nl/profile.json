@@ -68,7 +68,7 @@
   "BIOMETRIC_NOT_SUPPORTED_TITLE": "Biometrie niet ondersteund",
   "BIOMETRIC_AUTHENTICATION_FAILED_TITLE": "Authenticatie is mislukt",
   "BIOMETRIC_AUTHENTICATION_FAILED": "Biometrische authenticatie is mislukt",
-  "AUTHENTICATE_TO_CONTINUE": "Authenticeer om door te gaan",
+  "HELLO": "Hallo",
   "ERROR": "Fout",
   "ERROR_OCCURED": "Er is een fout opgetreden bij het controleren van de beschikbaarheid van biometrie.",
   "PIN_CHANGED_SUCCESS": "Pin veranderd met succes",

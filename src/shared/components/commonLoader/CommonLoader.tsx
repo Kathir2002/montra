@@ -1,8 +1,8 @@
 import React from 'react';
 import LottieView from 'lottie-react-native';
 import LoaderLottie from '@assets/lottie/loader.json';
-import {View} from 'react-native';
-import {appColors} from '@shared/appColors';
+import { View } from 'react-native';
+import { appColors } from '@shared/appColors';
 const CommonLoader = () => {
   return (
     <View
@@ -11,6 +11,8 @@ const CommonLoader = () => {
         backgroundColor: appColors.transparentBackground,
         alignItems: 'center',
         justifyContent: 'center',
+        zIndex: 1000, // <—— smaller than banner
+
       }}>
       <LottieView
         source={LoaderLottie}

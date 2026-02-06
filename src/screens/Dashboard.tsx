@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
   FlatList,
   KeyboardAvoidingView,
-  Modal,
+  Linking,
   Platform,
   Pressable,
   RefreshControl,
@@ -13,12 +13,7 @@ import {
   Vibration,
   View,
 } from 'react-native';
-import {
-  NavigationProp,
-  ParamListBase,
-  useIsFocused,
-  useNavigation,
-} from '@react-navigation/native';
+import { NavigationProp, ParamListBase, useIsFocused, useNavigation } from '@react-navigation/native';
 import { Avatar, Icon } from '@rneui/base';
 import MonthPicker, { EventTypes } from 'react-native-month-year-picker';
 import { appColors } from '@shared/appColors';
@@ -40,15 +35,12 @@ import AccountService from '@services/setup/accountService';
 import DashBoardBarChart from '@components/charts/DashboardBarChart';
 import CommonDropDown from '@shared/components/commonDropdown/CommonDropDown';
 import FinanceStory from '@components/financeReport/FinanceStory';
-import {
-  updateIsFabToggleOpen,
-  updateIsTransactionAdded,
-} from '@store/slice/appSlice';
+import { updateIsFabToggleOpen, updateIsTransactionAdded } from '@store/slice/appSlice';
 import { getCurrencySymbol } from '@src/lib/functions';
 import callPermission from '@services/permission';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { navigationStore } from '@services/setup/navigationStore';
 import { useTranslation } from 'react-i18next';
+import { CustomModal } from '@shared/components/CustomModal';
 
 export interface TransactionListInterface {
   _id: string;
@@ -92,39 +84,8 @@ export interface TransactionListInterface {
 }
 
 const Dashboard = () => {
-  useEffect(() => {
-    checkPendingDeepLink();
-  }, []);
+
   const { t } = useTranslation('transaction');
-
-  const checkPendingDeepLink = async () => {
-    const pendingUrl = await navigationStore.getPendingDeepLink();
-    if (pendingUrl) {
-      handleDeepLink(pendingUrl);
-    }
-  };
-
-  const handleDeepLink = (url: string) => {
-    try {
-      // Remove the scheme from the URL
-      const path = url.replace(/.*?:\/\//g, '');
-
-      const screen = path?.split('montra.netlify.app')[1];
-      // Navigate based on the screen path
-      switch (screen) {
-        case '/profile/settings/security':
-          navigation.navigate('Security');
-          break;
-        case '/help-center':
-          navigation.navigate('Help');
-          break;
-        default:
-          console.log(`Unknown deep link path: ${screen}`);
-      }
-    } catch (error) {
-      console.error('Error handling deep link:', error);
-    }
-  };
 
   // Set Monday as the first day of the week
   moment.updateLocale('en', {
@@ -162,9 +123,7 @@ const Dashboard = () => {
   const [accountBalanceData, setAccountBalanceData] = useState<any>({});
   const [chartDropdownOpen, setChartDropdownOpen] = useState(false);
   const [isUpdated, setIsUpdated] = useState(true);
-  const [filterData, setFilterData] = useState<{
-    filterMonth: Date;
-  }>({ filterMonth: new Date() });
+  const [filterData, setFilterData] = useState<{ filterMonth: Date }>({ filterMonth: new Date() });
 
   const monthFirstdate = moment(filterData.filterMonth).startOf('month');
   const monthLastdate = moment(filterData.filterMonth).endOf('month');
@@ -360,6 +319,15 @@ const Dashboard = () => {
     getAccountBalance(chartDropdownValue);
   };
 
+  const openDeveloperOptions = () => {
+    if (Platform.OS === 'android') {
+      Linking.sendIntent("android.settings.APPLICATION_DEVELOPMENT_SETTINGS")
+        .catch((err) => {
+          Linking.openSettings(); // fallback
+        });
+    }
+  };
+
   const HeaderComponent = () => {
     return (
       <View style={{ flex: 1 }}>
@@ -405,6 +373,7 @@ const Dashboard = () => {
             marginBottom: 20,
           }}>
           <Pressable
+            onPress={() => openDeveloperOptions()}
             style={{
               backgroundColor: appColors.incomeBg,
               paddingHorizontal: 20,
@@ -490,18 +459,17 @@ const Dashboard = () => {
               bold
             />
 
-            <View style={{ width: '55%' }}>
+            <View style={{ width: '57%' }}>
               <CommonDropDown
                 dropDownStyle={{
-                  height: 45,
-                  minHeight: 45,
+                  minHeight: 40,
                   width: '100%',
                 }}
-                dropDownContainerStyle={{ width: '100%' }}
+                dropDownContainerStyle={{ width: '100%', }}
                 placeholder=""
                 maxHeight={150}
                 zIndex={14}
-                items={chartDropdownData as any}
+                items={chartDropdownData}
                 open={chartDropdownOpen}
                 setOpen={setChartDropdownOpen}
                 value={chartDropdownValue}
@@ -552,7 +520,7 @@ const Dashboard = () => {
         setChartDropdownOpen(false);
         return false;
       }}
-      style={{ flex: 1, backgroundColor: appColors.dark }}>
+      style={{ flex: 1, backgroundColor: appColors.light }}>
       <CommonHeader
         leftIcon
         leftIconPressBack={() => { }}
@@ -608,7 +576,7 @@ const Dashboard = () => {
           </TouchableOpacity>
         }
       // customRightHeaderComponent={
-      //   <TouchableOpacity activeOpacity={0.7} onPress={() => {}}>
+      //   <TouchableOpacity activeOpacity={0.7} onPress={() => { }}>
       //     <NotificationIcon height={30} width={30} />
       //   </TouchableOpacity>
       // }
@@ -675,13 +643,13 @@ const Dashboard = () => {
           exiting={FadeOut}
           style={{
             backgroundColor: appColors.transparentBackground,
-            ...StyleSheet.absoluteFillObject,
+            ...StyleSheet.absoluteFill,
           }}
         />
       ) : undefined}
-      <Modal visible={isLoading} transparent animationType="fade">
+      <CustomModal visible={isLoading} transparent animationType="fade">
         <CommonLoader />
-      </Modal>
+      </CustomModal>
       {show && (
         <MonthPicker
           onChange={onValueChange}
@@ -691,13 +659,13 @@ const Dashboard = () => {
           locale="en"
         />
       )}
-      <Modal
+      <CustomModal
         transparent={true}
         visible={isFinanceStoryVisible}
         animationType='slide'
         onRequestClose={() => setIsFinanceStoryVisible(false)}>
         <FinanceStory closeHandler={() => setIsFinanceStoryVisible(false)} />
-      </Modal>
+      </CustomModal>
     </KeyboardAvoidingView>
   );
 };

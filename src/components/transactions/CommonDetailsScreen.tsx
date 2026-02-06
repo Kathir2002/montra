@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Image,
   Modal,
@@ -16,7 +16,7 @@ import {
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
-import DocumentPicker from 'react-native-document-picker';
+import DocumentPicker from '@react-native-documents/picker';
 
 import CommonButton from '../../shared/components/commonButton/CommonButton';
 import CommonHeader from '../../shared/components/commonHeader/CommonHeader';
@@ -25,8 +25,8 @@ import DeleteIcon from '@assets/svg/delete.svg';
 import ExcelIcon from '@assets/svg/fileFormats/excel.svg';
 import PDFIcon from '@assets/svg/fileFormats/pdf.svg';
 import WordIcon from '@assets/svg/fileFormats/word.svg';
-import {appColors} from '@shared/appColors';
-import {TransactionListInterface} from '@screens/Dashboard';
+import { appColors } from '@shared/appColors';
+import { TransactionListInterface } from '@screens/Dashboard';
 import {
   formatBytes,
   getCurrencySymbol,
@@ -36,15 +36,16 @@ import CommonRBSheet, {
   RBSheetRef,
 } from '../../shared/components/commonRBSheet/CommonRBSheet';
 import TransactionService from '@services/transactionService';
-import {Toast} from '@shared/ToastConfig';
+import { Toast } from '@shared/ToastConfig';
 import CommonLoader from '../../shared/components/commonLoader/CommonLoader';
-import {paymentData, PaymentDataInterface} from '@assets/svg';
+import { paymentData, PaymentDataInterface } from '@assets/svg';
 import Popover from 'react-native-popover-view';
 import LottieView from 'lottie-react-native';
-import {useDispatch} from 'react-redux';
-import {updateIsTransactionAdded} from '@store/slice/appSlice';
-import {useTranslation} from 'react-i18next';
+import { useDispatch } from 'react-redux';
+import { updateIsTransactionAdded } from '@store/slice/appSlice';
+import { useTranslation } from 'react-i18next';
 import CommonConfirmation from '@shared/components/CommonConfirmation';
+import { CustomModal } from '@shared/components/CustomModal';
 
 interface PropInterface {
   id: string;
@@ -55,8 +56,8 @@ const CommonDetailsScreen = ({
 }: {
   screenName: 'Expense' | 'Income' | 'Transfer';
 }) => {
-  const {t} = useTranslation('transaction');
-  const route: RouteProp<{transactionDetails: PropInterface}> = useRoute();
+  const { t } = useTranslation('transaction');
+  const route: RouteProp<{ transactionDetails: PropInterface }> = useRoute();
   const dispatch = useDispatch();
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const [transactionDetails, setTransactionDetails] =
@@ -93,14 +94,14 @@ const CommonDetailsScreen = ({
   }, [isFocused]);
 
   const getTransactionDetails = async () => {
-    await TransactionService.getTransactionDetails({id: route?.params?.id})
+    await TransactionService.getTransactionDetails({ id: route?.params?.id })
       .then((res: any) => {
         setTransactionDetails(res?.transaction);
         setIsLoading(false);
       })
       .catch(err => {
         setIsLoading(false);
-        Toast({type: 'error', message: err?.response?.data?.message});
+        Toast({ type: 'error', message: err?.response?.data?.message });
       });
   };
 
@@ -128,13 +129,13 @@ const CommonDetailsScreen = ({
         deleteRBSheetRef.current?.close();
         setRbSheetOpen(false);
         setIsLoading(false);
-        Toast({message: err?.response?.data?.message, type: 'error'});
+        Toast({ message: err?.response?.data?.message, type: 'error' });
       });
   };
 
   return (
     <View
-      style={{flex: 1, backgroundColor: appColors.light, position: 'relative'}}>
+      style={{ flex: 1, backgroundColor: appColors.light, position: 'relative' }}>
       <CommonHeader
         leftIcon
         theme="dark"
@@ -144,8 +145,8 @@ const CommonDetailsScreen = ({
           screenName == 'Income'
             ? appColors.incomeBg
             : screenName == 'Expense'
-            ? appColors.expenseBg
-            : appColors.transferBg
+              ? appColors.expenseBg
+              : appColors.transferBg
         }
         customRightHeaderComponent={
           <TouchableOpacity
@@ -163,10 +164,10 @@ const CommonDetailsScreen = ({
           rbSheetOpen || isSuccessPopoverVisible || isLoading
             ? appColors.transparentBackground
             : screenName == 'Income'
-            ? appColors.incomeBg
-            : screenName == 'Expense'
-            ? appColors.expenseBg
-            : appColors.transferBg
+              ? appColors.incomeBg
+              : screenName == 'Expense'
+                ? appColors.expenseBg
+                : appColors.transferBg
         }
         barStyle={'light-content'}
       />
@@ -177,13 +178,13 @@ const CommonDetailsScreen = ({
             screenName == 'Income'
               ? appColors.incomeBg
               : screenName == 'Expense'
-              ? appColors.expenseBg
-              : appColors.transferBg,
+                ? appColors.expenseBg
+                : appColors.transferBg,
           maxHeight: 150,
           borderBottomRightRadius: 20,
           borderBottomLeftRadius: 20,
         }}>
-        <View style={{alignItems: 'center', gap: 10}}>
+        <View style={{ alignItems: 'center', gap: 10 }}>
           <CommonText
             content={getCurrencySymbol(
               transactionDetails?.amount as number,
@@ -222,38 +223,36 @@ const CommonDetailsScreen = ({
           backgroundColor: appColors.light,
           borderRadius: 20,
         }}>
-        <View style={{flex: 0.2, alignItems: 'center'}}>
+        <View style={{ flex: 0.2, alignItems: 'center' }}>
           <CommonText content={t('TYPE')} color={appColors.placeholderColor} />
           <CommonText bold content={transactionDetails?.transactionType} />
         </View>
-        <View style={{flex: 0.35, alignItems: 'center'}}>
+        <View style={{ flex: 0.35, alignItems: 'center' }}>
           <CommonText
             content={`${screenName == 'Transfer' ? t('FROM') : t('CATEGORY')}`}
             color={appColors.placeholderColor}
           />
           <CommonText
-            style={{textAlign: 'center'}}
+            style={{ textAlign: 'center' }}
             bold
-            content={`${
-              screenName === 'Transfer'
-                ? transferData?.fromAccount
-                : transactionDetails?.transactionFor
-            }`}
+            content={`${screenName === 'Transfer'
+              ? transferData?.fromAccount
+              : transactionDetails?.transactionFor
+              }`}
           />
         </View>
-        <View style={{flex: 0.35, alignItems: 'center'}}>
+        <View style={{ flex: 0.35, alignItems: 'center' }}>
           <CommonText
             content={`${screenName == 'Transfer' ? t('TO') : t('WALLET')}`}
             color={appColors.placeholderColor}
           />
           <CommonText
-            style={{textAlign: 'center'}}
+            style={{ textAlign: 'center' }}
             bold
-            content={`${
-              screenName === 'Transfer'
-                ? transferData?.toAccount
-                : transferData?.wallet
-            }`}
+            content={`${screenName === 'Transfer'
+              ? transferData?.toAccount
+              : transferData?.wallet
+              }`}
           />
         </View>
       </View>
@@ -265,7 +264,7 @@ const CommonDetailsScreen = ({
           borderStyle: 'dashed',
         }}
       />
-      <View style={{flex: 1, backgroundColor: appColors.light, padding: 15}}>
+      <View style={{ flex: 1, backgroundColor: appColors.light, padding: 15 }}>
         <View style={{}}>
           {transactionDetails?.description && (
             <CommonText
@@ -321,7 +320,7 @@ const CommonDetailsScreen = ({
                     false,
                   );
                 }}
-                style={{maxWidth: 210}}>
+                style={{ maxWidth: 210 }}>
                 <View
                   style={{
                     gap: 5,
@@ -335,24 +334,23 @@ const CommonDetailsScreen = ({
                     paddingVertical: 5,
                   }}>
                   {transactionDetails?.document?.fileFormat ===
-                  DocumentPicker.types.pdf ? (
+                    DocumentPicker.types.pdf ? (
                     <PDFIcon width={35} height={35} />
                   ) : transactionDetails?.document?.fileFormat ===
-                      'application/msword' ||
+                    'application/msword' ||
                     'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ? (
                     <WordIcon width={35} height={35} />
                   ) : (
                     <ExcelIcon width={35} height={35} />
                   )}
-                  <View style={{flex: 1, gap: 5}}>
+                  <View style={{ flex: 1, gap: 5 }}>
                     <CommonText
                       size={'medium'}
-                      content={`${transactionDetails?.document?.fileName}.${
-                        transactionDetails?.document?.fileUrl?.split('.')[
-                          transactionDetails?.document?.fileUrl?.split('.')
-                            ?.length - 1
-                        ]
-                      }`}
+                      content={`${transactionDetails?.document?.fileName}.${transactionDetails?.document?.fileUrl?.split('.')[
+                        transactionDetails?.document?.fileUrl?.split('.')
+                          ?.length - 1
+                      ]
+                        }`}
                       color={appColors.placeholderColor}
                     />
                     <CommonText
@@ -400,12 +398,12 @@ const CommonDetailsScreen = ({
         closeOnPressMask={true}
         draggable={true}
         customStyles={{
-          container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
+          container: { borderTopLeftRadius: 20, borderTopRightRadius: 20 },
         }}
       />
-      <Modal visible={isLoading} transparent animationType="fade">
+      <CustomModal visible={isLoading} transparent animationType="fade">
         <CommonLoader />
-      </Modal>
+      </CustomModal>
       <Popover
         isVisible={isSuccessPopoverVisible}
         popoverStyle={{
@@ -418,12 +416,12 @@ const CommonDetailsScreen = ({
           source={require('@assets/lottie/sucess-lottie.json')}
           loop
           autoPlay
-          style={{height: 80, width: 80}}
+          style={{ height: 80, width: 80 }}
         />
         <CommonText
           content={t('TRANSACTION_REMOVED_SUCCESS')}
           size={'label'}
-          style={{textAlign: 'center', paddingHorizontal: 20}}
+          style={{ textAlign: 'center', paddingHorizontal: 20 }}
         />
       </Popover>
     </View>

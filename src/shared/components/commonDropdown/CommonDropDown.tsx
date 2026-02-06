@@ -2,15 +2,14 @@ import {
   StyleProp,
   StyleSheet,
   TextStyle,
-  useWindowDimensions,
   View,
   ViewStyle,
 } from 'react-native';
-import React, {Dispatch, FC, SetStateAction, useEffect, useState} from 'react';
+import React, { Dispatch, FC, SetStateAction, useEffect, useState } from 'react';
 
-import {AnimatedDropdown, ItemTypeValue, ValueType} from './src/index';
-import {appColors} from '@shared/appColors';
-import {appFonts} from '@shared/appFonts';
+import { AnimatedDropdown, ItemTypeValue, ValueType } from './src/index';
+import { appColors } from '@shared/appColors';
+import { appFonts } from '@shared/appFonts';
 import CommonText from '../commonText/CommonText';
 
 type SetStateCallback<S> = (prevState: S) => S;
@@ -83,7 +82,7 @@ const CommonDropDown: FC<CommonDropdownInterface> = ({
       showTickIcon={showTickIcon}
       selectedItemLabelStyle={[
         commonDropDownStyle?.selectedItemLabelStyle,
-        {fontSize: 13},
+        { fontSize: 13 },
         selectedItemLabelStyle,
       ]}
       autoScroll={true}
@@ -97,7 +96,7 @@ const CommonDropDown: FC<CommonDropdownInterface> = ({
       ]}
       listItemLabelStyle={[
         commonDropDownStyle.listItemLabelStyle,
-        {fontSize: 13},
+        { fontSize: 13 },
         listItemLabelStyle,
       ]}
       selectedItemContainerStyle={[
@@ -107,9 +106,9 @@ const CommonDropDown: FC<CommonDropdownInterface> = ({
       style={[commonDropDownStyle.dropDownStyle, dropDownStyle]}
       searchable={searchable}
       arrowIconStyle={
-        {tintColor: appColors.placeholderColor} as StyleProp<ViewStyle>
+        { tintColor: appColors.placeholderColor } as StyleProp<ViewStyle>
       }
-      placeholderStyle={[commonDropDownStyle.placeholderStyle, {fontSize: 13}]}
+      placeholderStyle={[commonDropDownStyle.placeholderStyle, { fontSize: 13 }]}
       ListEmptyComponent={({
         listMessageTextStyle,
         ActivityIndicatorComponent,
@@ -164,7 +163,6 @@ const commonDropDownStyle = StyleSheet.create({
   },
   placeholderStyle: {
     color: appColors.placeholderColor,
-
     fontFamily: appFonts.medium,
   },
   listItemLabelStyle: {

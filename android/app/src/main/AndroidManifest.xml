@@ -16,14 +16,12 @@
     android:icon="@mipmap/ic_launcher"
     android:roundIcon="@mipmap/ic_launcher_round"
     android:allowBackup="false"
-    android:theme="@style/AppTheme"
+    android:theme="@style/BootSplashTheme"
     android:extractNativeLibs="true"
+    android:usesCleartextTraffic="${usesCleartextTraffic}"
+    android:supportsRtl="true"
   >
     <!-- android:usesCleartextTraffic="true" -->
-    <!-- for push notification popup-->
-    <meta-data
-      android:name="com.dieam.reactnativepushnotification.notification_foreground"
-      android:value="true" />
 
     <meta-data
       android:name="asset_statements"

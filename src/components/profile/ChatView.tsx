@@ -6,18 +6,17 @@ import {
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
-import {Icon} from '@rneui/base';
-const x = 10;
+import { Icon } from '@rneui/base';
 
 import ContactService from '@services/contactSupportService';
-import {appColors} from '@shared/appColors';
+import { appColors } from '@shared/appColors';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
 import CommonText from '@shared/components/commonText/CommonText';
-import {Toast} from '@shared/ToastConfig';
-import {useSocket} from '@src/hooks/useSocket';
-import {getDateLabel} from '@src/lib/functions';
-import {RootState} from '@store/store';
+import { Toast } from '@shared/ToastConfig';
+import { useSocket } from '@src/hooks/useSocket';
+import { getDateLabel } from '@src/lib/functions';
+import { RootState } from '@store/store';
 import LottieView from 'lottie-react-native';
 import React, {
   useState,
@@ -41,30 +40,31 @@ import {
   Keyboard,
   ListRenderItemInfo,
   StatusBar,
-  Modal,
   Vibration,
   Text,
   ActivityIndicator,
+  Platform,
+  Pressable
 } from 'react-native';
 import Animated, {
   FadeIn,
   FadeOut,
   runOnJS,
-  useAnimatedGestureHandler,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
-import {useSelector} from 'react-redux';
-import {RBSheetRef} from '@shared/components/commonRBSheet/CommonRBSheet';
+import { useSelector } from 'react-redux';
+import { RBSheetRef } from '@shared/components/commonRBSheet/CommonRBSheet';
 import {
+  Gesture,
+  GestureDetector,
   GestureHandlerRootView,
-  PanGestureHandler,
 } from 'react-native-gesture-handler';
-import {Pressable} from 'react-native';
 import CommonConfirmation from '@shared/components/CommonConfirmation';
 import Popover from 'react-native-popover-view';
-import {useTranslation} from 'react-i18next';
+import { useTranslation } from 'react-i18next';
+import { CustomModal } from '@shared/components/CustomModal';
 
 export interface Message {
   id: string;
@@ -96,21 +96,21 @@ interface MessageBubbleProps {
   highLightMessageIndex: number;
   index: number;
   setShowMenu: Dispatch<
-    SetStateAction<{visible: boolean; message: Message | null}>
+    SetStateAction<{ visible: boolean; message: Message | null }>
   >;
   setHighLightMessageIndex: Dispatch<SetStateAction<number | null>>;
   isFocus: React.RefObject<TextInput>;
 }
 
-const ReplyPreview: FC<ReplyPreviewProps> = ({replyTo, onCancel, isOwn}) => {
-  const {t} = useTranslation('profile');
+const ReplyPreview: FC<ReplyPreviewProps> = ({ replyTo, onCancel, isOwn }) => {
+  const { t } = useTranslation('profile');
 
   if (!replyTo) return null;
   return (
     <View style={styles.replyPreview}>
       <View style={styles.replyContainer}>
         <View
-          style={[styles.replyBar, {backgroundColor: isOwn ? 'blue' : 'green'}]}
+          style={[styles.replyBar, { backgroundColor: isOwn ? 'blue' : 'green' }]}
         />
         <View style={styles.replyContent}>
           <View
@@ -157,7 +157,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
   setHighLightMessageIndex,
   isFocus,
 }) => {
-  const {t} = useTranslation('profile');
+  const { t } = useTranslation('profile');
 
   const translateX = useSharedValue(0);
   const bubbleRef = useRef<View>(null);
@@ -168,44 +168,47 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
     }
   }, [isFocus]);
 
-  const onGestureEvent = useAnimatedGestureHandler({
-    onStart: () => {
+  const panGesture = Gesture.Pan()
+    .activeOffsetX([-10, 10])       // allow slight horizontal swipe
+    .failOffsetY([-10, 10])  // only vertical movement
+    .onStart(() => {
       translateX.value = 0;
-    },
-    onActive: event => {
+    })
+    .onUpdate((event) => {
       if (event.translationX > 0) {
         translateX.value = Math.min(event.translationX, 100);
       }
-    },
-    onEnd: event => {
+    })
+    .onEnd((event) => {
       if (event.translationX > 50) {
         runOnJS(Vibration.vibrate)(50);
         runOnJS(onSwipeToReply)(message);
         runOnJS(handleFocus)();
       }
+
       translateX.value = withSpring(0, {
-        damping: 15,
+        damping: 20,
         stiffness: 150,
       });
-    },
-  });
+    });
+
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
-      transform: [{translateX: translateX.value}],
+      transform: [{ translateX: translateX.value }],
     };
   });
 
   return (
     <Pressable
       onPress={() => {
-        setShowMenu({visible: false, message: null});
+        setShowMenu({ visible: false, message: null });
         setHighLightMessageIndex(null);
       }}
-      style={{width: '100%'}}
+      style={{ width: '100%' }}
       onLongPress={() => {
         if (message?.isOwn) {
-          setShowMenu({visible: true, message: message});
+          setShowMenu({ visible: true, message: message });
           setHighLightMessageIndex(index);
           Vibration.vibrate(70);
         }
@@ -222,7 +225,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
           },
         ]}
         ref={bubbleRef}>
-        <PanGestureHandler onGestureEvent={onGestureEvent}>
+        <GestureDetector gesture={panGesture}>
           <Animated.View
             style={[
               styles.bubbleContainer,
@@ -245,14 +248,14 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
                   <View
                     style={[
                       styles.replyBar,
-                      {backgroundColor: isOwn ? 'blue' : 'green'},
+                      { backgroundColor: isOwn ? 'blue' : 'green' },
                     ]}
                   />
                   <View style={styles.replyContent}>
                     <Text
                       style={[
                         styles.replyName,
-                        {color: isOwn ? 'blue' : 'green'},
+                        { color: isOwn ? 'blue' : 'green' },
                       ]}
                       numberOfLines={1}
                       ellipsizeMode="clip">
@@ -287,14 +290,14 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
               </View>
             </View>
           </Animated.View>
-        </PanGestureHandler>
+        </GestureDetector>
       </Animated.View>
     </Pressable>
   );
 };
 
-const DateSeparator: FC<{date: Date}> = ({date}) => {
-  const {t} = useTranslation('profile');
+const DateSeparator: FC<{ date: Date }> = ({ date }) => {
+  const { t } = useTranslation('profile');
 
   return (
     <View style={styles.dateSeparator}>
@@ -307,8 +310,8 @@ const DateSeparator: FC<{date: Date}> = ({date}) => {
           getDateLabel(date) === 'Today'
             ? t('TODAY')
             : getDateLabel(date) === 'Yesterday'
-            ? t('YESTERDAY')
-            : getDateLabel(date)
+              ? t('YESTERDAY')
+              : getDateLabel(date)
         }
       />
       <View style={styles.dateLine} />
@@ -323,14 +326,14 @@ const TypingAnimation = () => {
         style={[
           styles.bubbleContainer,
           styles.otherMessageContainer,
-          {minWidth: '10%'},
+          { minWidth: '10%' },
         ]}>
         <View style={[styles.tail, styles.otherTail]} />
         <View
           style={[
             styles.bubble,
             styles.otherBubble,
-            {minWidth: '10%', padding: 0},
+            { minWidth: '10%', padding: 0 },
           ]}>
           <LottieView
             style={{
@@ -349,7 +352,7 @@ const TypingAnimation = () => {
 };
 
 const ChatView: FC = () => {
-  const {t} = useTranslation('profile');
+  const { t } = useTranslation('profile');
 
   const isFocused = useIsFocused();
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
@@ -362,23 +365,24 @@ const ChatView: FC = () => {
   const [flatListData, setFlatListData] = useState<IFlatListData[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [highLightMessageIndex, setHighLightMessageIndex] = useState<
     number | null
   >(null);
   const [showMenuOption, setShowMenuOptions] = useState<{
     visible: boolean;
     message: Message | null;
-  }>({visible: false, message: null});
+  }>({ visible: false, message: null });
   const [rbSheetOpen, setRbSheetOpen] = useState(false);
   const deleteRBSheetRef = useRef<RBSheetRef>(null);
   const isFieldFocus = useRef<TextInput>(null);
   const [isSocketReconnecting, setisSocketReconnecting] = useState(false);
-  const route = useRoute<RouteProp<{params: {id: string}}, 'params'>>();
+  const route = useRoute<RouteProp<{ params: { id: string } }, 'params'>>();
   // FlatList viewability config
-  const viewabilityConfig = useRef({itemVisiblePercentThreshold: 50}).current;
+  const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 50 }).current;
   const typingTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  const {sendTypingStatus, socket, joinRoom, leaveRoom, isConnected, connect} =
+  const { sendTypingStatus, socket, joinRoom, leaveRoom, isConnected, connect } =
     useSocket();
 
   useEffect(() => {
@@ -411,13 +415,15 @@ const ChatView: FC = () => {
     groupMessagesByDate(messages);
   }, [messages]);
 
+
+
   // To get the user is typing or not
   useEffect(() => {
     if (!socket) return;
 
     joinRoom(route?.params?.id);
 
-    const handleTyping = (data: {isTyping: boolean}) => {
+    const handleTyping = (data: { isTyping: boolean }) => {
       setIsTyping(data?.isTyping);
       setFlatListData(prev => {
         // Remove existing typing indicator
@@ -426,18 +432,18 @@ const ChatView: FC = () => {
         // If user is typing, add new typing indicator at the start
         return data?.isTyping
           ? [
-              {
-                type: 'typing',
-                id: 'typing-indicator', // Use a fixed ID to prevent multiple duplicates
-                isOwn: false,
-                text: '',
-                senderId: '',
-                timestamp: new Date(),
-                isRead: false,
-                senderName: '',
-              },
-              ...filteredData,
-            ]
+            {
+              type: 'typing',
+              id: 'typing-indicator', // Use a fixed ID to prevent multiple duplicates
+              isOwn: false,
+              text: '',
+              senderId: '',
+              timestamp: new Date(),
+              isRead: false,
+              senderName: '',
+            },
+            ...filteredData,
+          ]
           : filteredData; // Otherwise, just return filtered data
       });
     };
@@ -466,7 +472,7 @@ const ChatView: FC = () => {
       setMessages(prev => {
         return prev.map(item => {
           if (messageIDs?.includes(item?.id)) {
-            return {...item, isRead: true};
+            return { ...item, isRead: true };
           }
           return item;
         });
@@ -482,7 +488,7 @@ const ChatView: FC = () => {
         setRbSheetOpen(false);
         setHighLightMessageIndex(null);
         deleteRBSheetRef.current?.close();
-        setShowMenuOptions({visible: false, message: null});
+        setShowMenuOptions({ visible: false, message: null });
         setMessages(prevMessages => {
           // Filter out the message with the given ID
           const filteredMessages = prevMessages.filter(
@@ -492,7 +498,7 @@ const ChatView: FC = () => {
           // Update replyTo in remaining messages
           return filteredMessages.map(msg => {
             if (msg.replyTo && msg.replyTo._id === message?.messageId) {
-              return {...msg, replyTo: undefined};
+              return { ...msg, replyTo: undefined };
             }
             return msg;
           });
@@ -515,8 +521,8 @@ const ChatView: FC = () => {
 
   // UseRef to avoid unnecessary re-renders
   const onViewableItemsChanged = useRef(
-    ({viewableItems}: {viewableItems: {item: IFlatListData}[]}) => {
-      const visibleIds = viewableItems?.map(({item}) => {
+    ({ viewableItems }: { viewableItems: { item: IFlatListData }[] }) => {
+      const visibleIds = viewableItems?.map(({ item }) => {
         if (!item?.isOwn && !item?.isRead && item?.type === 'message')
           return item?.id;
       });
@@ -563,7 +569,7 @@ const ChatView: FC = () => {
       }
     } catch (err: any) {
       setIsLoading(false);
-      Toast({message: err?.message, type: 'error'});
+      Toast({ message: err?.message, type: 'error' });
     }
   };
 
@@ -572,6 +578,20 @@ const ChatView: FC = () => {
       getChat();
     }
   }, [isFocused]);
+
+  useEffect(() => {
+    const subscribe = Keyboard.addListener("keyboardDidShow", () => {
+      setKeyboardVisible(true);
+    })
+    const unsubscribe = Keyboard.addListener("keyboardDidHide", () => {
+      setKeyboardVisible(false);
+    })
+
+    return () => {
+      subscribe.remove();
+      unsubscribe.remove();
+    }
+  }, [])
 
   const groupMessagesByDate = useCallback(
     (data: Message[]) => {
@@ -608,7 +628,10 @@ const ChatView: FC = () => {
       });
 
       setFlatListData(groups);
-      setIsLoading(false);
+      setTimeout(() => {
+        setIsLoading(false);
+      });
+
     },
     [isTyping, messages],
   );
@@ -637,7 +660,7 @@ const ChatView: FC = () => {
     });
   };
 
-  const renderMessage = ({item, index}: ListRenderItemInfo<IFlatListData>) => {
+  const renderMessage = ({ item, index }: ListRenderItemInfo<IFlatListData>) => {
     if (item.type === 'date') {
       return <DateSeparator date={item.timestamp} />;
     }
@@ -677,11 +700,12 @@ const ChatView: FC = () => {
   }, [newMessage]);
 
   return (
-    <GestureHandlerRootView style={{flex: 1}}>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <KeyboardAvoidingView
         style={styles.container}
+        behavior={Platform.OS === "ios" ? "padding" : keyboardVisible ? "padding" : undefined}
         onStartShouldSetResponder={() => {
-          setShowMenuOptions({visible: false, message: null});
+          setShowMenuOptions({ visible: false, message: null });
           setHighLightMessageIndex(null);
           return false;
         }}>
@@ -746,7 +770,6 @@ const ChatView: FC = () => {
         <FlatList
           initialNumToRender={15}
           ref={flatListRef}
-          onStartReached={() => {}}
           data={flatListData}
           renderItem={renderMessage}
           keyExtractor={(item, index) => index.toString()}
@@ -775,6 +798,7 @@ const ChatView: FC = () => {
                 handleTyping();
               }}
               placeholder={`${t('TYPE_A_MESSAGE')}...`}
+              placeholderTextColor={appColors.lightDark}
               multiline
             />
             <TouchableOpacity
@@ -798,10 +822,8 @@ const ChatView: FC = () => {
             </TouchableOpacity>
           </View>
         </View>
-        <Modal visible={isLoading} animationType="fade" transparent>
-          <CommonLoader />
-        </Modal>
       </KeyboardAvoidingView>
+
       <CommonConfirmation
         titleText={t('REMOVE_MESSAGE_CONFIRMATION')}
         subText={t('REMOVE_MESSAGE_SUBTEXT')}
@@ -819,7 +841,7 @@ const ChatView: FC = () => {
         closeOnPressMask={true}
         draggable={true}
         customStyles={{
-          container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
+          container: { borderTopLeftRadius: 20, borderTopRightRadius: 20 },
         }}
       />
       <Popover
@@ -832,11 +854,14 @@ const ChatView: FC = () => {
           height: 100,
         }}
         isVisible={isSocketReconnecting}>
-        <View style={{gap: 10}}>
+        <View style={{ gap: 10 }}>
           <ActivityIndicator size={'small'} color={appColors.primary} />
           <CommonText content={`${t('RECONNECTING')}...`} />
         </View>
       </Popover>
+      <CustomModal visible={isLoading} animationType="fade" transparent>
+        <CommonLoader />
+      </CustomModal>
     </GestureHandlerRootView>
   );
 };
@@ -893,12 +918,12 @@ const styles = StyleSheet.create({
   ownTail: {
     right: -6,
     borderTopColor: '#DCF8C6',
-    transform: [{rotate: '135deg'}],
+    transform: [{ rotate: '135deg' }],
   },
   otherTail: {
     left: -6,
     borderTopColor: '#f0f0ff',
-    transform: [{rotate: '135deg'}],
+    transform: [{ rotate: '135deg' }],
   },
 
   timestampContainer: {
@@ -943,6 +968,7 @@ const styles = StyleSheet.create({
     paddingRight: 45,
     paddingVertical: 8,
     maxHeight: 100,
+    minHeight: 45,
   },
   sendButton: {
     backgroundColor: appColors.primary,
@@ -952,7 +978,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 22,
     top: '50%',
-    transform: [{translateY: -17}],
+    transform: [{ translateY: -17 }],
   },
   replyPreview: {
     backgroundColor: '#f0f0ff',

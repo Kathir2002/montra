@@ -68,7 +68,7 @@
   "BIOMETRIC_NOT_SUPPORTED_TITLE": "ಬಯೋಮೆಟ್ರಿಕ್ಸ್ ಬೆಂಬಲಿಸುವುದಿಲ್ಲ",
   "BIOMETRIC_AUTHENTICATION_FAILED_TITLE": "ದೃ hentic ೀಕರಣ ವಿಫಲವಾಗಿದೆ",
   "BIOMETRIC_AUTHENTICATION_FAILED": "ಬಯೋಮೆಟ್ರಿಕ್ ದೃ hentic ೀಕರಣ ವಿಫಲವಾಗಿದೆ",
-  "AUTHENTICATE_TO_CONTINUE": "ಮುಂದುವರಿಯಲು ದೃ ate ೀಕರಿಸಿ",
+  "HELLO": "ನಮಸ್ಕಾರ",
   "ERROR": "ದೋಷ",
   "ERROR_OCCURED": "ಬಯೋಮೆಟ್ರಿಕ್ಸ್ ಲಭ್ಯತೆಯನ್ನು ಪರಿಶೀಲಿಸುವಾಗ ದೋಷ ಸಂಭವಿಸಿದೆ.",
   "PIN_CHANGED_SUCCESS": "ಪಿನ್ ಯಶಸ್ವಿಯಾಗಿ ಬದಲಾಗಿದೆ",

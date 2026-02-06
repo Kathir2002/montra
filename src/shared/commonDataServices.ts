@@ -1,8 +1,8 @@
-import {TFunction} from 'i18next';
-import {Platform} from 'react-native';
+import { TFunction } from 'i18next';
+import { Platform } from 'react-native';
 import DocumentPicker, {
   DocumentPickerResponse,
-} from 'react-native-document-picker';
+} from '@react-native-documents/picker';
 import EncryptedStorage from 'react-native-encrypted-storage';
 
 class commonDataService {

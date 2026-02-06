@@ -68,7 +68,7 @@
   "BIOMETRIC_NOT_SUPPORTED_TITLE": "Biometrik tidak didukung",
   "BIOMETRIC_AUTHENTICATION_FAILED_TITLE": "Otentikasi gagal",
   "BIOMETRIC_AUTHENTICATION_FAILED": "Otentikasi biometrik gagal",
-  "AUTHENTICATE_TO_CONTINUE": "Mengotentikasi untuk melanjutkan",
+  "HELLO": "Halo",
   "ERROR": "Kesalahan",
   "ERROR_OCCURED": "Terjadi kesalahan saat memeriksa ketersediaan biometrik.",
   "PIN_CHANGED_SUCCESS": "Pin berhasil berubah",
