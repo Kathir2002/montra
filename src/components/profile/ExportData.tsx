@@ -8,13 +8,13 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {Buffer} from 'buffer';
-import React, {useState} from 'react';
+import { Buffer } from 'buffer';
+import React, { useState } from 'react';
 import ReactNativeBlobUtil, {
   FS,
   ReactNativeBlobUtilConfig,
 } from 'react-native-blob-util';
-import {appColors} from '@shared/appColors';
+import { appColors } from '@shared/appColors';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 import {
   NavigationProp,
@@ -26,14 +26,15 @@ import CommonDropDown from '@shared/components/commonDropdown/CommonDropDown';
 import CommonButton from '@shared/components/commonButton/CommonButton';
 import UploadIcon from '@assets/svg/upload.svg';
 import ExportImage from '@assets/svg/illustration.svg';
-import {Toast} from '@shared/ToastConfig';
-import {config} from '../../../environment';
+import { Toast } from '@shared/ToastConfig';
+import { config } from '../../../environment';
 import CommonDataService from '@shared/commonDataServices';
 import TransactionService from '@services/transactionService';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
-import {useTranslation} from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import axiosInstance from '@services/interceptor';
 import axios from 'axios';
+import { CustomModal } from '@shared/components/CustomModal';
 
 interface PayloadData {
   transactionType: string;
@@ -42,7 +43,7 @@ interface PayloadData {
 }
 
 const ExportData = () => {
-  const {t} = useTranslation('profile');
+  const { t } = useTranslation('profile');
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const [dataToExportOpen, setdataToExportOpen] = useState(false);
   const [formatOpen, setFormatOpen] = useState(false);
@@ -55,20 +56,20 @@ const ExportData = () => {
 
   const dropdownData = {
     dataDropdown: [
-      {label: t('EXPORT_DATA_LABEL.TYPE.ALL'), value: 'All'},
-      {label: t('EXPORT_DATA_LABEL.TYPE.EXPENSE'), value: 'Expense'},
-      {label: t('EXPORT_DATA_LABEL.TYPE.INCOME'), value: 'Income'},
+      { label: t('EXPORT_DATA_LABEL.TYPE.ALL'), value: 'All' },
+      { label: t('EXPORT_DATA_LABEL.TYPE.EXPENSE'), value: 'Expense' },
+      { label: t('EXPORT_DATA_LABEL.TYPE.INCOME'), value: 'Income' },
     ],
     dateRangeDropdownData: [
-      {label: t('EXPORT_DATA_LABEL.DATE_RANGE.30dAYS'), value: '30days'},
-      {label: t('EXPORT_DATA_LABEL.DATE_RANGE.60DAYS'), value: '60days'},
-      {label: t('EXPORT_DATA_LABEL.DATE_RANGE.6MONTHS'), value: '6months'},
-      {label: t('EXPORT_DATA_LABEL.DATE_RANGE.1YEAR'), value: '1year'},
-      {label: t('EXPORT_DATA_LABEL.DATE_RANGE.LIFETIME'), value: 'lifeTime'},
+      { label: t('EXPORT_DATA_LABEL.DATE_RANGE.30dAYS'), value: '30days' },
+      { label: t('EXPORT_DATA_LABEL.DATE_RANGE.60DAYS'), value: '60days' },
+      { label: t('EXPORT_DATA_LABEL.DATE_RANGE.6MONTHS'), value: '6months' },
+      { label: t('EXPORT_DATA_LABEL.DATE_RANGE.1YEAR'), value: '1year' },
+      { label: t('EXPORT_DATA_LABEL.DATE_RANGE.LIFETIME'), value: 'lifeTime' },
     ],
     formatDropdownData: [
-      {label: 'CSV', value: 'CSV'},
-      {label: 'Excel', value: 'Excel'},
+      { label: 'CSV', value: 'CSV' },
+      { label: 'Excel', value: 'Excel' },
     ],
   };
 
@@ -111,18 +112,17 @@ const ExportData = () => {
       fileFormat: formatValue,
       dateRange: dateRangeValue,
     };
-    await TransactionService.exportData({...data, isChecking: true})
+    await TransactionService.exportData({ ...data, isChecking: true })
       .then(async (res: any) => {
         if (res?.success) {
           // Directories for different platforms
-          const {fs}: {fs: FS} = ReactNativeBlobUtil;
+          const { fs }: { fs: FS } = ReactNativeBlobUtil;
           const downloadDir = Platform.select({
             ios: fs.dirs.DocumentDir,
             android: fs.dirs.LegacyDownloadDir,
           });
-          const filename = `transactions_${new Date().getTime()}.${
-            formatValue === 'CSV' ? 'csv' : 'xlsx'
-          }`;
+          const filename = `transactions_${new Date().getTime()}.${formatValue === 'CSV' ? 'csv' : 'xlsx'
+            }`;
 
           // Full path for the file
           const filePath = `${downloadDir}/${filename}`;
@@ -220,13 +220,13 @@ const ExportData = () => {
             });
         } else {
           setLoading(false);
-          Toast({message: res?.message, type: 'error'});
+          Toast({ message: res?.message, type: 'error' });
         }
       })
       .catch(err => {
         setLoading(false);
         console.log('Error in exporting data:', err?.response?.data?.message);
-        Toast({message: err?.response?.data?.message, type: 'error'});
+        Toast({ message: err?.response?.data?.message, type: 'error' });
       })
       .finally(() => {
         setLoading(false);
@@ -240,7 +240,7 @@ const ExportData = () => {
   };
   return (
     <KeyboardAvoidingView
-      style={{flex: 1, backgroundColor: appColors.light}}
+      style={{ flex: 1, backgroundColor: appColors.light }}
       onStartShouldSetResponder={() => {
         dropdownCloseHandler();
         return false;
@@ -256,7 +256,7 @@ const ExportData = () => {
         }
         barStyle={loading ? 'light-content' : 'dark-content'}
       />
-      <View style={{flex: 1, paddingHorizontal: 15}}>
+      <View style={{ flex: 1, paddingHorizontal: 15 }}>
         <View>
           <CommonText content={t('WHAT_WANT_TO_EXPORT')} size={'label'} />
           <CommonDropDown
@@ -267,7 +267,7 @@ const ExportData = () => {
             items={dropdownData.dataDropdown}
             value={dataToExportValue}
             setValue={setdataToExportValue}
-            onSelectItem={() => {}}
+            onSelectItem={() => { }}
             open={dataToExportOpen}
             setOpen={setdataToExportOpen}
           />
@@ -282,7 +282,7 @@ const ExportData = () => {
             items={dropdownData.dateRangeDropdownData}
             value={dateRangeValue}
             setValue={setDateRangeValue}
-            onSelectItem={() => {}}
+            onSelectItem={() => { }}
             open={dateRangeOpen}
             setOpen={setDateRangeOpen}
           />
@@ -297,7 +297,7 @@ const ExportData = () => {
             items={dropdownData.formatDropdownData}
             value={formatValue}
             setValue={setFormatValue}
-            onSelectItem={() => {}}
+            onSelectItem={() => { }}
             open={formatOpen}
             setOpen={setFormatOpen}
           />
@@ -334,7 +334,7 @@ const ExportData = () => {
           </TouchableOpacity>
         </View>
       </View>
-      <Modal
+      <CustomModal
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}>
         <View
@@ -375,16 +375,16 @@ const ExportData = () => {
                 width: '100%',
               }}
               onPress={() => {
-                navigation.navigate('BottomTab', {screen: 'Dashboard'});
+                navigation.navigate('BottomTab', { screen: 'Dashboard' });
               }}
               title={t('BACK_TO_HOME')}
             />
           </View>
         </View>
-      </Modal>
-      <Modal visible={loading} animationType="fade" transparent={true}>
+      </CustomModal>
+      <CustomModal visible={loading} animationType="fade" transparent={true}>
         <CommonLoader />
-      </Modal>
+      </CustomModal>
     </KeyboardAvoidingView>
   );
 };

@@ -1,4 +1,4 @@
-import React, {useState, useRef, forwardRef, useImperativeHandle} from 'react';
+import React, { useState, useRef, forwardRef, useImperativeHandle } from 'react';
 import {
   Animated,
   PanResponder,
@@ -13,6 +13,7 @@ import {
   KeyboardAvoidingViewProps,
   StyleProp,
 } from 'react-native';
+import { CustomModal } from '../CustomModal';
 
 export interface RBSheetRef {
   open: () => void;
@@ -84,7 +85,7 @@ const CommonRBSheet = forwardRef<RBSheetRef, RBSheetProps>(
 
         onPanResponderMove: (e, gestureState) => {
           gestureState.dy > 0 &&
-            Animated.event([null, {dy: pan.y}], {useNativeDriver})(
+            Animated.event([null, { dy: pan.y }], { useNativeDriver })(
               e,
               gestureState,
             );
@@ -95,7 +96,7 @@ const CommonRBSheet = forwardRef<RBSheetRef, RBSheetProps>(
             handleSetVisible(false);
           } else {
             Animated.spring(pan, {
-              toValue: {x: 0, y: 0},
+              toValue: { x: 0, y: 0 },
               useNativeDriver,
             }).start();
           }
@@ -123,7 +124,7 @@ const CommonRBSheet = forwardRef<RBSheetRef, RBSheetProps>(
           duration: closeDuration,
         }).start(() => {
           setModalVisible(visible);
-          pan.setValue({x: 0, y: 0});
+          pan.setValue({ x: 0, y: 0 });
           if (typeof onClose === 'function') {
             onClose();
           }
@@ -132,7 +133,7 @@ const CommonRBSheet = forwardRef<RBSheetRef, RBSheetProps>(
     };
 
     return (
-      <Modal
+      <CustomModal
         testID={testID}
         transparent
         visible={modalVisible}
@@ -155,8 +156,8 @@ const CommonRBSheet = forwardRef<RBSheetRef, RBSheetProps>(
             {...(dragOnContent && !dragNotClose && panResponder.panHandlers)}
             style={[
               styles.container,
-              {height: animatedHeight},
-              {transform: pan.getTranslateTransform()},
+              { height: animatedHeight },
+              { transform: pan.getTranslateTransform() },
               customStyles.container,
             ]}>
             {draggable && (
@@ -173,7 +174,7 @@ const CommonRBSheet = forwardRef<RBSheetRef, RBSheetProps>(
             {children}
           </Animated.View>
         </KeyboardAvoidingView>
-      </Modal>
+      </CustomModal>
     );
   },
 );

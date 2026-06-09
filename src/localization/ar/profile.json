@@ -68,7 +68,7 @@
   "BIOMETRIC_NOT_SUPPORTED_TITLE": "القياسات الحيوية غير مدعومة",
   "BIOMETRIC_AUTHENTICATION_FAILED_TITLE": "فشلت المصادقة",
   "BIOMETRIC_AUTHENTICATION_FAILED": "فشلت المصادقة البيومترية",
-  "AUTHENTICATE_TO_CONTINUE": "المصادقة للمتابعة",
+  "HELLO": "مرحباً",
   "ERROR": "خطأ",
   "ERROR_OCCURED": "حدث خطأ أثناء التحقق من توافر القياسات الحيوية.",
   "PIN_CHANGED_SUCCESS": "تم تغيير PIN الناجح",

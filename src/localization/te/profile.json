@@ -68,7 +68,7 @@
   "BIOMETRIC_NOT_SUPPORTED_TITLE": "బయోమెట్రిక్స్ మద్దతు లేదు",
   "BIOMETRIC_AUTHENTICATION_FAILED_TITLE": "ప్రామాణీకరణ విఫలమైంది",
   "BIOMETRIC_AUTHENTICATION_FAILED": "బయోమెట్రిక్ ప్రామాణీకరణ విఫలమైంది",
-  "AUTHENTICATE_TO_CONTINUE": "కొనసాగించడానికి ప్రామాణీకరించండి",
+  "HELLO": "నమస్తే",
   "ERROR": "లోపం",
   "ERROR_OCCURED": "బయోమెట్రిక్స్ లభ్యతను తనిఖీ చేస్తున్నప్పుడు లోపం సంభవించింది.",
   "PIN_CHANGED_SUCCESS": "పిన్ విజయవంతంగా మార్చబడింది",

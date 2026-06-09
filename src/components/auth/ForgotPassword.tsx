@@ -6,8 +6,8 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
-import {appColors} from '@shared/appColors';
+import React, { useState } from 'react';
+import { appColors } from '@shared/appColors';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 import * as yup from 'yup';
 import {
@@ -17,17 +17,18 @@ import {
 } from '@react-navigation/native';
 import CommonText from '@shared/components/commonText/CommonText';
 import CommonInput from '@shared/components/commonInput/CommonInput';
-import {useFormik} from 'formik';
+import { useFormik } from 'formik';
 import CommonButton from '@shared/components/commonButton/CommonButton';
-import {Icon, Image} from '@rneui/base';
+import { Icon, Image } from '@rneui/base';
 import LottieView from 'lottie-react-native';
 import AuthService from '@services/authService';
-import {Toast} from '@shared/ToastConfig';
-import {useTranslation} from 'react-i18next';
-import {TouchableOpacity} from 'react-native';
+import { Toast } from '@shared/ToastConfig';
+import { useTranslation } from 'react-i18next';
+import { TouchableOpacity } from 'react-native';
+import { CustomModal } from '@shared/components/CustomModal';
 
 const ForgotPassword = () => {
-  const {t} = useTranslation('auth');
+  const { t } = useTranslation('auth');
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const [emailModalVisible, setEmailModalVisible] = useState<boolean>(false);
 
@@ -55,29 +56,29 @@ const ForgotPassword = () => {
         email: formik.values.email,
       };
 
-      await AuthService.forgotPassword({data})
+      await AuthService.forgotPassword({ data })
         .then((res: any) => {
           if (res?.success) {
             setEmailModalVisible(true);
           }
         })
         .catch(err => {
-          Toast({message: err?.response?.data?.message, type: 'error'});
+          Toast({ message: err?.response?.data?.message, type: 'error' });
         });
     },
   });
 
   return (
-    <KeyboardAvoidingView style={{flex: 1, backgroundColor: appColors.light}}>
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: appColors.light }}>
       <CommonHeader
         title={t('forgotPassword')}
         leftIconPressBack={() => navigation.goBack()}
         leftIcon={true}
       />
       <ScrollView
-        contentContainerStyle={{flexGrow: 1, paddingBottom: 30}}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 30 }}
         showsVerticalScrollIndicator={false}>
-        <View style={{gap: 30, paddingHorizontal: 15}}>
+        <View style={{ gap: 30, paddingHorizontal: 15 }}>
           <View style={{}}>
             <LottieView
               style={{
@@ -93,7 +94,7 @@ const ForgotPassword = () => {
             <CommonText
               bold
               color={appColors.dark}
-              style={{textAlign: 'left', lineHeight: 30}}
+              style={{ textAlign: 'left', lineHeight: 30 }}
               size={24}
               content={t('dontworry')}
             />
@@ -127,7 +128,7 @@ const ForgotPassword = () => {
         </View>
       </ScrollView>
 
-      <Modal
+      <CustomModal
         visible={emailModalVisible}
         animationType="fade"
         onRequestClose={() => {
@@ -164,7 +165,7 @@ const ForgotPassword = () => {
               content={t('mailOnWay')}
               color={appColors.dark}
               bold
-              style={{textAlign: 'center', letterSpacing: 0.5}}
+              style={{ textAlign: 'center', letterSpacing: 0.5 }}
               size={'header'}
             />
             <CommonText
@@ -172,7 +173,7 @@ const ForgotPassword = () => {
                 'andFollowIns',
               )}`}
               size={'large'}
-              style={{textAlign: 'center'}}
+              style={{ textAlign: 'center' }}
             />
           </View>
           <View
@@ -217,7 +218,7 @@ const ForgotPassword = () => {
             />
           </View>
         </ScrollView>
-      </Modal>
+      </CustomModal>
     </KeyboardAvoidingView>
   );
 };

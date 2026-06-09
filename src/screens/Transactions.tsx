@@ -19,9 +19,7 @@ import CommonText from '@shared/components/commonText/CommonText';
 import ArrowRightIcon from '@assets/svg/arrow-right.svg';
 import FilterIcon from '@assets/svg/filter.svg';
 
-import CommonRBSheet, {
-  RBSheetRef,
-} from '@shared/components/commonRBSheet/CommonRBSheet';
+import CommonRBSheet, { RBSheetRef } from '@shared/components/commonRBSheet/CommonRBSheet';
 import CommonButton from '@shared/components/commonButton/CommonButton';
 import Popover from 'react-native-popover-view';
 import moment, { max } from 'moment';
@@ -43,6 +41,7 @@ import { RefreshControl } from 'react-native';
 import FinanceStory from '@components/financeReport/FinanceStory';
 import { updateIsFabToggleOpen } from '@store/slice/appSlice';
 import { useTranslation } from 'react-i18next';
+import { CustomModal } from '@shared/components/CustomModal';
 
 const Transaction = () => {
   const isFocused = useIsFocused();
@@ -144,6 +143,8 @@ const Transaction = () => {
       })
       .catch(err => {
         Toast({ message: err?.response?.data?.message, type: 'error' });
+        setIsLoading(false)
+        setRefreshing(false);
       });
   };
 
@@ -306,14 +307,14 @@ const Transaction = () => {
           }}
           style={{
             backgroundColor: appColors.transparentBackground,
-            ...StyleSheet.absoluteFillObject,
+            ...StyleSheet.absoluteFill,
           }}
         />
       ) : undefined}
       <CommonRBSheet
         onClose={() => setRBSheetOpen(false)}
         ref={rbSheetRef}
-        height={350}
+        height={370}
         closeOnPressBack={true}
         closeOnPressMask={true}
         draggable={true}
@@ -622,9 +623,9 @@ const Transaction = () => {
           />
         </ScrollView>
       </CommonRBSheet>
-      <Modal visible={isLoading} transparent animationType="fade">
+      <CustomModal visible={isLoading} transparent animationType="fade">
         <CommonLoader />
-      </Modal>
+      </CustomModal>
       {show && (
         <MonthPicker
           onChange={onValueChange}
@@ -663,13 +664,13 @@ const Transaction = () => {
           </TouchableOpacity>
         </Animated.View>
       )}
-      <Modal
+      <CustomModal
         transparent={true}
         visible={isFinanceStoryVisible}
         animationType='slide'
         onRequestClose={() => setIsFinanceStoryVisible(false)}>
         <FinanceStory closeHandler={() => setIsFinanceStoryVisible(false)} />
-      </Modal>
+      </CustomModal>
     </View>
   );
 };

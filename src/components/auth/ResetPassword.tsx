@@ -8,12 +8,12 @@ import {
   Modal,
   BackHandler,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
-import {appColors} from '@shared/appColors';
-import {useFormik} from 'formik';
+import React, { useEffect, useState } from 'react';
+import { appColors } from '@shared/appColors';
+import { useFormik } from 'formik';
 import * as yup from 'yup';
 import CommonInput from '@shared/components/commonInput/CommonInput';
-import {Icon} from '@rneui/base';
+import { Icon } from '@rneui/base';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 import {
   CommonActions,
@@ -23,15 +23,16 @@ import {
   useRoute,
 } from '@react-navigation/native';
 import CommonButton from '@shared/components/commonButton/CommonButton';
-import {encryptDetails} from '@src/lib/functions';
+import { encryptDetails } from '@src/lib/functions';
 import AuthService from '@services/authService';
-import {Toast} from '@shared/ToastConfig';
+import { Toast } from '@shared/ToastConfig';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
-import {useTranslation} from 'react-i18next';
+import { useTranslation } from 'react-i18next';
+import { CustomModal } from '@shared/components/CustomModal';
 
 const ResetPassword = () => {
   const route: any = useRoute().params;
-  const {t} = useTranslation('auth');
+  const { t } = useTranslation('auth');
   const [isLoading, setIsLoading] = useState(false);
   const [newPasswordVisible, setNewPasswordVisible] = useState<boolean>(false);
   const [rePasswordVisible, setRePasswordVisible] = useState<boolean>(false);
@@ -57,7 +58,7 @@ const ResetPassword = () => {
       navigation.dispatch(
         CommonActions.reset({
           index: 0,
-          routes: [{name: 'SignIn'}], // Replace 'Home' with your default screen
+          routes: [{ name: 'SignIn' }], // Replace 'Home' with your default screen
         }),
       );
       return true;
@@ -92,35 +93,35 @@ const ResetPassword = () => {
     onSubmit: async () => {
       setIsLoading(true);
       await AuthService.resetPassword({
-        data: {newPassword: formik.values.rePassword},
+        data: { newPassword: formik.values.rePassword },
         token: encryptDetails(route?.userToken)!,
       })
         .then((res: any) => {
           setIsLoading(false);
           if (res?.success) {
             navigation.navigate('SignIn');
-            Toast({message: t('PASSWORD_RESET_SUCCESS'), type: 'success'});
+            Toast({ message: t('PASSWORD_RESET_SUCCESS'), type: 'success' });
           }
         })
         .catch(err => {
           setIsLoading(false);
           console.log(err?.response?.data);
 
-          Toast({message: err?.response?.data?.message, type: 'error'});
+          Toast({ message: err?.response?.data?.message, type: 'error' });
         });
     },
   });
 
   return (
-    <KeyboardAvoidingView style={{flex: 1, backgroundColor: appColors.light}}>
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: appColors.light }}>
       <CommonHeader
         title={t('RESET_PASSWORD')}
         leftIconPressBack={() => handleBackPress()}
         leftIcon
       />
       <StatusBar backgroundColor={appColors.light} barStyle={'dark-content'} />
-      <ScrollView contentContainerStyle={{flexGrow: 1}}>
-        <View style={{flex: 1, paddingHorizontal: 15, marginTop: 30, gap: 10}}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <View style={{ flex: 1, paddingHorizontal: 15, marginTop: 30, gap: 10 }}>
           <CommonInput
             leftIcon={{
               name: 'lock',
@@ -184,7 +185,7 @@ const ResetPassword = () => {
             onBlur={formik.handleBlur('rePassword')}
           />
           <CommonButton
-            buttonStyle={{marginVertical: 10}}
+            buttonStyle={{ marginVertical: 10 }}
             title={t('CONTINUE')}
             onPress={() => {
               formik.handleSubmit();
@@ -192,9 +193,9 @@ const ResetPassword = () => {
           />
         </View>
       </ScrollView>
-      <Modal visible={isLoading} animationType="fade" transparent={true}>
+      <CustomModal visible={isLoading} animationType="fade" transparent={true}>
         <CommonLoader />
-      </Modal>
+      </CustomModal>
     </KeyboardAvoidingView>
   );
 };

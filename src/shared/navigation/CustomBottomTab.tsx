@@ -8,14 +8,14 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import Animated, {useAnimatedStyle, withSpring} from 'react-native-reanimated';
-import {BottomTabBarProps} from '@react-navigation/bottom-tabs/lib/typescript/src/types';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Animated, { useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import { BottomTabBarProps } from '@react-navigation/bottom-tabs/lib/typescript/src/types';
 
-import {useDispatch} from 'react-redux';
-import {appColors} from '@shared/appColors';
+import { useDispatch } from 'react-redux';
+import { appColors } from '@shared/appColors';
 import BottomTabIcon from './BottomTabIcon';
-import {updateIsFabToggleOpen} from '@store/slice/appSlice';
+import { updateIsFabToggleOpen } from '@store/slice/appSlice';
 
 const CustomBottomTab = ({
   state,
@@ -23,7 +23,7 @@ const CustomBottomTab = ({
   navigation,
 }: BottomTabBarProps) => {
   const insets = useSafeAreaInsets();
-  const {width} = useWindowDimensions();
+  const { width } = useWindowDimensions();
 
   const MARGIN = 15;
   const TAB_BAR_WIDTH = width - 2 * MARGIN;
@@ -56,13 +56,13 @@ const CustomBottomTab = ({
       <Animated.View
         style={[
           styles.slidingTabContainer,
-          {width: TAB_WIDTH},
+          { width: TAB_WIDTH },
           translateAnimation,
         ]}>
         {state.index !== 2 && <View style={styles.slidingTab} />}
       </Animated.View>
       {state.routes.map((route, index) => {
-        const {options} = descriptors[route.key];
+        const { options } = descriptors[route.key];
         const isFocused = state.index === index;
 
         const onPress = (e: GestureResponderEvent) => {
@@ -80,7 +80,7 @@ const CustomBottomTab = ({
 
             if (!isFocused && !event.defaultPrevented) {
               // The `merge: true` option makes sure that the params inside the tab screen are preserved
-              navigation.navigate(route.name, {merge: true});
+              navigation.navigate(route.name, { merge: true });
             }
           }
         };
@@ -96,7 +96,7 @@ const CustomBottomTab = ({
           <Pressable
             key={index}
             accessibilityRole="button"
-            accessibilityState={isFocused ? {selected: true} : {}}
+            accessibilityState={isFocused ? { selected: true } : {}}
             accessibilityLabel={options.tabBarAccessibilityLabel}
             testID={options.tabBarTestID}
             onPress={e => onPress(e)}
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
     backgroundColor: appColors.primary,
   },
   slidingTabContainer: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     alignItems: 'center',
     justifyContent: 'center',
   },

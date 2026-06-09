@@ -1,4 +1,4 @@
-import React, {FC, memo, useEffect, useMemo, useRef, useState} from 'react';
+import React, { FC, memo, useEffect, useMemo, useRef, useState } from 'react';
 import {
   BackHandler,
   Dimensions,
@@ -13,8 +13,8 @@ import {
   Vibration,
   View,
 } from 'react-native';
-import DocumentPicker from 'react-native-document-picker';
-import {appColors} from '@shared/appColors';
+import DocumentPicker from '@react-native-documents/picker';
+import { appColors } from '@shared/appColors';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 import * as yup from 'yup';
 import {
@@ -30,12 +30,12 @@ import CommonRBSheet, {
 } from '@shared/components/commonRBSheet/CommonRBSheet';
 import CommonText from '@shared/components/commonText/CommonText';
 import CommonInput from '@shared/components/commonInput/CommonInput';
-import {useFormik} from 'formik';
+import { useFormik } from 'formik';
 import CommonDropDown from '@shared/components/commonDropdown/CommonDropDown';
 import CommonButton from '@shared/components/commonButton/CommonButton';
 
-import {Icon, Input} from '@rneui/base';
-import {appFonts} from '@shared/appFonts';
+import { Icon, Input } from '@rneui/base';
+import { appFonts } from '@shared/appFonts';
 import AttachmentIcon from '@assets/svg/attachment.svg';
 import CloseIcon from '@assets/svg/close.svg';
 
@@ -51,7 +51,7 @@ import ExcelIcon from '@assets/svg/fileFormats/excel.svg';
 import PDFIcon from '@assets/svg/fileFormats/pdf.svg';
 import WordIcon from '@assets/svg/fileFormats/word.svg';
 import TransactionService from '@services/transactionService';
-import {Toast} from '@shared/ToastConfig';
+import { Toast } from '@shared/ToastConfig';
 import CommonLoader from '../../shared/components/commonLoader/CommonLoader';
 import AccountService from '@services/setup/accountService';
 import TransferIcon from '@assets/svg/transfer.svg';
@@ -60,17 +60,18 @@ import {
   getCurrencySymbol,
   openFileFromUrl,
 } from '@src/lib/functions';
-import {TransactionListInterface} from '@screens/Dashboard';
-import {ItemTypeValue} from '@shared/components/commonDropdown/src';
+import { TransactionListInterface } from '@screens/Dashboard';
+import { ItemTypeValue } from '@shared/components/commonDropdown/src';
 import Popover from 'react-native-popover-view';
 import LottieView from 'lottie-react-native';
 import CommonSlider from '../../shared/components/CommonSlider';
 import BudgetService from '@services/setup/budgetSerice';
 import DeleteDocumetSvg from '@assets/svg/delete-document.svg';
-import {updateIsTransactionAdded} from '@store/slice/appSlice';
-import {useDispatch} from 'react-redux';
-import {useTranslation} from 'react-i18next';
+import { updateIsTransactionAdded } from '@store/slice/appSlice';
+import { useDispatch } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import CommonConfirmation from '@shared/components/CommonConfirmation';
+import { CustomModal } from '@shared/components/CustomModal';
 interface FormValues {
   newDropdownItem: string;
   description: string;
@@ -112,7 +113,7 @@ interface AddBudgetPayloadData {
 }
 const CommonAddScreen: FC<{
   screenName: 'Transfer' | 'Income' | 'Expense' | 'Budget';
-}> = ({screenName}) => {
+}> = ({ screenName }) => {
   const route: RouteProp<{
     transactionDetails: TransactionListInterface & {
       budgetMonth: Date;
@@ -124,7 +125,7 @@ const CommonAddScreen: FC<{
     };
   }> = useRoute();
   const deleteRBSheetRef = useRef<RBSheetRef>(null);
-  const {t} = useTranslation('transaction');
+  const { t } = useTranslation('transaction');
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [walletOpen, setWalletOpen] = useState(false);
@@ -137,7 +138,7 @@ const CommonAddScreen: FC<{
   const [fromWalletDropdownData, setFromWalletDropdownData] = useState([]);
   const [toWalletDropdownData, setToWalletDropdownData] = useState([]);
   const [categoryDropdownData, setCategoryDropdownData] = useState<
-    {label: string; value: string}[]
+    { label: string; value: string }[]
   >([]);
   const dirtyRBSheetRef = useRef<RBSheetRef>(null);
   const [isButtonLoader, setIsButtonLoader] = useState(false);
@@ -184,13 +185,13 @@ const CommonAddScreen: FC<{
         deleteRBSheetRef.current?.close();
         setDocument(undefined);
         formik?.setFieldTouched('isDocumentUpdate', false);
-        navigation.setParams({document: undefined});
-        Toast({message: res?.message, type: 'success'});
+        navigation.setParams({ document: undefined });
+        Toast({ message: res?.message, type: 'success' });
       })
       .catch(err => {
         setIsLoading(false);
         setRbSheetOpen(false);
-        Toast({message: err?.response?.data?.message, type: 'error'});
+        Toast({ message: err?.response?.data?.message, type: 'error' });
       });
   };
 
@@ -239,7 +240,7 @@ const CommonAddScreen: FC<{
       })
       .catch(err => {
         console.log('Get wallet list data api call failed', err);
-        Toast({message: err?.response?.data?.message, type: 'error'});
+        Toast({ message: err?.response?.data?.message, type: 'error' });
       });
   };
 
@@ -266,7 +267,7 @@ const CommonAddScreen: FC<{
       })
       .catch(err => {
         console.log('Get category data api call failed', err);
-        Toast({message: err?.response?.data?.message, type: 'error'});
+        Toast({ message: err?.response?.data?.message, type: 'error' });
         setIsLoading(false);
       });
   };
@@ -303,10 +304,10 @@ const CommonAddScreen: FC<{
         screenName == 'Income'
           ? t('ENTER_INCOME_AMOUNT')
           : screenName == 'Expense'
-          ? t('ENTER_EXPENSE_AMOUNT')
-          : screenName == 'Transfer'
-          ? t('ENTER_TRANSFER_AMOUNT')
-          : t('ENTER_BUDGET_AMOUNT'),
+            ? t('ENTER_EXPENSE_AMOUNT')
+            : screenName == 'Transfer'
+              ? t('ENTER_TRANSFER_AMOUNT')
+              : t('ENTER_BUDGET_AMOUNT'),
       ),
     wallet: yup.string().when('currentScreenName', (data, schema) => {
       if (data[0] === 'Expense' || data[0] === 'Income') {
@@ -470,14 +471,14 @@ const CommonAddScreen: FC<{
         if (res?.success) {
           setIsLoading(false);
           Vibration.vibrate(50);
-          Toast({message: res?.message, type: 'success'});
+          Toast({ message: res?.message, type: 'success' });
           dispatch(updateIsTransactionAdded(true));
-          navigation.navigate('BottomTab', {screen: 'Transaction'});
+          navigation.navigate('BottomTab', { screen: 'Transaction' });
         }
       })
       .catch(err => {
         setIsLoading(false);
-        Toast({message: err?.response?.data?.message, type: 'error'});
+        Toast({ message: err?.response?.data?.message, type: 'error' });
       });
   };
 
@@ -567,16 +568,16 @@ const CommonAddScreen: FC<{
           setIsSuccessPopoverVisible(true);
           dispatch(updateIsTransactionAdded(true));
           setTimeout(() => {
-            navigation.navigate('BottomTab', {screen: 'Transaction'});
-            Toast({message: res?.message, type: 'success'});
+            navigation.navigate('BottomTab', { screen: 'Transaction' });
+            Toast({ message: res?.message, type: 'success' });
             setIsSuccessPopoverVisible(false);
           }, 2000);
         } else {
-          Toast({message: res?.message, type: 'error'});
+          Toast({ message: res?.message, type: 'error' });
         }
       })
       .catch(err => {
-        Toast({message: err?.response?.data?.message, type: 'error'});
+        Toast({ message: err?.response?.data?.message, type: 'error' });
         console.log('Error in update transaction', err);
       })
       .finally(() => {
@@ -601,14 +602,14 @@ const CommonAddScreen: FC<{
           setIsLoading(false);
           setIsSuccessPopoverVisible(true);
           setTimeout(() => {
-            navigation.navigate('BottomTab', {screen: 'Budget'});
-            Toast({message: res?.message, type: 'success'});
+            navigation.navigate('BottomTab', { screen: 'Budget' });
+            Toast({ message: res?.message, type: 'success' });
             setIsSuccessPopoverVisible(false);
           }, 2000);
         }
       })
       .catch(err => {
-        Toast({message: err?.response?.data?.message, type: 'error'});
+        Toast({ message: err?.response?.data?.message, type: 'error' });
         setIsLoading(false);
       });
   };
@@ -632,14 +633,14 @@ const CommonAddScreen: FC<{
           dispatch(updateIsTransactionAdded(true));
           setTimeout(() => {
             navigation.navigate('Budget');
-            Toast({message: res?.message, type: 'success'});
+            Toast({ message: res?.message, type: 'success' });
             setIsSuccessPopoverVisible(false);
           }, 2000);
         }
       })
       .catch(err => {
         setIsLoading(false);
-        Toast({message: err?.response?.data?.message, type: 'error'});
+        Toast({ message: err?.response?.data?.message, type: 'error' });
       });
   };
 
@@ -656,15 +657,15 @@ const CommonAddScreen: FC<{
             ? route?.params?.category
             : ''
           : route?.params?.transactionFor
-          ? route?.params?.transactionFor
-          : '',
+            ? route?.params?.transactionFor
+            : '',
       amount: route?.params?.amount
         ? getCurrencySymbol(Number(route?.params?.amount))
         : screenName === 'Budget'
-        ? route?.params?.budget
-          ? getCurrencySymbol(Number(route?.params?.budget))
-          : ''
-        : '',
+          ? route?.params?.budget
+            ? getCurrencySymbol(Number(route?.params?.budget))
+            : ''
+          : '',
       wallet: route?.params?.wallet?.id ? route?.params?.wallet?.id : '',
       walletName: route?.params?.wallet?.walletName
         ? route?.params?.wallet?.walletName
@@ -794,19 +795,19 @@ const CommonAddScreen: FC<{
     }
   };
 
-  const dates = Array.from({length: 31}, (_, i) => {
+  const dates = Array.from({ length: 31 }, (_, i) => {
     const date = i + 1;
-    return {label: date.toString(), value: date.toString()};
+    return { label: date.toString(), value: date.toString() };
   });
 
   const days = [
-    {label: t('DAYS.SUNDAY'), value: 0},
-    {label: t('DAYS.MONDAY'), value: 1},
-    {label: t('DAYS.TUESDAY'), value: 2},
-    {label: t('DAYS.WEDNESDAY'), value: 3},
-    {label: t('DAYS.THURSDAY'), value: 4},
-    {label: t('DAYS.FRIDAY'), value: 5},
-    {label: t('DAYS.SATURDAY'), value: 6},
+    { label: t('DAYS.SUNDAY'), value: 0 },
+    { label: t('DAYS.MONDAY'), value: 1 },
+    { label: t('DAYS.TUESDAY'), value: 2 },
+    { label: t('DAYS.WEDNESDAY'), value: 3 },
+    { label: t('DAYS.THURSDAY'), value: 4 },
+    { label: t('DAYS.FRIDAY'), value: 5 },
+    { label: t('DAYS.SATURDAY'), value: 6 },
   ];
 
   const isFieldValid = (fieldName: keyof FormValues) => {
@@ -868,7 +869,7 @@ const CommonAddScreen: FC<{
         if (res?.success) {
           formik.setFieldValue('newDropdownItem', '');
           formik.setFieldValue('categoryId', '');
-          Toast({message: res?.message, type: 'success'});
+          Toast({ message: res?.message, type: 'success' });
           setCategoryDropdownData(
             res?.category?.map((item: any) => ({
               label: item.categoryName,
@@ -883,7 +884,7 @@ const CommonAddScreen: FC<{
         setIsButtonLoader(false);
         setIsAddPopoverOpen(false);
         console.log('Error in adding new transaction category', err);
-        Toast({message: err?.message, type: 'error'});
+        Toast({ message: err?.message, type: 'error' });
       });
   };
   return (
@@ -906,10 +907,10 @@ const CommonAddScreen: FC<{
             screenName == 'Income'
               ? appColors.incomeBg
               : screenName == 'Expense'
-              ? appColors.expenseBg
-              : screenName === 'Transfer'
-              ? appColors.transferBg
-              : appColors.primary,
+                ? appColors.expenseBg
+                : screenName === 'Transfer'
+                  ? appColors.transferBg
+                  : appColors.primary,
           flex: 1,
           justifyContent: 'space-between',
         }}>
@@ -918,10 +919,10 @@ const CommonAddScreen: FC<{
             screenName == 'Income'
               ? appColors.incomeBg
               : screenName == 'Expense'
-              ? appColors.expenseBg
-              : screenName === 'Transfer'
-              ? appColors.transferBg
-              : appColors.primary
+                ? appColors.expenseBg
+                : screenName === 'Transfer'
+                  ? appColors.transferBg
+                  : appColors.primary
           }
           title={
             screenName == 'Budget'
@@ -929,16 +930,16 @@ const CommonAddScreen: FC<{
                 ? t('EDIT_BUDGET')
                 : t('CREATE_BUDGET')
               : route?.params?.amount
-              ? screenName === 'Expense'
-                ? t('EDIT_EXPENSE')
-                : screenName == 'Income'
-                ? t('EDIT_INCOME')
-                : t('EDIT_TRANSFER')
-              : screenName === 'Expense'
-              ? t('CREATE_EXPENSE')
-              : screenName == 'Income'
-              ? t('CREATE_INCOME')
-              : t('CREATE_TRANSFER')
+                ? screenName === 'Expense'
+                  ? t('EDIT_EXPENSE')
+                  : screenName == 'Income'
+                    ? t('EDIT_INCOME')
+                    : t('EDIT_TRANSFER')
+                : screenName === 'Expense'
+                  ? t('CREATE_EXPENSE')
+                  : screenName == 'Income'
+                    ? t('CREATE_INCOME')
+                    : t('CREATE_TRANSFER')
           }
           leftIconPressBack={() => {
             formik.dirty || formik?.touched?.isDocumentUpdate
@@ -950,22 +951,22 @@ const CommonAddScreen: FC<{
         <StatusBar
           backgroundColor={
             rbSheetOpen ||
-            isSuccessPopoverVisible ||
-            isLoading ||
-            isAddPopoverOpen
+              isSuccessPopoverVisible ||
+              isLoading ||
+              isAddPopoverOpen
               ? appColors.transparentBackground
               : screenName == 'Income'
-              ? appColors.incomeBg
-              : screenName == 'Expense'
-              ? appColors.expenseBg
-              : screenName === 'Transfer'
-              ? appColors.transferBg
-              : appColors.primary
+                ? appColors.incomeBg
+                : screenName == 'Expense'
+                  ? appColors.expenseBg
+                  : screenName === 'Transfer'
+                    ? appColors.transferBg
+                    : appColors.primary
           }
           barStyle={'light-content'}
         />
         <View>
-          <View style={{paddingHorizontal: 15}}>
+          <View style={{ paddingHorizontal: 15 }}>
             <CommonText
               content={
                 screenName == 'Budget'
@@ -980,7 +981,7 @@ const CommonAddScreen: FC<{
               inputContainerStyle={{
                 borderBottomWidth: 0,
               }}
-              containerStyle={{paddingHorizontal: 0}}
+              containerStyle={{ paddingHorizontal: 0 }}
               placeholder={getCurrencySymbol(0)}
               placeholderTextColor={appColors.light}
               style={{
@@ -1036,8 +1037,8 @@ const CommonAddScreen: FC<{
                       flex: 0.455,
                       paddingTop:
                         (formik.errors.wallet && formik.touched.wallet) ||
-                        (formik.errors.description &&
-                          formik.touched.description)
+                          (formik.errors.description &&
+                            formik.touched.description)
                           ? 5
                           : 0,
                     }}>
@@ -1067,7 +1068,7 @@ const CommonAddScreen: FC<{
                     />
                     {formik.errors.from && formik.touched.from ? (
                       <CommonText
-                        style={{marginTop: 5, marginLeft: 5}}
+                        style={{ marginTop: 5, marginLeft: 5 }}
                         content={formik.errors.from.wallet}
                         color={appColors.error}
                         size={'error'}
@@ -1093,8 +1094,8 @@ const CommonAddScreen: FC<{
                       flex: 0.455,
                       paddingTop:
                         (formik.errors.wallet && formik.touched.wallet) ||
-                        (formik.errors.description &&
-                          formik.touched.description)
+                          (formik.errors.description &&
+                            formik.touched.description)
                           ? 5
                           : 0,
                     }}>
@@ -1124,7 +1125,7 @@ const CommonAddScreen: FC<{
                     />
                     {formik.errors.to && formik.touched.to ? (
                       <CommonText
-                        style={{marginTop: 5, marginLeft: 5}}
+                        style={{ marginTop: 5, marginLeft: 5 }}
                         content={formik.errors.to.wallet}
                         color={appColors.error}
                         size={'error'}
@@ -1137,7 +1138,7 @@ const CommonAddScreen: FC<{
                   style={{
                     paddingTop:
                       (formik.errors.category && formik.touched.category) ||
-                      (formik.errors.description && formik.touched.description)
+                        (formik.errors.description && formik.touched.description)
                         ? 5
                         : 0,
                   }}>
@@ -1209,8 +1210,8 @@ const CommonAddScreen: FC<{
                       style={{
                         paddingTop:
                           (formik.errors.wallet && formik.touched.wallet) ||
-                          (formik.errors.description &&
-                            formik.touched.description)
+                            (formik.errors.description &&
+                              formik.touched.description)
                             ? 5
                             : 0,
                       }}>
@@ -1243,7 +1244,7 @@ const CommonAddScreen: FC<{
                       />
                       {formik.errors.wallet && formik.touched.wallet ? (
                         <CommonText
-                          style={{marginTop: 5, marginLeft: 5}}
+                          style={{ marginTop: 5, marginLeft: 5 }}
                           content={formik.errors.wallet}
                           color={appColors.error}
                           size={'error'}
@@ -1257,14 +1258,14 @@ const CommonAddScreen: FC<{
                     value={
                       formik.values.transactionDate !== ''
                         ? moment(formik.values.transactionDate).format(
-                            'DD MMM YYYY',
-                          )
+                          'DD MMM YYYY',
+                        )
                         : ''
                     }
                     editable={false}
                     error={
                       formik.errors.transactionDate &&
-                      formik.touched.transactionDate
+                        formik.touched.transactionDate
                         ? formik.errors.transactionDate
                         : ''
                     }
@@ -1367,7 +1368,7 @@ const CommonAddScreen: FC<{
                           !document?.url?.includes('https://')!,
                         );
                       }}
-                      style={{maxWidth: 210}}>
+                      style={{ maxWidth: 210 }}>
                       <View
                         style={{
                           gap: 5,
@@ -1388,17 +1389,16 @@ const CommonAddScreen: FC<{
                         ) : (
                           <ExcelIcon width={35} height={35} />
                         )}
-                        <View style={{flex: 1, gap: 5}}>
+                        <View style={{ flex: 1, gap: 5 }}>
                           <CommonText
                             size={'medium'}
-                            content={`${document?.name}${
-                              route?.params?.document
-                                ? '.' +
-                                  document?.url?.split('.')[
-                                    document?.url?.split('.')?.length - 1
-                                  ]
-                                : ''
-                            }`}
+                            content={`${document?.name}${route?.params?.document
+                              ? '.' +
+                              document?.url?.split('.')[
+                              document?.url?.split('.')?.length - 1
+                              ]
+                              : ''
+                              }`}
                             color={appColors.placeholderColor}
                           />
                           <CommonText
@@ -1466,7 +1466,7 @@ const CommonAddScreen: FC<{
                       <CommonSwitch
                         activeColor={appColors.primary}
                         value={formik.values.isRepeatSelected}
-                        style={{transform: [{scaleX: 0.8}, {scaleY: 0.8}]}}
+                        style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }}
                         onValueChange={() => {
                           if (formik.values.isRepeatSelected) {
                             formik.setFieldValue('isRepeatSelected', false);
@@ -1494,7 +1494,7 @@ const CommonAddScreen: FC<{
                         alignItems: 'center',
                         flex: 1,
                       }}>
-                      <View style={{flex: 0.4}}>
+                      <View style={{ flex: 0.4 }}>
                         <CommonText
                           content={t('FREQUENCY')}
                           bold
@@ -1528,7 +1528,7 @@ const CommonAddScreen: FC<{
                           ) : undefined}
                         </CommonText>
                       </View>
-                      <View style={{flex: 0.4}}>
+                      <View style={{ flex: 0.4 }}>
                         <CommonText
                           content={t('END_AFTER')}
                           bold
@@ -1603,11 +1603,11 @@ const CommonAddScreen: FC<{
                       justifyContent: 'space-between',
                       alignItems: 'center',
                     }}>
-                    <View style={{flex: 0.7, gap: 5}}>
+                    <View style={{ flex: 0.7, gap: 5 }}>
                       <CommonText bold content={t('RECEIVE_ALERT')} />
                       <CommonText
                         color={appColors.placeholderColor}
-                        style={{textAlign: 'justify'}}
+                        style={{ textAlign: 'justify' }}
                         content={t('RECEIVE_ALERT_DESCRIPTION')}
                       />
                     </View>
@@ -1623,7 +1623,7 @@ const CommonAddScreen: FC<{
                       }}
                       value={formik?.values?.isReceiveAlert}
                       style={{
-                        transform: [{scaleX: 0.8}, {scaleY: 0.8}],
+                        transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }],
                       }}
                     />
                   </View>
@@ -1645,11 +1645,11 @@ const CommonAddScreen: FC<{
                   )}
                 </View>
               )}
-              <View style={{zIndex: -1, paddingVertical: 10}}>
+              <View style={{ zIndex: -1, paddingVertical: 10 }}>
                 <CommonButton
                   onPress={() => {
                     if (formik.errors.amount) {
-                      Toast({message: formik.errors.amount, type: 'error'});
+                      Toast({ message: formik.errors.amount, type: 'error' });
                     }
                     if (
                       (formik.values.amount?.length >= 2 &&
@@ -1674,7 +1674,7 @@ const CommonAddScreen: FC<{
                       ? t('UPDATE')
                       : t('auth:CONTINUE')
                   }
-                  buttonStyle={{marginVertical: 20}}
+                  buttonStyle={{ marginVertical: 20 }}
                 />
               </View>
             </ScrollView>
@@ -1690,8 +1690,8 @@ const CommonAddScreen: FC<{
             screenName == 'Income'
               ? appColors.incomeBg
               : screenName == 'Expense'
-              ? appColors.expenseBg
-              : appColors.transferBg,
+                ? appColors.expenseBg
+                : appColors.transferBg,
           )
         }
         ref={rbSheetRef}
@@ -1700,7 +1700,7 @@ const CommonAddScreen: FC<{
         closeOnPressMask={true}
         draggable={true}
         customStyles={{
-          container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
+          container: { borderTopLeftRadius: 20, borderTopRightRadius: 20 },
         }}>
         <FileUploadRbSheet
           setDocument={setDocument}
@@ -1724,7 +1724,7 @@ const CommonAddScreen: FC<{
         draggable={true}
         dragNotClose={true}
         customStyles={{
-          container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
+          container: { borderTopLeftRadius: 20, borderTopRightRadius: 20 },
         }}>
         <ScrollView
           contentContainerStyle={{
@@ -1738,7 +1738,7 @@ const CommonAddScreen: FC<{
             style={{
               paddingTop:
                 (formik.errors.category && formik.touched.category) ||
-                (formik.errors.description && formik.touched.description)
+                  (formik.errors.description && formik.touched.description)
                   ? 5
                   : 0,
             }}>
@@ -1792,8 +1792,8 @@ const CommonAddScreen: FC<{
             style={{
               marginBottom:
                 (formik.errors.date && formik.touched.date) ||
-                (formik.errors.day && formik.touched.day) ||
-                (formik.errors.month && formik.touched.month)
+                  (formik.errors.day && formik.touched.day) ||
+                  (formik.errors.month && formik.touched.month)
                   ? 10
                   : 0,
             }}>
@@ -1804,9 +1804,9 @@ const CommonAddScreen: FC<{
                 value={
                   formik.values.month !== ''
                     ? moment()
-                        .month(Number(formik.values.month) - 1)
-                        .date(Number(formik.values?.date))
-                        .format('MMM, Do')
+                      .month(Number(formik.values.month) - 1)
+                      .date(Number(formik.values?.date))
+                      .format('MMM, Do')
                     : ''
                 }
                 editable={false}
@@ -1835,8 +1835,8 @@ const CommonAddScreen: FC<{
               <View>
                 <CommonDropDown
                   maxHeight={150}
-                  dropDownStyle={{width: '100%'}}
-                  dropDownContainerStyle={{width: '100%'}}
+                  dropDownStyle={{ width: '100%' }}
+                  dropDownContainerStyle={{ width: '100%' }}
                   items={dates}
                   placeholder={t('DATE')}
                   open={dateOpen}
@@ -1873,14 +1873,14 @@ const CommonAddScreen: FC<{
                     formik.values.frequency == 'weekly' ? '100%' : undefined,
                   paddingTop:
                     (formik.errors.category && formik.touched.category) ||
-                    (formik.errors.description && formik.touched.description)
+                      (formik.errors.description && formik.touched.description)
                       ? 5
                       : 0,
                 }}>
                 <CommonDropDown
                   maxHeight={150}
-                  dropDownStyle={{width: '100%'}}
-                  dropDownContainerStyle={{width: '100%'}}
+                  dropDownStyle={{ width: '100%' }}
+                  dropDownContainerStyle={{ width: '100%' }}
                   items={days}
                   placeholder={t('DAY')}
                   open={dayOpen}
@@ -1950,7 +1950,7 @@ const CommonAddScreen: FC<{
               }
               mode={'date'}
               is24Hour={true}
-              positiveButton={{label: t('OK'), textColor: appColors.primary}}
+              positiveButton={{ label: t('OK'), textColor: appColors.primary }}
               negativeButton={{
                 label: t('CANCEL'),
                 textColor: appColors.primary,
@@ -1967,7 +1967,7 @@ const CommonAddScreen: FC<{
               value={initialDate}
               mode={'date'}
               is24Hour={true}
-              positiveButton={{label: t('OK'), textColor: appColors.primary}}
+              positiveButton={{ label: t('OK'), textColor: appColors.primary }}
               negativeButton={{
                 label: t('CANCEL'),
                 textColor: appColors.primary,
@@ -1999,16 +1999,16 @@ const CommonAddScreen: FC<{
           />
         </ScrollView>
       </CommonRBSheet>
-      <Modal visible={isLoading} transparent={true} animationType="fade">
+      <CustomModal visible={isLoading} transparent={true} animationType="fade">
         <CommonLoader />
-      </Modal>
+      </CustomModal>
       {dateVisible ? (
         <DateTimePicker
           value={initialDate}
           mode={'date'}
           is24Hour={true}
-          positiveButton={{label: t('OK'), textColor: appColors.primary}}
-          negativeButton={{label: t('CANCEL'), textColor: appColors.primary}}
+          positiveButton={{ label: t('OK'), textColor: appColors.primary }}
+          negativeButton={{ label: t('CANCEL'), textColor: appColors.primary }}
           maximumDate={initialDate}
           display="calendar"
           onChange={(event: DateTimePickerEvent, selectedDate?: Date) =>
@@ -2039,7 +2039,7 @@ const CommonAddScreen: FC<{
         draggable={true}
         dragNotClose={true}
         customStyles={{
-          container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
+          container: { borderTopLeftRadius: 20, borderTopRightRadius: 20 },
         }}
       />
       <Popover
@@ -2054,7 +2054,7 @@ const CommonAddScreen: FC<{
           source={require('@assets/lottie/sucess-lottie.json')}
           loop
           autoPlay
-          style={{height: 80, width: 80}}
+          style={{ height: 80, width: 80 }}
         />
         <CommonText
           content={
@@ -2063,11 +2063,11 @@ const CommonAddScreen: FC<{
                 ? t('BUDGET_UPDATED')
                 : t('BUDGET_ADDED')
               : route?.params?.amount
-              ? t('TRANSACTION_UPDATED')
-              : t('TRANSACTION_ADDED')
+                ? t('TRANSACTION_UPDATED')
+                : t('TRANSACTION_ADDED')
           }
           size={'label'}
-          style={{textAlign: 'center', paddingHorizontal: 20}}
+          style={{ textAlign: 'center', paddingHorizontal: 20 }}
         />
       </Popover>
       <Popover
@@ -2089,7 +2089,7 @@ const CommonAddScreen: FC<{
         </View>
 
         <ScrollView
-          contentContainerStyle={{paddingHorizontal: 15, paddingTop: 15}}>
+          contentContainerStyle={{ paddingHorizontal: 15, paddingTop: 15 }}>
           <CommonInput
             value={formik.values.newDropdownItem}
             placeholder={t('CATEGORY')}
@@ -2097,7 +2097,7 @@ const CommonAddScreen: FC<{
             onBlur={formik.handleBlur('newDropdownItem')}
             error={
               formik.touched.newDropdownItem &&
-              formik.values.newDropdownItem == ''
+                formik.values.newDropdownItem == ''
                 ? t('FIELD_REQUIRED')
                 : undefined
             }
@@ -2110,7 +2110,7 @@ const CommonAddScreen: FC<{
               gap: 10,
             }}>
             <CommonButton
-              buttonStyle={{width: 80, height: 45}}
+              buttonStyle={{ width: 80, height: 45 }}
               buttonType="clear"
               title={t('CANCEL')}
               onPress={() => {
@@ -2121,7 +2121,7 @@ const CommonAddScreen: FC<{
             <CommonButton
               title={t('ADD')}
               loading={isButtonLoader}
-              buttonStyle={{width: 80, height: 45}}
+              buttonStyle={{ width: 80, height: 45 }}
               onPress={() => handleAddNewDropdownItem()}
             />
           </View>
@@ -2137,28 +2137,27 @@ const CommonAddScreen: FC<{
         closeOnPressMask={true}
         draggable={true}
         customStyles={{
-          container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
+          container: { borderTopLeftRadius: 20, borderTopRightRadius: 20 },
         }}>
-        <View style={{padding: 15, gap: 10}}>
+        <View style={{ padding: 15, gap: 10 }}>
           <CommonText
             content={t('DELETE_FILE_HEADING')}
             bold
             size={'large'}
-            style={{textAlign: 'center'}}
+            style={{ textAlign: 'center' }}
           />
           <CommonText
-            content={`${document?.name}.${
-              document?.url?.split('.')[document?.url?.split('.')?.length - 1]
-            }`}
+            content={`${document?.name}.${document?.url?.split('.')[document?.url?.split('.')?.length - 1]
+              }`}
             color={appColors.primary}
             size={'label'}
-            style={{textAlign: 'center', paddingHorizontal: 15}}
+            style={{ textAlign: 'center', paddingHorizontal: 15 }}
           />
           <CommonText
             content={t('DELETE_FILE_MESSAGE')}
             color={appColors.placeholderColor}
             size={'label'}
-            style={{textAlign: 'center', paddingHorizontal: 15}}
+            style={{ textAlign: 'center', paddingHorizontal: 15 }}
           />
           <View
             style={{
@@ -2166,7 +2165,7 @@ const CommonAddScreen: FC<{
               justifyContent: 'space-between',
               alignItems: 'center',
             }}>
-            <View style={{flex: 0.45}}>
+            <View style={{ flex: 0.45 }}>
               <CommonButton
                 title={t('NO')}
                 buttonType="clear"
@@ -2176,7 +2175,7 @@ const CommonAddScreen: FC<{
                 }}
               />
             </View>
-            <View style={{flex: 0.45}}>
+            <View style={{ flex: 0.45 }}>
               <CommonButton title={t('YES')} onPress={deleteDocumentHandler} />
             </View>
           </View>

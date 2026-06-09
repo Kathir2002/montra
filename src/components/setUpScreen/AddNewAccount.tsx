@@ -8,10 +8,10 @@ import {
   Vibration,
   View,
 } from 'react-native';
-import {paymentData, PaymentDataInterface, PaymentType} from '@assets/svg';
+import { paymentData, PaymentDataInterface, PaymentType } from '@assets/svg';
 
-import React, {useEffect, useRef, useState} from 'react';
-import {appColors} from '@shared/appColors';
+import React, { useEffect, useRef, useState } from 'react';
+import { appColors } from '@shared/appColors';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 import * as yup from 'yup';
 import {
@@ -27,29 +27,30 @@ import CommonRBSheet, {
 } from '@shared/components/commonRBSheet/CommonRBSheet';
 import CommonText from '@shared/components/commonText/CommonText';
 import CommonInput from '@shared/components/commonInput/CommonInput';
-import {useFormik} from 'formik';
+import { useFormik } from 'formik';
 import CommonButton from '@shared/components/commonButton/CommonButton';
 
-import {Divider, Input} from '@rneui/base';
-import {appFonts} from '@shared/appFonts';
+import { Divider, Input } from '@rneui/base';
+import { appFonts } from '@shared/appFonts';
 
 import LottieView from 'lottie-react-native';
 import CommonDropDown from '@shared/components/commonDropdown/CommonDropDown';
 import MoreIcon from '@assets/svg/more.svg';
-import {Toast} from '@shared/ToastConfig';
-import {useDispatch, useSelector} from 'react-redux';
+import { Toast } from '@shared/ToastConfig';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   updateCurrentUser,
   updateIsTransactionAdded,
 } from '@store/slice/appSlice';
-import {RootState} from '@store/store';
+import { RootState } from '@store/store';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
 import AccountService from '@services/setup/accountService';
 import DeleteIcon from '@assets/svg/delete.svg';
 import Popover from 'react-native-popover-view/dist/Popover';
-import {getCurrencySymbol} from '@src/lib/functions';
-import {useTranslation} from 'react-i18next';
+import { getCurrencySymbol } from '@src/lib/functions';
+import { useTranslation } from 'react-i18next';
 import CommonConfirmation from '@shared/components/CommonConfirmation';
+import { CustomModal } from '@shared/components/CustomModal';
 
 interface AccountRouteProps {
   provider: {
@@ -68,11 +69,11 @@ const AddNewAccount = () => {
     params: AccountRouteProps;
   }> = useRoute();
 
-  const {t} = useTranslation('account');
+  const { t } = useTranslation('account');
 
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const [setupModalVisible, setSetupModalVisible] = useState(false);
-  const [paymentDataList, setPaymentDataList] = useState({...paymentData});
+  const [paymentDataList, setPaymentDataList] = useState({ ...paymentData });
   const [open, setOpen] = useState(false);
   const [isSuccessPopoverVisible, setIsSuccessPopoverVisible] = useState(false);
 
@@ -168,7 +169,7 @@ const AddNewAccount = () => {
           if (!route?.params?.accountType) {
             setPaymentDataList(prev => {
               res?.rows?.forEach((account: any) => {
-                const {accountType, provider} = account;
+                const { accountType, provider } = account;
                 if (prev[accountType as keyof PaymentDataInterface]) {
                   prev[accountType as keyof PaymentDataInterface] = prev[
                     accountType as keyof PaymentDataInterface
@@ -182,7 +183,7 @@ const AddNewAccount = () => {
       })
       .catch(err => {
         console.log('Error in geting wallet list data', err?.response?.data);
-        Toast({message: err?.response?.data?.message, type: 'error'});
+        Toast({ message: err?.response?.data?.message, type: 'error' });
       })
       .finally(() => {
         setIsLoading(false);
@@ -194,7 +195,7 @@ const AddNewAccount = () => {
     if (formik.values.provider.providerCode && formik.values.accountType) {
       const allBanks =
         paymentDataList[
-          formik.values.accountType as keyof PaymentDataInterface
+        formik.values.accountType as keyof PaymentDataInterface
         ] || [];
       const selectedBankIndex = allBanks.findIndex(
         bank => bank.nameCode === formik.values.provider.providerCode,
@@ -237,7 +238,7 @@ const AddNewAccount = () => {
 
   const addNewBankAccount = async () => {
     if (formik.values.provider.providerCode === '') {
-      Toast({message: t('SELECT_ACCOUNT'), type: 'error'});
+      Toast({ message: t('SELECT_ACCOUNT'), type: 'error' });
       return;
     }
     setIsLoading(true);
@@ -250,21 +251,21 @@ const AddNewAccount = () => {
     await AccountService.addAccount(data)
       .then((res: any) => {
         if (res?.success) {
-          Toast({message: res?.message, type: 'success'});
+          Toast({ message: res?.message, type: 'success' });
           setSetupModalVisible(true);
           dispatch(updateIsTransactionAdded(true));
           Vibration.vibrate(50);
           setTimeout(() => {
-            dispatch(updateCurrentUser({...userDetails, isSetupDone: true}));
+            dispatch(updateCurrentUser({ ...userDetails, isSetupDone: true }));
             setSetupModalVisible(false);
             route?.params?.fromAccountPage
               ? navigation.navigate('Account')
-              : navigation.navigate('BottomTab', {screen: 'Dashboard'});
+              : navigation.navigate('BottomTab', { screen: 'Dashboard' });
           }, 2000);
         }
       })
       .catch(err => {
-        Toast({message: err?.response?.data?.message, type: 'error'});
+        Toast({ message: err?.response?.data?.message, type: 'error' });
       })
       .finally(() => {
         setIsLoading(false);
@@ -272,7 +273,7 @@ const AddNewAccount = () => {
   };
   const updateBankAccount = async () => {
     if (formik.values.provider.providerCode === '') {
-      Toast({message: t('SELECT_ACCOUNT'), type: 'error'});
+      Toast({ message: t('SELECT_ACCOUNT'), type: 'error' });
       return;
     }
     setIsLoading(true);
@@ -290,7 +291,7 @@ const AddNewAccount = () => {
     await AccountService.updateAccount(data)
       .then((res: any) => {
         if (res?.success) {
-          Toast({message: res?.message, type: 'success'});
+          Toast({ message: res?.message, type: 'success' });
           setSetupModalVisible(true);
           dispatch(updateIsTransactionAdded(true));
           Vibration.vibrate(50);
@@ -298,12 +299,12 @@ const AddNewAccount = () => {
             setSetupModalVisible(false);
             route?.params?.fromAccountPage
               ? navigation.navigate('Account')
-              : navigation.navigate('BottomTab', {screen: 'Dashboard'});
+              : navigation.navigate('BottomTab', { screen: 'Dashboard' });
           }, 2000);
         }
       })
       .catch(err => {
-        Toast({message: err?.response?.data?.message, type: 'error'});
+        Toast({ message: err?.response?.data?.message, type: 'error' });
       })
       .finally(() => {
         setIsLoading(false);
@@ -311,10 +312,10 @@ const AddNewAccount = () => {
   };
 
   const handlePress = (name: string, nameCode: string, index: number) => {
-    const {provider} = formik.values;
+    const { provider } = formik.values;
     const allBanks =
       paymentDataList[
-        formik.values.accountType as keyof PaymentDataInterface
+      formik.values.accountType as keyof PaymentDataInterface
       ] || [];
 
     if (provider.providerCode === nameCode) {
@@ -366,7 +367,7 @@ const AddNewAccount = () => {
         deleteRBSheetRef.current?.close();
         setIsLoading(false);
         console.log(err?.response?.data?.message);
-        Toast({message: err?.response?.data?.message, type: 'error'});
+        Toast({ message: err?.response?.data?.message, type: 'error' });
       });
   };
 
@@ -374,7 +375,7 @@ const AddNewAccount = () => {
   const getDisplayedBanks = () => {
     const allBanks =
       paymentDataList[
-        formik.values.accountType as keyof PaymentDataInterface
+      formik.values.accountType as keyof PaymentDataInterface
       ] || [];
     let displayedBanks: PaymentType[] = [];
 
@@ -458,7 +459,7 @@ const AddNewAccount = () => {
           barStyle={'light-content'}
         />
         <View>
-          <View style={{paddingHorizontal: 15}}>
+          <View style={{ paddingHorizontal: 15 }}>
             <CommonText
               content={`${t('ACCOUNT_BALANCE')}?`}
               color={appColors.lightGrey}
@@ -468,7 +469,7 @@ const AddNewAccount = () => {
               inputContainerStyle={{
                 borderBottomWidth: 0,
               }}
-              containerStyle={{paddingHorizontal: 0}}
+              containerStyle={{ paddingHorizontal: 0 }}
               placeholder="₹00.0"
               placeholderTextColor={appColors.light}
               style={{
@@ -531,16 +532,16 @@ const AddNewAccount = () => {
                     paddingTop:
                       (formik.errors.accountType &&
                         formik.touched.accountType) ||
-                      (formik.errors.name && formik.touched.name)
+                        (formik.errors.name && formik.touched.name)
                         ? 5
                         : 0,
                   }}>
                   <CommonDropDown
                     maxHeight={150}
                     items={[
-                      {label: t('ACCOUNT_TYPE_LABEL.UPI'), value: 'UPI'},
-                      {label: t('ACCOUNT_TYPE_LABEL.BANK'), value: 'Bank'},
-                      {label: t('ACCOUNT_TYPE_LABEL.CASH'), value: 'Cash'},
+                      { label: t('ACCOUNT_TYPE_LABEL.UPI'), value: 'UPI' },
+                      { label: t('ACCOUNT_TYPE_LABEL.BANK'), value: 'Bank' },
+                      { label: t('ACCOUNT_TYPE_LABEL.CASH'), value: 'Cash' },
                     ]}
                     placeholder={t('ACCOUNT_TYPE')}
                     open={open}
@@ -554,14 +555,14 @@ const AddNewAccount = () => {
                   />
                   {formik.errors.accountType && formik.touched.accountType ? (
                     <CommonText
-                      style={{marginTop: 5, marginLeft: 5}}
+                      style={{ marginTop: 5, marginLeft: 5 }}
                       content={formik.errors.accountType}
                       color={appColors.error}
                       size={'error'}
                     />
                   ) : undefined}
                 </View>
-                <View style={{zIndex: -1, paddingVertical: 10}}>
+                <View style={{ zIndex: -1, paddingVertical: 10 }}>
                   {formik.values.accountType !== '' ? (
                     <View>
                       <CommonText bold content={formik.values.accountType} />
@@ -582,18 +583,18 @@ const AddNewAccount = () => {
                                 key={index}
                                 onPress={() => {
                                   index === displayedBanks.length - 1 &&
-                                  item.nameCode === 'seeMore'
+                                    item.nameCode === 'seeMore'
                                     ? rbSheetRef?.current?.open()
                                     : handlePress(
-                                        item.name,
-                                        item?.nameCode,
-                                        index,
-                                      );
+                                      item.name,
+                                      item?.nameCode,
+                                      index,
+                                    );
                                 }}
                                 style={{
                                   backgroundColor:
                                     formik.values.provider?.providerCode ===
-                                    item?.nameCode
+                                      item?.nameCode
                                       ? appColors.buttonClear
                                       : appColors.formBorderColor,
                                   paddingHorizontal: 15,
@@ -602,7 +603,7 @@ const AddNewAccount = () => {
                                   borderWidth: 1,
                                   borderColor:
                                     formik.values.provider?.providerCode ===
-                                    item?.nameCode
+                                      item?.nameCode
                                       ? appColors.primary
                                       : appColors.formBorderColor,
                                   elevation: 2,
@@ -655,7 +656,7 @@ const AddNewAccount = () => {
                         ? t('profile:UPDATE')
                         : t('auth:CONTINUE')
                     }
-                    buttonStyle={{marginVertical: 20}}
+                    buttonStyle={{ marginVertical: 20 }}
                   />
                 </View>
               </View>
@@ -663,7 +664,7 @@ const AddNewAccount = () => {
           </View>
         </View>
       </View>
-      <Modal
+      <CustomModal
         visible={setupModalVisible}
         animationType="fade"
         onRequestClose={() => setSetupModalVisible(false)}>
@@ -689,7 +690,7 @@ const AddNewAccount = () => {
             size={24}
           />
         </View>
-      </Modal>
+      </CustomModal>
       <CommonRBSheet
         onOpen={() =>
           StatusBar.setBackgroundColor(appColors.transparentBackground)
@@ -701,17 +702,17 @@ const AddNewAccount = () => {
         closeOnPressMask={true}
         draggable={true}
         customStyles={{
-          container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
+          container: { borderTopLeftRadius: 20, borderTopRightRadius: 20 },
         }}>
         <CommonText
           content={formik.values.accountType}
           bold
           color={appColors.primary}
           size={'header'}
-          style={{alignSelf: 'center'}}
+          style={{ alignSelf: 'center' }}
         />
-        <Divider style={{marginVertical: 5}} />
-        <ScrollView contentContainerStyle={{paddingBottom: 20}}>
+        <Divider style={{ marginVertical: 5 }} />
+        <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
           <View
             style={{
               flexDirection: 'row',
@@ -757,9 +758,9 @@ const AddNewAccount = () => {
           </View>
         </ScrollView>
       </CommonRBSheet>
-      <Modal visible={isLoading} transparent={true} animationType="fade">
+      <CustomModal visible={isLoading} transparent={true} animationType="fade">
         <CommonLoader />
-      </Modal>
+      </CustomModal>
       <CommonConfirmation
         titleText={t('transaction:EXIT_CONFIRM_TITLE')}
         subText={t('transaction:EXIT_MESSAGE')}
@@ -782,7 +783,7 @@ const AddNewAccount = () => {
         draggable={true}
         dragNotClose={true}
         customStyles={{
-          container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
+          container: { borderTopLeftRadius: 20, borderTopRightRadius: 20 },
         }}
       />
       <CommonConfirmation
@@ -804,7 +805,7 @@ const AddNewAccount = () => {
         closeOnPressMask={true}
         draggable={true}
         customStyles={{
-          container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
+          container: { borderTopLeftRadius: 20, borderTopRightRadius: 20 },
         }}
       />
       <Popover
@@ -819,12 +820,12 @@ const AddNewAccount = () => {
           source={require('@assets/lottie/sucess-lottie.json')}
           loop
           autoPlay
-          style={{height: 80, width: 80}}
+          style={{ height: 80, width: 80 }}
         />
         <CommonText
           content={t('WALLET_REMOVED_SUCCESS')}
           size={'label'}
-          style={{textAlign: 'center', paddingHorizontal: 20}}
+          style={{ textAlign: 'center', paddingHorizontal: 20 }}
         />
       </Popover>
     </KeyboardAvoidingView>

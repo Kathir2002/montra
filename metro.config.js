@@ -1,8 +1,11 @@
-const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
-const defaultConfig = getDefaultConfig(__dirname);
+// metro.config.js
 
-const { assetExts, sourceExts } = defaultConfig.resolver;
-const exclusionList = require('metro-config/src/defaults/exclusionList');
+const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+
+const defaultConfig = getDefaultConfig(__dirname);
+const {
+    resolver: { sourceExts, assetExts },
+} = defaultConfig;
 
 /**
  * Metro configuration
@@ -12,14 +15,13 @@ const exclusionList = require('metro-config/src/defaults/exclusionList');
  */
 const config = {
     transformer: {
-        babelTransformerPath: require.resolve("react-native-svg-transformer")
+        babelTransformerPath: require.resolve('react-native-svg-transformer'),
     },
     resolver: {
-        blacklistRE: exclusionList([
-        ]),
-        assetExts: assetExts.filter((ext) => ext !== "svg"),
-        sourceExts: [...sourceExts, "svg"]
-    }
+        // Add 'svg' to assetExts, and filter it out of sourceExts
+        assetExts: assetExts.filter(ext => ext !== 'svg'),
+        sourceExts: [...sourceExts, 'svg'],
+    },
 };
 
-module.exports = mergeConfig(getDefaultConfig(__dirname), config);
+module.exports = mergeConfig(defaultConfig, config);

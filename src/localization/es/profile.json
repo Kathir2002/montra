@@ -68,7 +68,7 @@
   "BIOMETRIC_NOT_SUPPORTED_TITLE": "Datos biométricos no admitidos",
   "BIOMETRIC_AUTHENTICATION_FAILED_TITLE": "Error de autenticación",
   "BIOMETRIC_AUTHENTICATION_FAILED": "Error de autenticación biométrica",
-  "AUTHENTICATE_TO_CONTINUE": "Autenticar para continuar",
+  "HELLO": "Hola",
   "ERROR": "Error",
   "ERROR_OCCURED": "Se produjo un error al comprobar la disponibilidad de datos biométricos",
   "PIN_CHANGED_SUCCESS": "PIN cambiado correctamente",

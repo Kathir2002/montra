@@ -68,7 +68,7 @@
   "BIOMETRIC_NOT_SUPPORTED_TITLE": "Biometria não suportada",
   "BIOMETRIC_AUTHENTICATION_FAILED_TITLE": "Autenticação falhou",
   "BIOMETRIC_AUTHENTICATION_FAILED": "A autenticação biométrica falhou",
-  "AUTHENTICATE_TO_CONTINUE": "Autenticar para continuar",
+  "HELLO": "Olá",
   "ERROR": "Erro",
   "ERROR_OCCURED": "Ocorreu um erro ao verificar a disponibilidade de biometria.",
   "PIN_CHANGED_SUCCESS": "PIN mudou com sucesso",
@@ -78,7 +78,6 @@
   "CHANGE_SECURITY_METHOD": "Alterar o método de segurança?",
   "CHANGE_SECURITY_METHOD_DESCRIPION": "Tem certeza que você quer mudar o método de segurança?",
   "SECURITY_METHOD_UPDATED": "Método de segurança do usuário atualizado com sucesso",
-
   "UNLOCK": "Desbloquear",
   "SUBJECT": "Assunto",
   "MESSAGE": "Mensagem",

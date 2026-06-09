@@ -5,19 +5,20 @@ import {
   useIsFocused,
   useNavigation,
 } from '@react-navigation/native';
-import {Avatar, Icon} from '@rneui/base';
+import { Avatar, Icon } from '@rneui/base';
 import ContactService from '@services/contactSupportService';
-import {appColors} from '@shared/appColors';
+import { appColors } from '@shared/appColors';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
 import CommonSearchBar from '@shared/components/CommonSearchBar/CommonSearchBar';
 import CommonText from '@shared/components/commonText/CommonText';
-import {Toast} from '@shared/ToastConfig';
-import {getRelativeTime} from '@src/lib/functions';
-import {RootState} from '@store/store';
+import { CustomModal } from '@shared/components/CustomModal';
+import { Toast } from '@shared/ToastConfig';
+import { getRelativeTime } from '@src/lib/functions';
+import { RootState } from '@store/store';
 import LottieView from 'lottie-react-native';
-import React, {useEffect, useRef, useState} from 'react';
-import {useTranslation} from 'react-i18next';
+import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   FlatList,
   KeyboardAvoidingView,
@@ -28,7 +29,7 @@ import {
   Vibration,
   View,
 } from 'react-native';
-import {useSelector} from 'react-redux';
+import { useSelector } from 'react-redux';
 
 export interface RequestTicketInterface {
   _id: string;
@@ -59,7 +60,7 @@ export interface RequestTicketInterface {
 }
 
 const HelpRequest_List = () => {
-  const {t} = useTranslation('finaceReport');
+  const { t } = useTranslation('finaceReport');
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const [search, setSearch] = useState('');
   const isFirstRender = useRef(true);
@@ -88,7 +89,7 @@ const HelpRequest_List = () => {
       .catch(err => {
         setIsLoading(false);
         setRefreshing(false);
-        Toast({message: err?.response?.data?.message, type: 'error'});
+        Toast({ message: err?.response?.data?.message, type: 'error' });
       });
   };
 
@@ -141,10 +142,10 @@ const HelpRequest_List = () => {
             item?.priority === 'Low'
               ? appColors.priority.low
               : item.priority === 'Medium'
-              ? appColors.priority.medium
-              : item?.priority === 'High'
-              ? appColors.priority.high
-              : undefined,
+                ? appColors.priority.medium
+                : item?.priority === 'High'
+                  ? appColors.priority.high
+                  : undefined,
           borderTopColor: appColors.borderColor,
           borderBottomColor: appColors.borderColor,
           borderRightColor: appColors.borderColor,
@@ -157,11 +158,11 @@ const HelpRequest_List = () => {
             // gap: 15,
             flex: 1,
           }}>
-          <View style={{flex: 0.15}}>
+          <View style={{ flex: 0.15 }}>
             <Avatar
-              source={{uri: item?.userImage}}
+              source={{ uri: item?.userImage }}
               size={45}
-              avatarStyle={{resizeMode: 'stretch'}}
+              avatarStyle={{ resizeMode: 'stretch' }}
               containerStyle={{
                 backgroundColor: appColors.buttonClear,
                 borderWidth: 0,
@@ -203,10 +204,10 @@ const HelpRequest_List = () => {
                   item?.priority === 'Low'
                     ? appColors.priority.low
                     : item.priority === 'Medium'
-                    ? appColors.priority.medium
-                    : item?.priority === 'High'
-                    ? appColors.priority.high
-                    : undefined,
+                      ? appColors.priority.medium
+                      : item?.priority === 'High'
+                        ? appColors.priority.high
+                        : undefined,
               }}
             />
             <CommonText
@@ -236,8 +237,8 @@ const HelpRequest_List = () => {
                 item?.status === 'New'
                   ? appColors.status.new
                   : item.status === 'Progress'
-                  ? appColors.status.progress
-                  : appColors.status.resolved,
+                    ? appColors.status.progress
+                    : appColors.status.resolved,
               paddingHorizontal: 5,
               paddingVertical: 3,
               borderRadius: 5,
@@ -251,15 +252,15 @@ const HelpRequest_List = () => {
                 item?.status === 'New'
                   ? t('NEW')
                   : item.status === 'Progress'
-                  ? t('PROGRESS')
-                  : t('RESOLVED')
+                    ? t('PROGRESS')
+                    : t('RESOLVED')
               }
               color={
                 item?.status === 'New'
                   ? appColors.light
                   : item.status === 'Progress'
-                  ? appColors.dark
-                  : appColors.light
+                    ? appColors.dark
+                    : appColors.light
               }
             />
           </View>
@@ -296,17 +297,17 @@ const HelpRequest_List = () => {
               item?.priority === 'Low'
                 ? appColors.priority.low
                 : item.priority === 'Medium'
-                ? appColors.priority.medium
-                : item?.priority === 'High'
-                ? appColors.priority.high
-                : undefined
+                  ? appColors.priority.medium
+                  : item?.priority === 'High'
+                    ? appColors.priority.high
+                    : undefined
             }
             content={
               item?.priority === 'Low'
                 ? t('LOW')
                 : item.priority === 'Medium'
-                ? t('MEDIUM')
-                : t('HIGH')
+                  ? t('MEDIUM')
+                  : t('HIGH')
             }
           />
           {item?.replies?.length ? (
@@ -350,7 +351,7 @@ const HelpRequest_List = () => {
   };
 
   return (
-    <KeyboardAvoidingView style={{flex: 1, backgroundColor: appColors.light}}>
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: appColors.light }}>
       <View
         style={{
           backgroundColor: appColors.primary,
@@ -360,7 +361,7 @@ const HelpRequest_List = () => {
         }}>
         <CommonHeader
           theme="dark"
-          headerContainerStyle={{backgroundColor: appColors.primary}}
+          headerContainerStyle={{ backgroundColor: appColors.primary }}
           title={t('SUPPORT_TICKETS')}
           leftIconPressBack={() => navigation.goBack()}
         />
@@ -376,10 +377,10 @@ const HelpRequest_List = () => {
           )}`}
           color={appColors.lightGrey}
           size={'large'}
-          style={{marginHorizontal: 15}}
+          style={{ marginHorizontal: 15 }}
         />
       </View>
-      <View style={{top: -20}}>
+      <View style={{ top: -20 }}>
         <CommonSearchBar
           search={search}
           placeholder={`${t('SEARCH_TICKETS')}...`}
@@ -420,10 +421,10 @@ const HelpRequest_List = () => {
               source={require('@assets/lottie/list-empty-lottie.json')}
               autoPlay
               loop
-              style={{height: 200, width: 200}}
+              style={{ height: 200, width: 200 }}
             />
             <CommonText
-              style={{textAlign: 'center'}}
+              style={{ textAlign: 'center' }}
               content={t('NO_SUPPORT_TICKET_FOUNND')}
             />
           </View>
@@ -435,9 +436,9 @@ const HelpRequest_List = () => {
           paddingTop: 15,
         }}
       />
-      <Modal visible={isLoading} animationType="fade" transparent={true}>
+      <CustomModal visible={isLoading} animationType="fade" transparent={true}>
         <CommonLoader />
-      </Modal>
+      </CustomModal>
     </KeyboardAvoidingView>
   );
 };

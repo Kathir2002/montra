@@ -5,8 +5,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
-import {appColors} from '@shared/appColors';
+import React, { useEffect, useState } from 'react';
+import { appColors } from '@shared/appColors';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 import {
   NavigationProp,
@@ -19,16 +19,16 @@ import BackgroundTimer from 'react-native-background-timer';
 import CommonText from '@shared/components/commonText/CommonText';
 import CommonButton from '@shared/components/commonButton/CommonButton';
 import LottieView from 'lottie-react-native';
-import {Toast} from '@shared/ToastConfig';
+import { Toast } from '@shared/ToastConfig';
 import AuthService from '@services/authService';
 import OTPInput from './OTPInput';
-import {useTranslation} from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 const EmailVerification = () => {
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const [otp, setOtp] = useState(new Array(6).fill(null));
   const [remainingTime, setRemainingTime] = useState<number>(300);
-  const {t} = useTranslation('auth');
+  const { t } = useTranslation('auth');
   const route: RouteProp<{
     params: {
       email: string;
@@ -66,11 +66,11 @@ const EmailVerification = () => {
   };
 
   const resendOtpHandler = async () => {
-    AuthService.resendOtp({data: {email: route?.params?.email}})
+    AuthService.resendOtp({ data: { email: route?.params?.email } })
       .then((res: any) => {
         if (res?.success) {
           setRemainingTime(300);
-          Toast({message: res?.message, type: 'success'});
+          Toast({ message: res?.message, type: 'success' });
         }
       })
       .catch(err => {
@@ -89,7 +89,7 @@ const EmailVerification = () => {
         title={t('EMAIL_VERIFICATION')}
         leftIconPressBack={() => navigation.goBack()}
       />
-      <ScrollView contentContainerStyle={{flex: 1}}>
+      <ScrollView contentContainerStyle={{ flex: 1 }}>
         <LottieView
           style={{
             height: 225,
@@ -129,7 +129,7 @@ const EmailVerification = () => {
           <CommonText
             content={undefined}
             size={'large'}
-            style={{marginVertical: 10}}>
+            style={{ marginVertical: 10 }}>
             {t('SEND_VERIFICATION_CODE')}{' '}
             <CommonText
               content={undefined}
@@ -141,11 +141,11 @@ const EmailVerification = () => {
             . You can check your inbox.
           </CommonText>
           {remainingTime === 0 && (
-            <TouchableOpacity activeOpacity={0.5} onPress={() => {}}>
+            <TouchableOpacity activeOpacity={0.5} onPress={() => { }}>
               <CommonText
                 onPress={() => resendOtpHandler()}
                 content={t('RECEIVED_CODE')}
-                style={{textDecorationLine: 'underline'}}
+                style={{ textDecorationLine: 'underline' }}
                 color={appColors.primary}
                 size={'large'}
               />
@@ -157,11 +157,11 @@ const EmailVerification = () => {
             onPress={() => {
               if (otp.length === 6 && !otp.includes(null)) {
                 AuthService.verifyOtp({
-                  data: {otp: otp?.join(''), email: route?.params?.email},
+                  data: { otp: otp?.join(''), email: route?.params?.email },
                 })
                   .then((res: any) => {
                     if (res?.success) {
-                      Toast({type: 'success', message: res?.message});
+                      Toast({ type: 'success', message: res?.message });
                       navigation.navigate('SignIn');
                     }
                   })
@@ -172,10 +172,10 @@ const EmailVerification = () => {
                     });
                   });
               } else {
-                Toast({message: t('ENTER_OTP'), type: 'error'});
+                Toast({ message: t('ENTER_OTP'), type: 'error' });
               }
             }}
-            buttonStyle={{marginTop: 35}}
+            buttonStyle={{ marginTop: 35 }}
           />
         </View>
       </ScrollView>

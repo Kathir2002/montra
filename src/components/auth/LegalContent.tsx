@@ -1,7 +1,8 @@
-import {appColors} from '@shared/appColors';
+import { appColors } from '@shared/appColors';
 import CommonButton from '@shared/components/commonButton/CommonButton';
 import CommonText from '@shared/components/commonText/CommonText';
-import React, {useState} from 'react';
+import { CustomModal } from '@shared/components/CustomModal';
+import React, { useState } from 'react';
 import {
   View,
   Modal,
@@ -97,7 +98,7 @@ const LegalDocumentsModal = ({
   );
 
   return (
-    <Modal
+    <CustomModal
       animationType="slide"
       transparent={true}
       visible={visible}
@@ -145,17 +146,17 @@ const LegalDocumentsModal = ({
               title="Decline"
               onPress={onDecline}
               buttonType="clear"
-              buttonStyle={{paddingHorizontal: 40}}
+              buttonStyle={{ paddingHorizontal: 40 }}
             />
             <CommonButton
               title="Accept"
               onPress={onAccept}
-              buttonStyle={{paddingHorizontal: 40}}
+              buttonStyle={{ paddingHorizontal: 40 }}
             />
           </View>
         </View>
       </View>
-    </Modal>
+    </CustomModal>
   );
 };
 

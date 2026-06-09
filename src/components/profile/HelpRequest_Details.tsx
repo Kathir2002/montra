@@ -6,8 +6,8 @@ import {
   Vibration,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
-import {appColors} from '@shared/appColors';
+import React, { useEffect, useState } from 'react';
+import { appColors } from '@shared/appColors';
 import {
   NavigationProp,
   ParamListBase,
@@ -18,24 +18,25 @@ import {
 } from '@react-navigation/native';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
-import {Toast} from '@shared/ToastConfig';
+import { Toast } from '@shared/ToastConfig';
 import ContactService from '@services/contactSupportService';
 import CommonText from '@shared/components/commonText/CommonText';
-import {RequestTicketInterface} from './HelpRequest_List';
+import { RequestTicketInterface } from './HelpRequest_List';
 import Clipboard from '@react-native-clipboard/clipboard';
-import DocumentPicker from 'react-native-document-picker';
-import {TouchableOpacity} from 'react-native';
-import {Icon, Image} from '@rneui/base';
+import DocumentPicker from '@react-native-documents/picker';
+import { TouchableOpacity } from 'react-native';
+import { Icon, Image } from '@rneui/base';
 import moment from 'moment';
 import CommonDropDown from '@shared/components/commonDropdown/CommonDropDown';
-import {useSelector} from 'react-redux';
-import {RootState} from '@store/store';
-import {formatBytes, openFileFromUrl} from '@src/lib/functions';
+import { useSelector } from 'react-redux';
+import { RootState } from '@store/store';
+import { formatBytes, openFileFromUrl } from '@src/lib/functions';
 import ExcelIcon from '@assets/svg/fileFormats/excel.svg';
 import PDFIcon from '@assets/svg/fileFormats/pdf.svg';
 import WordIcon from '@assets/svg/fileFormats/word.svg';
-import {useTranslation} from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import CommonButton from '@shared/components/commonButton/CommonButton';
+import { CustomModal } from '@shared/components/CustomModal';
 
 const HelpRequest_Details = () => {
   const isFocused = useIsFocused();
@@ -43,7 +44,7 @@ const HelpRequest_Details = () => {
   const [isLoading, setIsLoading] = useState(true);
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const [ticketDetails, setTicketDetails] = useState<RequestTicketInterface>();
-  const {t} = useTranslation('profile');
+  const { t } = useTranslation('profile');
   const [priorityDropdownOpen, setPriorityDropdownOpen] = useState(false);
   const [priorityDropdownValue, setPriorityDropdownValue] =
     useState<RequestTicketInterface['priority']>();
@@ -103,7 +104,7 @@ const HelpRequest_Details = () => {
       })
       .catch(err => {
         setIsLoading(false);
-        Toast({message: err?.response?.data?.message, type: 'error'});
+        Toast({ message: err?.response?.data?.message, type: 'error' });
       });
   };
 
@@ -138,13 +139,13 @@ const HelpRequest_Details = () => {
       .then((res: any) => {
         setIsLoading(false);
         if (res?.success) {
-          Toast({message: res?.message, type: 'success'});
+          Toast({ message: res?.message, type: 'success' });
           getTicketDetails();
         }
       })
       .catch(err => {
         setIsLoading(false);
-        Toast({message: err?.response?.data?.message, type: 'error'});
+        Toast({ message: err?.response?.data?.message, type: 'error' });
       });
   };
 
@@ -169,9 +170,15 @@ const HelpRequest_Details = () => {
         }}>
         <CommonHeader
           theme="dark"
-          headerContainerStyle={{backgroundColor: appColors.primary}}
+          headerContainerStyle={{ backgroundColor: appColors.primary }}
           title={t('TICKET_DETAILS')}
-          leftIconPressBack={() => navigation.goBack()}
+          leftIconPressBack={() => {
+            if (navigation.canGoBack()) {
+              navigation.goBack();
+            } else {
+              navigation.navigate('BottomTab', { screen: 'Dashboard' }); // fallback screen
+            }
+          }}
         />
         <StatusBar
           backgroundColor={
@@ -179,7 +186,7 @@ const HelpRequest_Details = () => {
           }
           barStyle={'light-content'}
         />
-        <View style={{paddingHorizontal: 15, gap: 5}}>
+        <View style={{ paddingHorizontal: 15, gap: 5 }}>
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={() => {
@@ -220,7 +227,7 @@ const HelpRequest_Details = () => {
           flexGrow: 1,
           paddingTop: 25,
         }}>
-        <View style={{gap: 15}}>
+        <View style={{ gap: 15 }}>
           <View
             style={{
               flex: 1,
@@ -228,7 +235,7 @@ const HelpRequest_Details = () => {
               justifyContent: 'space-between',
               flexDirection: 'row',
             }}>
-            <View style={{flex: 0.45}}>
+            <View style={{ flex: 0.45 }}>
               <CommonDropDown
                 disabled={!userDetails.isAdmin}
                 placeholder={t('STATUS')}
@@ -238,12 +245,12 @@ const HelpRequest_Details = () => {
                 value={statusDropdownValue!}
                 setValue={setStatusDropdownValue}
                 onSelectItem={async data => {
-                  await updateStatus({status: data?.value as string});
+                  await updateStatus({ status: data?.value as string });
                 }}
                 zIndex={2}
               />
             </View>
-            <View style={{flex: 0.45}}>
+            <View style={{ flex: 0.45 }}>
               <CommonDropDown
                 placeholder={t('PRIORITY')}
                 disabled={!userDetails.isAdmin}
@@ -253,13 +260,13 @@ const HelpRequest_Details = () => {
                 value={priorityDropdownValue!}
                 setValue={setPriorityDropdownValue}
                 onSelectItem={async data =>
-                  await updateStatus({priority: data?.value as string})
+                  await updateStatus({ priority: data?.value as string })
                 }
                 zIndex={2}
               />
             </View>
           </View>
-          <View style={{zIndex: 1, gap: 5}}>
+          <View style={{ zIndex: 1, gap: 5 }}>
             <View
               style={{
                 flexDirection: 'row',
@@ -359,7 +366,7 @@ const HelpRequest_Details = () => {
                       false,
                     );
                   }}
-                  style={{maxWidth: 210}}>
+                  style={{ maxWidth: 210 }}>
                   <View
                     style={{
                       gap: 5,
@@ -373,24 +380,23 @@ const HelpRequest_Details = () => {
                       paddingVertical: 5,
                     }}>
                     {ticketDetails?.document?.fileFormat ===
-                    DocumentPicker.types.pdf ? (
+                      DocumentPicker.types.pdf ? (
                       <PDFIcon width={35} height={35} />
                     ) : ticketDetails?.document?.fileFormat ===
-                        'application/msword' ||
+                      'application/msword' ||
                       'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ? (
                       <WordIcon width={35} height={35} />
                     ) : (
                       <ExcelIcon width={35} height={35} />
                     )}
-                    <View style={{flex: 1, gap: 5}}>
+                    <View style={{ flex: 1, gap: 5 }}>
                       <CommonText
                         size={'medium'}
-                        content={`${ticketDetails?.document?.fileName}.${
-                          ticketDetails?.document?.fileUrl?.split('.')[
-                            ticketDetails?.document?.fileUrl?.split('.')
-                              ?.length - 1
-                          ]
-                        }`}
+                        content={`${ticketDetails?.document?.fileName}.${ticketDetails?.document?.fileUrl?.split('.')[
+                          ticketDetails?.document?.fileUrl?.split('.')
+                            ?.length - 1
+                        ]
+                          }`}
                         color={appColors.placeholderColor}
                       />
                       <CommonText
@@ -408,7 +414,7 @@ const HelpRequest_Details = () => {
           ) : undefined}
         </View>
         {userDetails?.isAdmin || ticketDetails?.replies?.length! > 0 ? (
-          <View style={{flex: 1, justifyContent: 'flex-end'}}>
+          <View style={{ flex: 1, justifyContent: 'flex-end', paddingBottom: 20 }}>
             <CommonButton
               title={t('SEND_REPLY')}
               onPress={() => {
@@ -416,7 +422,7 @@ const HelpRequest_Details = () => {
                   id: route?.params?.id,
                 });
               }}
-              iconContainerStyle={{marginRight: 10}}
+              iconContainerStyle={{ marginRight: 10 }}
               icon={{
                 type: 'feather',
                 name: 'send',
@@ -426,9 +432,9 @@ const HelpRequest_Details = () => {
           </View>
         ) : undefined}
       </ScrollView>
-      <Modal visible={isLoading} animationType="fade" transparent={true}>
+      <CustomModal visible={isLoading} animationType="fade" transparent={true}>
         <CommonLoader />
-      </Modal>
+      </CustomModal>
     </KeyboardAvoidingView>
   );
 };

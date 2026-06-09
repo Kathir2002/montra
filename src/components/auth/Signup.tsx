@@ -9,8 +9,8 @@ import {
   View,
 } from 'react-native';
 import * as yup from 'yup';
-import React, {useEffect, useState} from 'react';
-import {appColors} from '@shared/appColors';
+import React, { useEffect, useState } from 'react';
+import { appColors } from '@shared/appColors';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 import {
   NavigationProp,
@@ -18,21 +18,22 @@ import {
   useNavigation,
 } from '@react-navigation/native';
 import CommonInput from '@shared/components/commonInput/CommonInput';
-import {useFormik} from 'formik';
+import { useFormik } from 'formik';
 import CommonButton from '@shared/components/commonButton/CommonButton';
 import CommonText from '@shared/components/commonText/CommonText';
 import CommonCheckBox from '@shared/components/commonCheckbox/CustomCheckBox';
-import {Icon} from '@rneui/base';
-import {Toast} from '@shared/ToastConfig';
+import { Icon } from '@rneui/base';
+import { Toast } from '@shared/ToastConfig';
 import AuthService from '@services/authService';
 import LoginWithGoogle from '@shared/components/auth/LoginWithGoogle';
-import {useTranslation} from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
 import LegalDocumentsModal from './LegalContent';
+import { CustomModal } from '@shared/components/CustomModal';
 
 const SignUp = () => {
   const navigation: NavigationProp<ParamListBase> = useNavigation();
-  const {t} = useTranslation('auth');
+  const { t } = useTranslation('auth');
   const [isLoading, setIsLoading] = useState(false);
   const [termsModalVisible, setTermsModalVisible] = useState(false);
   const validationSchema = yup.object().shape({
@@ -79,7 +80,7 @@ const SignUp = () => {
         password: formik.values.password,
         name: formik.values.name,
       };
-      AuthService.signup({data})
+      AuthService.signup({ data })
         .then((res: any) => {
           if (res?.success) {
             navigation.navigate('EmailVerification', {
@@ -88,7 +89,7 @@ const SignUp = () => {
           }
         })
         .catch(err => {
-          Toast({message: err?.response?.data?.message, type: 'error'});
+          Toast({ message: err?.response?.data?.message, type: 'error' });
         });
     },
   });
@@ -223,33 +224,33 @@ const SignUp = () => {
                 />
               </View>
             </TouchableWithoutFeedback>
-            <View style={{flex: 1, marginLeft: 5}}>
+            <View style={{ flex: 1, marginLeft: 5 }}>
               <CommonText
-                style={{color: appColors.dark}}
+                style={{ color: appColors.dark }}
                 content={undefined}
                 onPress={() => setTermsModalVisible(true)}>
                 {t('bySigningUp')}{' '}
                 <CommonText
                   content={undefined}
-                  style={{color: appColors.primary}}>
+                  style={{ color: appColors.primary }}>
                   {t('termsAndConditions')}
                 </CommonText>
               </CommonText>
             </View>
           </View>
-          <View style={{gap: 15, marginVertical: 15}}>
+          <View style={{ gap: 15, marginVertical: 15 }}>
             <CommonButton
               title={t('signup')}
               onPress={() => {
                 if (formik.errors.terms) {
-                  Toast({message: formik.errors.terms, type: 'error'});
+                  Toast({ message: formik.errors.terms, type: 'error' });
                 }
                 formik.handleSubmit();
               }}
             />
             <CommonText
               content={t('orWith')}
-              style={{textAlign: 'center'}}
+              style={{ textAlign: 'center' }}
               color={appColors.placeholderColor}
             />
             {/* Signup with Google */}
@@ -259,7 +260,7 @@ const SignUp = () => {
             />
             <CommonText
               content={undefined}
-              style={{color: appColors.placeholderColor, textAlign: 'center'}}
+              style={{ color: appColors.placeholderColor, textAlign: 'center' }}
               size={'medium'}>
               {t('alreadyHaveAccount')}{' '}
               <CommonText
@@ -275,9 +276,9 @@ const SignUp = () => {
           </View>
         </View>
       </ScrollView>
-      <Modal visible={isLoading} animationType="fade" transparent={true}>
+      <CustomModal visible={isLoading} animationType="fade" transparent={true}>
         <CommonLoader />
-      </Modal>
+      </CustomModal>
       <LegalDocumentsModal
         visible={termsModalVisible}
         onAccept={() => {

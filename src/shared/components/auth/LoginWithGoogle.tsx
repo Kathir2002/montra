@@ -1,20 +1,18 @@
-import React, {Dispatch, SetStateAction} from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import {
-  NativeModules,
   Platform,
-  StyleSheet,
   TouchableOpacity,
 } from 'react-native';
-import {GoogleSignin} from '@react-native-google-signin/google-signin';
-import {useDispatch} from 'react-redux';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { useDispatch } from 'react-redux';
 import AuthService from '@services/authService';
 import CommonDataService from '@shared/commonDataServices';
-import {updateCurrentUser, updateIsLoggedin} from '@store/slice/appSlice';
-import {appColors} from '@shared/appColors';
+import { updateCurrentUser, updateIsLoggedin } from '@store/slice/appSlice';
+import { appColors } from '@shared/appColors';
 import CommonText from '../commonText/CommonText';
 import GoogleLogo from '@assets/svg/googleLogo.svg';
-import {useTranslation} from 'react-i18next';
-import {Toast} from '@shared/ToastConfig';
+import { useTranslation } from 'react-i18next';
+import { Toast } from '@shared/ToastConfig';
 import {
   NavigationProp,
   ParamListBase,
@@ -22,20 +20,20 @@ import {
 } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DeviceInfo from 'react-native-device-info';
-import messaging from '@react-native-firebase/messaging';
-import axios from 'axios';
-
+import { getMessaging, getToken } from '@react-native-firebase/messaging';
+import { addShortcut, removeAllShortcuts } from '@src/lib/shortcutHandler';
 interface LoginWithGoogleProps {
   buttonText: string;
   setIsLoading: Dispatch<SetStateAction<boolean>>;
 }
 
 const LoginWithGoogle = (props: LoginWithGoogleProps) => {
-  const {buttonText, setIsLoading} = props;
-  const {i18n} = useTranslation();
+  const { buttonText, setIsLoading } = props;
+  const { i18n } = useTranslation();
   const dispatch = useDispatch();
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
-  
+  const messagingInstance = getMessaging();
+
   const getDeviceDetails = async () => {
     const platform = DeviceInfo.getSystemName(); // e.g., "iOS" or "Android"
     const deviceModel = DeviceInfo.getModel(); // e.g., "iPhone 13"
@@ -43,7 +41,7 @@ const LoginWithGoogle = (props: LoginWithGoogleProps) => {
     const appVersion = DeviceInfo.getVersion(); // e.g., "1.0.0"
     const appId = DeviceInfo.getBundleId(); // e.g., "com.example.app"
     const manufacturer = await DeviceInfo.getManufacturer(); // e.g., "Apple" or "Samsung"
-    const fcmToken = await messaging().getToken();
+    const fcmToken = await getToken(messagingInstance);
 
     return {
       platform,
@@ -66,20 +64,33 @@ const LoginWithGoogle = (props: LoginWithGoogleProps) => {
       // Get the users ID token
       const getToken = await GoogleSignin.signIn();
 
-      if (getToken?.idToken) {
+      if (getToken?.data?.idToken) {
         setIsLoading(true);
         const data = await getDeviceDetails();
 
         await AuthService.signinWithGoogle({
           data,
-          token: getToken.idToken,
+          token: getToken?.data?.idToken,
         })
           .then(async (res: any) => {
             if (res?.success) {
               if (Platform.OS === 'android') {
                 try {
                   // After successful login API call
-                  await NativeModules.ShortcutModule.createShortcuts();
+                  removeAllShortcuts();
+                  addShortcut({
+                    id: "expense",
+                    title: "Add Expense",
+                    symbolName: "plus.circle",
+                    iconName: "ic_expense"
+                  })
+                  addShortcut({
+                    id: "income",
+                    title: "Add Income",
+                    symbolName: "plus.circle",
+                    iconName: "ic_income"
+                  })
+
                 } catch (error) {
                   console.error('Failed to create shortcuts:', error);
                 }
@@ -117,12 +128,12 @@ const LoginWithGoogle = (props: LoginWithGoogleProps) => {
               'Error in signin with google',
               err?.response?.data?.message,
             );
-            Toast({message: err?.response?.data?.message, type: 'error'});
+            Toast({ message: err?.response?.data?.message, type: 'error' });
             setIsLoading(false);
           });
       }
     } catch (error: any) {
-      Toast({message: error?.message, type: 'error'});
+      Toast({ message: error?.message, type: 'error' });
     }
   };
   return (
@@ -140,7 +151,7 @@ const LoginWithGoogle = (props: LoginWithGoogleProps) => {
       }}>
       <GoogleLogo height={30} width={30} />
       <CommonText
-        style={{paddingVertical: 10, textAlign: 'center'}}
+        style={{ paddingVertical: 10, textAlign: 'center' }}
         bold
         content={buttonText}
       />
@@ -149,5 +160,3 @@ const LoginWithGoogle = (props: LoginWithGoogleProps) => {
 };
 
 export default LoginWithGoogle;
-
-const styles = StyleSheet.create({});

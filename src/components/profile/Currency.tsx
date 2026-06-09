@@ -1,15 +1,14 @@
 import {
   FlatList,
   KeyboardAvoidingView,
-  Modal,
   StatusBar,
   StyleSheet,
   TouchableOpacity,
   Vibration,
   View,
 } from 'react-native';
-import React, {useEffect, useRef, useState} from 'react';
-import {appColors} from '@shared/appColors';
+import React, { useEffect, useRef, useState } from 'react';
+import { appColors } from '@shared/appColors';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 import {
   NavigationProp,
@@ -22,23 +21,21 @@ import {
 import TickIcon from '@assets/svg/tick.svg';
 import currencyValue from '@assets/data/currency.json';
 import CommonText from '@shared/components/commonText/CommonText';
-import CommonButton from '@shared/components/commonButton/CommonButton';
-import CommonRBSheet, {
-  RBSheetRef,
-} from '@shared/components/commonRBSheet/CommonRBSheet';
+import { RBSheetRef } from '@shared/components/commonRBSheet/CommonRBSheet';
 import LottieView from 'lottie-react-native';
 import AccountService from '@services/setup/accountService';
-import {Toast} from '@shared/ToastConfig';
+import { Toast } from '@shared/ToastConfig';
 import Popover from 'react-native-popover-view/dist/Popover';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
-import {useDispatch, useSelector} from 'react-redux';
-import {updateCurrentUser} from '@store/slice/appSlice';
-import {RootState} from '@store/store';
-import {useTranslation} from 'react-i18next';
+import { useDispatch, useSelector } from 'react-redux';
+import { updateCurrentUser } from '@store/slice/appSlice';
+import { RootState } from '@store/store';
+import { useTranslation } from 'react-i18next';
 import CommonConfirmation from '@shared/components/CommonConfirmation';
+import { CustomModal } from '@shared/components/CustomModal';
 
 const Currency = () => {
-  const {t} = useTranslation('profile');
+  const { t } = useTranslation('profile');
   const rbSheetRef = useRef<RBSheetRef>(null);
   const [isLimit, setIsLimit] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
@@ -47,7 +44,7 @@ const Currency = () => {
   const [isSuccessPopoverVisible, setIsSuccessPopoverVisible] = useState(false);
   const [rbSheetOpen, setRbSheetOpen] = useState(false);
   const [currencyData, setCurrencyData] = useState<
-    {code: string; name: string}[]
+    { code: string; name: string }[]
   >([]);
   const [currencySymbol, setCurrencySymbol] = useState<string>('');
   const isFocused = useIsFocused();
@@ -121,7 +118,7 @@ const Currency = () => {
           setIsSuccessPopoverVisible(true);
           Vibration.vibrate(50);
           dispatch(
-            updateCurrentUser({...userDetails, currencySymbol: currencySymbol}),
+            updateCurrentUser({ ...userDetails, currencySymbol: currencySymbol }),
           );
           setTimeout(() => {
             navigation.goBack();
@@ -133,25 +130,25 @@ const Currency = () => {
         rbSheetRef.current?.close();
         setRbSheetOpen(false);
         setLoading(false);
-        Toast({message: err?.response?.data?.message, type: 'error'});
+        Toast({ message: err?.response?.data?.message, type: 'error' });
       });
   };
 
   const RenderFooter = () => {
     return isLimit && currencyData?.length !== 0 ? (
-      <View style={{alignItems: 'center', justifyContent: 'center'}}>
+      <View style={{ alignItems: 'center', justifyContent: 'center' }}>
         <LottieView
           source={require('@assets/lottie/listLoader.json')}
           autoPlay
           loop
-          style={{height: 50, width: 50}}
+          style={{ height: 50, width: 50 }}
         />
       </View>
     ) : null;
   };
 
   return (
-    <KeyboardAvoidingView style={{flex: 1, backgroundColor: appColors.light}}>
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: appColors.light }}>
       <CommonHeader
         title={t('CURRENCY')}
         leftIcon
@@ -184,7 +181,7 @@ const Currency = () => {
             setIsLimit(false);
           }, 1000);
         }}
-        contentContainerStyle={{paddingHorizontal: 15}}
+        contentContainerStyle={{ paddingHorizontal: 15, paddingBottom: 25, }}
         data={currencyData}
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
@@ -212,7 +209,7 @@ const Currency = () => {
         closeOnPressMask={true}
         draggable={true}
         customStyles={{
-          container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
+          container: { borderTopLeftRadius: 20, borderTopRightRadius: 20 },
         }}
       />
       <Popover
@@ -227,17 +224,17 @@ const Currency = () => {
           source={require('@assets/lottie/sucess-lottie.json')}
           loop
           autoPlay
-          style={{height: 80, width: 80}}
+          style={{ height: 80, width: 80 }}
         />
         <CommonText
           content={t('CURRENCY_SYMBOL_UPDATED')}
           size={'label'}
-          style={{textAlign: 'center', paddingHorizontal: 20}}
+          style={{ textAlign: 'center', paddingHorizontal: 20 }}
         />
       </Popover>
-      <Modal visible={loading} transparent={true} animationType="fade">
+      <CustomModal visible={loading} transparent={true} animationType="fade">
         <CommonLoader />
-      </Modal>
+      </CustomModal>
     </KeyboardAvoidingView>
   );
 };

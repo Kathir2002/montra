@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React, { useRef, useState } from 'react';
 import {
   FlatList,
   I18nManager,
@@ -6,12 +6,11 @@ import {
   Modal,
   Platform,
   StatusBar,
-  StyleSheet,
   TouchableOpacity,
   Vibration,
   View,
 } from 'react-native';
-import {appColors} from '@shared/appColors';
+import { appColors } from '@shared/appColors';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 import {
   NavigationProp,
@@ -21,19 +20,22 @@ import {
   useRoute,
 } from '@react-navigation/native';
 import CommonText from '@shared/components/commonText/CommonText';
-import {RBSheetRef} from '@shared/components/commonRBSheet/CommonRBSheet';
+import { RBSheetRef } from '@shared/components/commonRBSheet/CommonRBSheet';
 import LottieView from 'lottie-react-native';
-import {Toast} from '@shared/ToastConfig';
+import { Toast } from '@shared/ToastConfig';
 import Popover from 'react-native-popover-view/dist/Popover';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
-import {useDispatch, useSelector} from 'react-redux';
-import {updateCurrentUser} from '@store/slice/appSlice';
-import {RootState} from '@store/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { updateCurrentUser } from '@store/slice/appSlice';
+import { RootState } from '@store/store';
 import languageValue from '@assets/data/language.json';
-import {useTranslation} from 'react-i18next';
-import {RNRestart} from '@src/lib/restart';
+import { useTranslation } from 'react-i18next';
+// import { RNRestart } from '@src/lib/restart';
 import CommonConfirmation from '@shared/components/CommonConfirmation';
-import {appFonts} from '@shared/appFonts';
+import { appFonts } from '@shared/appFonts';
+
+import RNRestart from "../../../specs/NativeRestart"
+import { CustomModal } from '@shared/components/CustomModal';
 
 interface CurrencyData {
   label: string;
@@ -43,7 +45,7 @@ interface CurrencyData {
 
 const Language = () => {
   const dispatch = useDispatch();
-  const {t, i18n} = useTranslation('profile');
+  const { t, i18n } = useTranslation('profile');
   const rbSheetRef = useRef<RBSheetRef>(null);
   const userDetails = useSelector((state: RootState) => state.auth.userDetails);
   const [loading, setLoading] = useState(false);
@@ -60,7 +62,7 @@ const Language = () => {
     };
   }> = useRoute();
 
-  const renderItem = ({item, index}: {item: CurrencyData; index: number}) => {
+  const renderItem = ({ item, index }: { item: CurrencyData; index: number }) => {
     const isSlected = route?.params?.selectedLanguage === item.code;
 
     return (
@@ -91,7 +93,7 @@ const Language = () => {
           <CommonText
             content={item.label}
             size={'header'}
-            style={{fontFamily: isSlected ? appFonts.bold : appFonts.medium}}
+            style={{ fontFamily: isSlected ? appFonts.bold : appFonts.medium }}
             color={isSlected ? appColors.transferBg : appColors.dark}
           />
           {!isSlected && (
@@ -133,30 +135,30 @@ const Language = () => {
         setIsSuccessPopoverVisible(true);
         Vibration.vibrate(50);
         dispatch(
-          updateCurrentUser({...userDetails, currentLanguage: currentLanguage}),
+          updateCurrentUser({ ...userDetails, currentLanguage: currentLanguage }),
         );
         setTimeout(() => {
           setIsSuccessPopoverVisible(false);
           if (i18n.language === 'ar') {
             Platform.OS === 'android'
-              ? RNRestart.restart('')
+              ? RNRestart.restart('user_triggered')
               : navigation.goBack();
           } else {
             if (isReloadAppNecessary) {
-              Platform.OS === 'android' && RNRestart.restart('');
+              Platform.OS === 'android' && RNRestart.restart('user_triggered');
             }
             navigation.goBack();
           }
         }, 2000);
       })
       .catch(err => {
-        Toast({message: t('ERROR_IN_UPDATE_LANGUAGE'), type: 'error'});
+        Toast({ message: t('ERROR_IN_UPDATE_LANGUAGE'), type: 'error' });
         console.log('Error in updating language', err);
       });
   };
 
   return (
-    <KeyboardAvoidingView style={{flex: 1, backgroundColor: appColors.light}}>
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: appColors.light }}>
       <CommonHeader
         title={t('LANGUAGE')}
         leftIcon
@@ -181,7 +183,7 @@ const Language = () => {
           gap: 15,
           paddingBottom: 25,
         }}
-        columnWrapperStyle={{gap: 15}}
+        columnWrapperStyle={{ gap: 15 }}
         data={languageValue}
         renderItem={renderItem}
         numColumns={2}
@@ -209,7 +211,7 @@ const Language = () => {
         closeOnPressMask={true}
         draggable={true}
         customStyles={{
-          container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
+          container: { borderTopLeftRadius: 20, borderTopRightRadius: 20 },
         }}
       />
 
@@ -225,17 +227,17 @@ const Language = () => {
           source={require('@assets/lottie/sucess-lottie.json')}
           loop
           autoPlay
-          style={{height: 80, width: 80}}
+          style={{ height: 80, width: 80 }}
         />
         <CommonText
           content={t('LANGUAGE_UPDATED')}
           size={'label'}
-          style={{textAlign: 'center', paddingHorizontal: 20}}
+          style={{ textAlign: 'center', paddingHorizontal: 20 }}
         />
       </Popover>
-      <Modal visible={loading} transparent={true} animationType="fade">
+      <CustomModal visible={loading} transparent={true} animationType="fade">
         <CommonLoader />
-      </Modal>
+      </CustomModal>
     </KeyboardAvoidingView>
   );
 };

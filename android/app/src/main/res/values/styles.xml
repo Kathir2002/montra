@@ -10,11 +10,8 @@
         <!-- add the above line -->
     </style>
 
-    <style name="SplashTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:statusBarColor">#FFFFFF</item>
-        <item name="android:windowLightStatusBar">false</item>
-        <item name="android:background">@drawable/ic_splash</item>
-        <item name="colorPrimaryDark">#FFFFFF</item>
+    <style name="BootSplashTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@drawable/bootsplash</item>
     </style>
 
 </resources>

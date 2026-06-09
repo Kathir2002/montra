@@ -1,6 +1,4 @@
 import {
-  Modal,
-  NativeModules,
   Platform,
   ScrollView,
   StatusBarProps,
@@ -9,38 +7,29 @@ import {
   Vibration,
   View,
 } from 'react-native';
-import React, {useRef, useState} from 'react';
+import React, { useRef, useState } from 'react';
 
 import EncryptedStorage from 'react-native-encrypted-storage';
 import EditIcon from '@assets/svg/edit.svg';
-import {GoogleSignin} from '@react-native-google-signin/google-signin';
-import {useDispatch, useSelector} from 'react-redux';
-import {
-  updateCurrentUser,
-  updateIsFabToggleOpen,
-  updateIsLoggedin,
-} from '@store/slice/appSlice';
-import {
-  NavigationProp,
-  ParamListBase,
-  useIsFocused,
-  useNavigation,
-} from '@react-navigation/native';
-import Animated, {FadeIn, FadeOut} from 'react-native-reanimated';
-import {RootState} from '@store/store';
-import {appColors} from '@shared/appColors';
-import {Toast} from '@shared/ToastConfig';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { useDispatch, useSelector } from 'react-redux';
+import { updateCurrentUser, updateIsFabToggleOpen, updateIsLoggedin, } from '@store/slice/appSlice';
+import { NavigationProp, ParamListBase, useIsFocused, useNavigation, } from '@react-navigation/native';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import { RootState } from '@store/store';
+import { appColors } from '@shared/appColors';
+import { Toast } from '@shared/ToastConfig';
 import CommonText from '@shared/components/commonText/CommonText';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
-import {StatusBar} from 'react-native';
-import {Avatar} from '@rneui/base';
+import { StatusBar } from 'react-native';
+import { Avatar } from '@rneui/base';
 import AccountIcon from '@assets/svg/account.svg';
 import SettingsIcon from '@assets/svg/settings.svg';
 import LogoutIcon from '@assets/svg/logout.svg';
 import DeactivateIcon from '@assets/svg/deactivate.svg';
 import ExportDataIcon from '@assets/svg/export.svg';
-import messaging from '@react-native-firebase/messaging';
-import {RBSheetRef} from '@shared/components/commonRBSheet/CommonRBSheet';
+import { getMessaging, getToken } from '@react-native-firebase/messaging';
+import { RBSheetRef } from '@shared/components/commonRBSheet/CommonRBSheet';
 import {
   DEV_ANDROID_CLIENTID,
   DEV_IOS_CLIENTID,
@@ -53,27 +42,30 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import AccountService from '@services/setup/accountService';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
 import FinanceStory from '@components/financeReport/FinanceStory';
-import {useTranslation} from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import CommonConfirmation from '@shared/components/CommonConfirmation';
+import { removeAllShortcuts } from '@src/lib/shortcutHandler';
+import { CustomModal } from '@shared/components/CustomModal';
 
 const Profile = () => {
-  const {t} = useTranslation('profile');
+  const { t } = useTranslation('profile');
   const [isLoading, setIsLoading] = useState(false);
   const isToggleOpen = useSelector(
     (state: RootState) => state.auth.isFabToggleOpen,
   );
   const isFocused = useIsFocused();
+
   const devData = {
     webClientId: DEV_WEB_CLIENTID,
-    androidClientId: DEV_ANDROID_CLIENTID,
-    iosClientId: DEV_IOS_CLIENTID,
+    // androidClientId: DEV_ANDROID_CLIENTID,
+    // iosClientId: DEV_IOS_CLIENTID,
     scopes: ['profile', 'email'],
   };
 
   const prodData = {
     webClientId: PROD_WEB_CLIENTID,
-    androidClientId: PROD_ANDROID_CLIENTID,
-    iosClientId: PROD_IOS_CLIENTID,
+    // androidClientId: PROD_ANDROID_CLIENTID,
+    // iosClientId: PROD_IOS_CLIENTID,
     scopes: ['profile', 'email'],
   };
   GoogleSignin.configure(__DEV__ ? devData : prodData);
@@ -85,13 +77,14 @@ const Profile = () => {
   const [isFinanceStoryVisible, setIsFinanceStoryVisible] = useState(false);
   const [rbSheetOpen, setRbSheetOpen] = useState(false);
   const userDetails = useSelector((state: RootState) => state.auth.userDetails);
+  const messagingInstance = getMessaging();
 
   const logoutUser = async () => {
     await GoogleSignin.signOut();
     if (Platform.OS === 'android') {
       try {
         // Before clearing user data
-        await NativeModules.ShortcutModule.removeShortcuts();
+        removeAllShortcuts();
         // Proceed with logout
       } catch (error) {
         console.error('Failed to remove shortcuts:', error);
@@ -106,17 +99,16 @@ const Profile = () => {
       }
     });
     dispatch(updateIsLoggedin(false));
-    dispatch(updateCurrentUser({activeContactRequestCount: 0, isAdmin: false}));
+    dispatch(updateCurrentUser({ activeContactRequestCount: 0, isAdmin: false }));
     setIsLoading(false);
-    navigation.navigate('SignIn');
   };
 
   const logoutHandler = async (isFromDeactivateAccount: boolean = false) => {
     setIsLoading(true);
     try {
-      const fcmToken = await messaging().getToken();
+      const fcmToken = await getToken(messagingInstance);
 
-      const data = {fcmToken};
+      const data = { fcmToken };
       if (!isFromDeactivateAccount) {
         await AccountService.logoutUser(data)
           .then(async (res: any) => {
@@ -126,7 +118,7 @@ const Profile = () => {
           })
           .catch(err => {
             setIsLoading(false);
-            Toast({type: 'error', message: err?.response?.data?.message});
+            Toast({ type: 'error', message: err?.response?.data?.message });
           });
       } else {
         await logoutUser();
@@ -134,7 +126,7 @@ const Profile = () => {
     } catch (error: any) {
       setIsLoading(false);
       console.log('Google Sign-Out Error: ', error);
-      Toast({message: error?.message, type: 'error'});
+      Toast({ message: error?.message, type: 'error' });
     }
   };
 
@@ -143,13 +135,13 @@ const Profile = () => {
     await AccountService.deactivateAccount()
       .then((res: any) => {
         if (res?.success) {
-          Toast({message: res?.message, type: 'success'});
+          Toast({ message: res?.message, type: 'success' });
           logoutHandler(true);
         }
       })
       .catch(err => {
         setIsLoading(false);
-        Toast({message: err?.response?.data?.message, type: 'error'});
+        Toast({ message: err?.response?.data?.message, type: 'error' });
       });
   };
 
@@ -200,7 +192,7 @@ const Profile = () => {
   }) => {
     return (
       <View
-        style={{flex: 1, marginTop: index == 0 ? 20 : 0, marginBottom: 20}}
+        style={{ flex: 1, marginTop: index == 0 ? 20 : 0, marginBottom: 20 }}
         key={index}>
         <TouchableOpacity
           activeOpacity={0.5}
@@ -237,7 +229,7 @@ const Profile = () => {
         paddingBottom: 100,
       }}>
       <CommonHeader
-        leftIconPressBack={() => {}}
+        leftIconPressBack={() => { }}
         leftIcon={false}
         title=""
         headerBgc="#F6F6F6"
@@ -274,9 +266,9 @@ const Profile = () => {
             justifyContent: 'center',
           }}>
           <Avatar
-            source={{uri: userDetails.picture}}
+            source={{ uri: userDetails.picture }}
             size={70}
-            avatarStyle={{borderRadius: 35}}
+            avatarStyle={{ borderRadius: 35 }}
           />
         </TouchableOpacity>
         <View
@@ -286,7 +278,7 @@ const Profile = () => {
             justifyContent: 'space-between',
             flex: 1,
           }}>
-          <View style={{gap: 5}}>
+          <View style={{ gap: 5 }}>
             <CommonText
               content={t('USER_NAME')}
               color={appColors.placeholderColor}
@@ -331,7 +323,7 @@ const Profile = () => {
         closeOnPressMask={true}
         draggable={true}
         customStyles={{
-          container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
+          container: { borderTopLeftRadius: 20, borderTopRightRadius: 20 },
         }}
       />
       <CommonConfirmation
@@ -354,7 +346,7 @@ const Profile = () => {
         closeOnPressMask={true}
         draggable={true}
         customStyles={{
-          container: {borderTopLeftRadius: 20, borderTopRightRadius: 20},
+          container: { borderTopLeftRadius: 20, borderTopRightRadius: 20 },
         }}
       />
       {isToggleOpen ? (
@@ -367,20 +359,20 @@ const Profile = () => {
           exiting={FadeOut}
           style={{
             backgroundColor: appColors.transparentBackground,
-            ...StyleSheet.absoluteFillObject,
+            ...StyleSheet.absoluteFill,
           }}
         />
       ) : undefined}
-      <Modal visible={isLoading} animationType="fade" transparent={true}>
+      <CustomModal visible={isLoading} animationType="fade" transparent={true}>
         <CommonLoader />
-      </Modal>
-      <Modal
+      </CustomModal>
+      <CustomModal
         transparent={true}
         visible={isFinanceStoryVisible}
         animationType='slide'
         onRequestClose={() => setIsFinanceStoryVisible(false)}>
         <FinanceStory closeHandler={() => setIsFinanceStoryVisible(false)} />
-      </Modal>
+      </CustomModal>
     </ScrollView>
   );
 };

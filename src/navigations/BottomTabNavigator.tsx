@@ -1,8 +1,5 @@
 import React from 'react';
-import {
-  BottomTabBarProps,
-  createBottomTabNavigator,
-} from '@react-navigation/bottom-tabs';
+import { BottomTabBarProps, createBottomTabNavigator, } from '@react-navigation/bottom-tabs';
 import Dashboard from '@screens/Dashboard';
 import Transaction from '@screens/Transactions';
 import Budget from '@screens/Budget';
@@ -29,10 +26,10 @@ const BottomTabNavigator = () => {
   return (
     <Tab.Navigator
       tabBar={CustomBottomTabs}
-      screenOptions={{headerShown: false, tabBarHideOnKeyboard: true}}>
+      screenOptions={{ headerShown: false, tabBarHideOnKeyboard: true }}>
       <Tab.Screen
         name="Dashboard"
-        options={{unmountOnBlur: true}}
+        options={{ unmountOnBlur: true }}
         component={Dashboard}
       />
       <Tab.Screen name="Transaction" component={Transaction} />

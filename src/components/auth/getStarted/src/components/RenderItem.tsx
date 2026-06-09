@@ -1,4 +1,4 @@
-import {StyleSheet, View, useWindowDimensions} from 'react-native';
+import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import React from 'react';
 import Animated, {
   Extrapolation,
@@ -6,9 +6,9 @@ import Animated, {
   interpolate,
   useAnimatedStyle,
 } from 'react-native-reanimated';
-import {OnboardingData} from '../data/data';
+import { OnboardingData } from '../data/data';
 import CommonText from '@shared/components/commonText/CommonText';
-import {appFonts} from '@shared/appFonts';
+import { appFonts } from '@shared/appFonts';
 
 type Props = {
   index: number;
@@ -16,8 +16,8 @@ type Props = {
   item: OnboardingData;
 };
 
-const RenderItem = ({index, x, item}: Props) => {
-  const {width: SCREEN_WIDTH} = useWindowDimensions();
+const RenderItem = ({ index, x, item }: Props) => {
+  const { width: SCREEN_WIDTH } = useWindowDimensions();
   const animatedStyle = useAnimatedStyle(() => {
     const scale = interpolate(
       Math.abs(x.value),
@@ -41,14 +41,14 @@ const RenderItem = ({index, x, item}: Props) => {
     );
 
     return {
-      transform: [{scale}, {translateY}],
+      transform: [{ scale }, { translateY }],
     };
   });
 
   return (
     <>
       <Animated.View
-        style={[styles.itemContainer, {width: SCREEN_WIDTH}, animatedStyle]}>
+        style={[styles.itemContainer, { width: SCREEN_WIDTH }, animatedStyle]}>
         <View
           style={[
             styles.animationContainer,
@@ -58,14 +58,14 @@ const RenderItem = ({index, x, item}: Props) => {
           ]}>
           <item.imageSrc height={250} width={250} />
         </View>
-        <View style={{flex: 1, paddingHorizontal: 20}}>
+        <View style={{ flex: 1, paddingHorizontal: 20 }}>
           <CommonText
             content={item.mainText}
-            style={[styles.mainText, {color: item.textColor}]}
+            style={[styles.mainText, { color: item.textColor }]}
           />
           <CommonText
             content={item.subText}
-            style={[styles.subText, {color: item.textColor}]}
+            style={[styles.subText, { color: item.textColor }]}
           />
         </View>
       </Animated.View>

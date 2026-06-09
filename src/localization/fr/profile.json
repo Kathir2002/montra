@@ -68,7 +68,7 @@
   "BIOMETRIC_NOT_SUPPORTED_TITLE": "Biométrie non prise en charge",
   "BIOMETRIC_AUTHENTICATION_FAILED_TITLE": "L'authentification a échoué",
   "BIOMETRIC_AUTHENTICATION_FAILED": "L'authentification biométrique a échoué",
-  "AUTHENTICATE_TO_CONTINUE": "Authentifiez-vous pour continuer",
+  "HELLO": "Bonjour",
   "ERROR": "Erreur",
   "ERROR_OCCURED": "Une erreur s'est produite lors de la vérification de la disponibilité de la biométrie.",
   "PIN_CHANGED_SUCCESS": "Le code PIN a été modifié avec succès",

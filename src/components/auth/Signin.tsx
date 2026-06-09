@@ -2,7 +2,6 @@ import {
   Dimensions,
   KeyboardAvoidingView,
   Modal,
-  NativeModules,
   Platform,
   ScrollView,
   StatusBar,
@@ -47,7 +46,10 @@ import CommonLoader from '@shared/components/commonLoader/CommonLoader';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DeviceInfo from 'react-native-device-info';
-import messaging from '@react-native-firebase/messaging';
+import { getMessaging, getToken } from '@react-native-firebase/messaging';
+import NativeShortcut from '../../../specs/NativeShortcut';
+import { addShortcut, removeAllShortcuts } from '@src/lib/shortcutHandler';
+import { CustomModal } from '@shared/components/CustomModal';
 
 const Signin = () => {
   const dispatch = useDispatch();
@@ -57,7 +59,7 @@ const Signin = () => {
   const { t, i18n } = useTranslation(['auth']);
   const [btnLoader, setBtnLoader] = useState(false);
   const navigation: NavigationProp<ParamListBase> = useNavigation();
-
+  const messagingInstance = getMessaging();
   const getDeviceDetails = async () => {
     const platform = DeviceInfo.getSystemName(); // e.g., "iOS" or "Android"
     const deviceModel = DeviceInfo.getModel(); // e.g., "iPhone 13"
@@ -65,7 +67,7 @@ const Signin = () => {
     const appVersion = DeviceInfo.getVersion(); // e.g., "1.0.0"
     const appId = DeviceInfo.getBundleId(); // e.g., "com.example.app"
     const manufacturer = await DeviceInfo.getManufacturer(); // e.g., "Apple" or "Samsung"
-    const fcmToken = await messaging().getToken();
+    const fcmToken = await getToken(messagingInstance);
 
     return {
       platform,
@@ -110,9 +112,22 @@ const Signin = () => {
           if (Platform.OS === 'android') {
             try {
               // After successful login API call
-              await NativeModules.ShortcutModule.createShortcuts();
+              removeAllShortcuts();
+              addShortcut({
+                id: "expense",
+                title: "Add Expense",
+                symbolName: "plus.circle",
+                iconName: "ic_expense"
+              })
+              addShortcut({
+                id: "income",
+                title: "Add Income",
+                symbolName: "plus.circle",
+                iconName: "ic_income"
+              })
             } catch (error) {
               console.error('Failed to create shortcuts:', error);
+
             }
           }
           setBtnLoader(false);
@@ -395,9 +410,9 @@ const Signin = () => {
           </View>
         </View>
       </ScrollView>
-      <Modal visible={isLoading} animationType="fade" transparent={true}>
+      <CustomModal visible={isLoading} animationType="fade" transparent={true}>
         <CommonLoader />
-      </Modal>
+      </CustomModal>
     </KeyboardAvoidingView>
   );
 };

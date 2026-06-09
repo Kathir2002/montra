@@ -1,7 +1,7 @@
-import {useWindowDimensions, View} from 'react-native';
-import SvgChart, {SVGRenderer} from '@wuba/react-native-echarts/svgChart';
+import { useWindowDimensions, View } from 'react-native';
+import SvgChart, { SVGRenderer } from '@wuba/react-native-echarts/svgChart';
 import * as echarts from 'echarts/core';
-import {PieChart} from 'echarts/charts';
+import { PieChart } from 'echarts/charts';
 import {
   TitleComponent,
   TooltipComponent,
@@ -9,19 +9,18 @@ import {
   LegendComponent,
 } from 'echarts/components';
 
-import React, {useEffect, useRef} from 'react';
-import {ECharts, EChartsOption} from 'echarts';
-import {appFonts} from '@shared/appFonts';
-import {gestureHandlerRootHOC} from 'react-native-gesture-handler';
-import {getCurrencySymbol} from '@src/lib/functions';
+import React, { useEffect, useRef } from 'react';
+import { ECharts, EChartsOption } from 'echarts';
+import { appFonts } from '@shared/appFonts';
+import { getCurrencySymbol } from '@src/lib/functions';
 
 const FinancePieChart = (props: {
-  chartData: {name: string; value: number}[];
+  chartData: { name: string; value: number }[];
   transactionType: string;
-  totalTransaction: {totalExpense: number; totalIncome: number};
+  totalTransaction: { totalExpense: number; totalIncome: number };
 }) => {
-  const {chartData, transactionType, totalTransaction} = props;
-  const {width} = useWindowDimensions();
+  const { chartData, transactionType, totalTransaction } = props;
+  const { width } = useWindowDimensions();
 
   // register extensions
   echarts.use([
@@ -98,10 +97,10 @@ const FinancePieChart = (props: {
   }, [option]);
 
   return (
-    <View style={{height: E_HEIGHT}}>
+    <View style={{ height: E_HEIGHT }}>
       <SvgChart ref={svgRef} useRNGH />
     </View>
   );
 };
 
-export default gestureHandlerRootHOC(FinancePieChart);
+export default (FinancePieChart);

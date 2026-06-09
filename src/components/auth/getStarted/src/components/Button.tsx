@@ -1,5 +1,5 @@
-import {Pressable, StyleSheet} from 'react-native';
-import React, {Dispatch, SetStateAction} from 'react';
+import { Pressable, StyleSheet } from 'react-native';
+import React, { Dispatch, SetStateAction } from 'react';
 import Animated, {
   Extrapolation,
   SharedValue,
@@ -8,10 +8,10 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
 } from 'react-native-reanimated';
-import {OnboardingData} from '../data/data';
+import { OnboardingData } from '../data/data';
 import Arrow from '@assets/svg/Arrow.svg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {navigationRef} from '../../../../../../index';
+import { navigationRef } from '../../../../../../index';
 
 type Props = {
   x: SharedValue<number>;
@@ -55,24 +55,25 @@ const Button = ({
             0,
             2 * screenWidth,
           );
-          x.value = withTiming(-clampValue, {duration: 1000});
+          x.value = withTiming(-clampValue, { duration: 1000 });
         }
         if (currentIndex === 2) {
-          await AsyncStorage.setItem(
-            'getStartedVisible',
-            JSON.stringify(false),
-          );
-          await AsyncStorage.setItem(
-            'isPushNotification',
-            JSON.stringify(false),
-          );
-          setIsGetStartedVisible(false);
-          if (navigationRef?.current)
-            navigationRef?.current?.navigate('SignIn');
+          if (navigationRef?.current) {
+            await AsyncStorage.setItem(
+              'getStartedVisible',
+              JSON.stringify(false),
+            );
+            await AsyncStorage.setItem(
+              'isPushNotification',
+              JSON.stringify(false),
+            );
+            setIsGetStartedVisible(false);
+            // navigationRef?.current?.navigate('SignIn');
+          }
         }
       }}>
       <Arrow
-        stroke={data[currentIndex].backgroundColor}
+        stroke={data[currentIndex]?.backgroundColor}
         width={40}
         height={40}
       />
