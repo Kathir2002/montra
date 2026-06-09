@@ -1,6 +1,6 @@
 # 📱 Montra — Personal Finance Manager & Budget Tracker
 
-Montra is a premium, feature-rich, and high-performance **React Native** application designed to help users track expenses, manage budgets, and gain complete control over their financial health. Powered by modern architecture, Montra offers elegant visualizations, real-time customer support, strict offline capabilities, and state-of-the-art native security integrations.
+Montra is a premium, feature-rich, and high-performance **React Native** application designed to help users track expenses, manage budgets, and gain complete control over their financial health. Powered by modern architecture, Montra offers elegant visualizations, real-time customer support, and state-of-the-art native security integrations.
 
 ---
 
