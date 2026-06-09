@@ -151,7 +151,7 @@ export const NetworkBannerUI = ({ isInModal = false }: { isInModal?: boolean }) 
                     styles.banner,
                     {
                         transform: [{ translateY: slideAnim }],
-                        paddingTop: insets.top + 10,
+                        paddingTop: insets.top,
                     },
                 ]}
                 pointerEvents="auto"
