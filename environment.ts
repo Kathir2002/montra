@@ -1,6 +1,6 @@
 export const config = {
   // apiUrldb: 'https://montra-api-50030155209.catalystappsail.in/'
   apiUrldb: __DEV__
-    ? 'http://172.17.0.207:8000/'
+    ? 'http://172.17.0.19:8000/'
     : 'https://overseas-lavinia-montra-c3fef864.koyeb.app/',
 };

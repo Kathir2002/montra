@@ -53,6 +53,9 @@ const Security = () => {
   const [securityType, setSecurityType] = useState<SecurityType>(
     userDetails?.securityMethod!,
   );
+
+  console.log(userDetails,);
+
   const [loading, setLoading] = useState(false);
   const [isSuccessPopoverVisible, setIsSuccessPopoverVisible] = useState(false);
   const securityData = [
@@ -144,22 +147,21 @@ const Security = () => {
     const data = {
       securityMethod: securityType,
     };
-    await AccountService.changeAccountPreferences(data)
-      .then(async (res: any) => {
-        if (res?.success) {
-          setLoading(false);
-          rbSheetRef.current?.close();
-          setRbSheetOpen(false);
-          setIsSuccessPopoverVisible(true);
-          Vibration.vibrate(50);
-          dispatch(
-            updateCurrentUser({ ...userDetails, securityMethod: securityType }),
-          );
-          setTimeout(() => {
-            setIsSuccessPopoverVisible(false);
-            navigation.goBack();
-          }, 2000);
-        }
+    await AsyncStorage.setItem('securityMethod', JSON.stringify({ method: securityType, useName: userDetails?.name }))
+      .then(async () => {
+        setLoading(false);
+        rbSheetRef.current?.close();
+        setRbSheetOpen(false);
+        setIsSuccessPopoverVisible(true);
+        Vibration.vibrate(50);
+        dispatch(
+          updateCurrentUser({ ...userDetails, securityMethod: securityType }),
+        );
+        setTimeout(() => {
+          setIsSuccessPopoverVisible(false);
+          navigation.goBack();
+        }, 2000);
+
       })
       .catch(err => {
         setLoading(false);

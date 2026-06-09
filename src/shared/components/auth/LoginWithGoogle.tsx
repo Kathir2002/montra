@@ -54,6 +54,11 @@ const LoginWithGoogle = (props: LoginWithGoogleProps) => {
     };
   };
 
+  const getSecurityMethodFromAsyncStorage = async () => {
+    const value = await AsyncStorage.getItem('securityMethod')
+    return value && JSON.parse(value)
+  }
+
   const loginWithGoogleHandler = async () => {
     try {
       // Check if your device supports Google Play
@@ -96,7 +101,11 @@ const LoginWithGoogle = (props: LoginWithGoogleProps) => {
                 }
               }
               await CommonDataService.setToken(res?.token);
-
+              const securityValue = await getSecurityMethodFromAsyncStorage()
+              if (securityValue === null) {
+                await AsyncStorage.setItem("securityMethod", JSON.stringify({ method: "PIN", useName: res?.user?.name }))
+              }
+              const updatedSecurityValue = await getSecurityMethodFromAsyncStorage()
               dispatch(
                 updateCurrentUser({
                   email: res?.user?.email,
@@ -106,7 +115,7 @@ const LoginWithGoogle = (props: LoginWithGoogleProps) => {
                   isSetupDone: res?.user?.isSetupDone,
                   currencySymbol: res?.user?.currency,
                   currentLanguage: i18n.language,
-                  securityMethod: res?.user?.securityMethod,
+                  securityMethod: updatedSecurityValue?.method,
                   phoneNumber: res?.user?.phoneNumber,
                   activeContactRequestCount:
                     res?.user?.activeContactRequestCount,

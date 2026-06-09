@@ -107,8 +107,45 @@ const App = () => {
     const userToken = await CommonDataService.getToken();
 
     if (userToken) {
-      await getUserDetails();
-    } else {
+      // await getUserDetails();
+      await AsyncStorage.getItem('securityMethod').then(async (value) => {
+        const securityValue = JSON.parse(value)?.method
+        const hasNotification = pendingNotificationData !== null;
+
+        // NOTE: do NOT perform deep-link navigation from inside biometric/pin handlers.
+        // Instead: set flags/route and let the centralized navigation handler perform the navigation
+        if (securityValue === 'PIN') {
+          // set up to show PIN screen (we will attempt navigation safely via pendingAuthRoute)
+          setPendingAuthRoute({
+            screen: 'PinGerneration',
+            params: hasNotification ? { pendingNotification: pendingNotificationData } : undefined,
+          });
+          setTimeout(() => {
+            setIsLoading(false)
+          }, 100)
+        } else if (securityValue === 'FINGERPRINT') {
+          // attempt biometric then set login state; do not navigate from biometric handler
+          setIsNavigateToLogin(false);
+          await handleBiometricAuth(hasNotification, securityValue?.userName);
+        } else {
+          // no security — direct login
+          setIsLoading(false);
+          dispatch(updateIsLoggedin(true));
+
+          // if there is a pending notification, let central handler navigate after nav ready
+          if (hasNotification) {
+            // do nothing here — central navigation handler (below) will handle it based on pendingNotificationData
+          }
+        }
+
+      })
+        .catch((err) => {
+          setBiometricAuthInProgress(false);
+          setPendingNotificationData(null); // Clear on error
+        })
+
+    }
+    else {
       setIsNavigateToLogin(true);
       setIsLoading(false);
       try {
@@ -125,7 +162,8 @@ const App = () => {
   const getUserDetails = async () => {
     try {
       const res: any = await AuthService.userDetails();
-
+      const value = await AsyncStorage.getItem('securityMethod')
+      const securityValue = value && JSON.parse(value)
       if (res?.success) {
         dispatch(
           updateCurrentUser({
@@ -136,46 +174,19 @@ const App = () => {
             isSetupDone: res?.user?.isSetupDone,
             currencySymbol: res?.user?.currency,
             phoneNumber: res?.user?.phoneNumber,
-            securityMethod: res?.user?.securityMethod,
+            securityMethod: securityValue?.method,
             currentLanguage: i18n.language,
             activeContactRequestCount: res?.user?.activeContactRequestCount,
             isAdmin: res?.user?.isAdmin,
           }),
         );
 
-        const securityValue = res?.user?.securityMethod;
-        const hasNotification = pendingNotificationData !== null;
 
-        // NOTE: do NOT perform deep-link navigation from inside biometric/pin handlers.
-        // Instead: set flags/route and let the centralized navigation handler perform the navigation
-        if (securityValue === 'PIN') {
-          // set up to show PIN screen (we will attempt navigation safely via pendingAuthRoute)
-          setPendingAuthRoute({
-            screen: 'PinGerneration',
-            params: hasNotification ? { pendingNotification: pendingNotificationData } : undefined,
-          });
-          setIsLoading(false);
-        } else if (securityValue === 'FINGERPRINT') {
-          // attempt biometric then set login state; do not navigate from biometric handler
-          setIsNavigateToLogin(false);
-          await handleBiometricAuth(hasNotification, res?.user?.name);
-        } else {
-          // no security — direct login
-          setIsLoading(false);
-          dispatch(updateIsLoggedin(true));
-
-          // if there is a pending notification, let central handler navigate after nav ready
-          if (hasNotification) {
-            // do nothing here — central navigation handler (below) will handle it based on pendingNotificationData
-          }
-        }
       } else {
         throw new Error('User details fetch failed');
       }
     } catch (err: any) {
       setIsLoading(false);
-      setBiometricAuthInProgress(false);
-      setPendingNotificationData(null); // Clear on error
       try {
         if (navigationRef.current?.isReady()) {
           navigationRef.current.navigate('SignIn');
@@ -208,6 +219,7 @@ const App = () => {
 
       if (success) {
         // mark logged in and clear flags; do NOT navigate from here
+        await getUserDetails()
         dispatch(updateIsLoggedin(true));
         setIsLoading(false);
         setIsNavigateToLogin(null);
@@ -412,17 +424,16 @@ const App = () => {
     };
 
     attemptAuthNav();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pendingAuthRoute]);
 
   // ---------------------- Splash hide on load end ----------------------
-  useEffect(() => {
-    if (!isLoading) {
-      try {
-        BootSplash.hide({ fade: true }).catch(() => { });
-      } catch (e) { }
-    }
-  }, [isLoading]);
+  // useEffect(() => {
+  //   if (!isLoading) {
+  //     try {
+  //       BootSplash.hide({ fade: true }).catch(() => { });
+  //     } catch (e) { }
+  //   }
+  // }, [isLoading]);
 
   // ---------------------- UI: splash while biometric/auth in progress ----------------------
   if (biometricAuthInProgress || (isLoading && isGetStartedVisible === null)) {

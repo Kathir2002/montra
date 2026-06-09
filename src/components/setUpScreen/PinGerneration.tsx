@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   BackHandler,
   FlatList,
@@ -10,12 +10,12 @@ import {
   Vibration,
   View,
 } from 'react-native';
-import {appColors} from '@shared/appColors';
+import { appColors } from '@shared/appColors';
 import CommonText from '@shared/components/commonText/CommonText';
 import CommonHeader from '@shared/components/commonHeader/CommonHeader';
 import ArrowIcon from '@assets/svg/submit-arrow.svg';
 import DeleteTextIcon from '@assets/svg/delete-text.svg';
-import {Toast} from '@shared/ToastConfig';
+import { Toast } from '@shared/ToastConfig';
 import {
   NavigationProp,
   ParamListBase,
@@ -23,9 +23,9 @@ import {
   useNavigation,
 } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useDispatch, useSelector} from 'react-redux';
-import {updateIsLoggedin} from '@store/slice/appSlice';
-import {RootState} from '@store/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { updateCurrentUser, updateIsLoggedin } from '@store/slice/appSlice';
+import { RootState } from '@store/store';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -33,7 +33,12 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import {useTranslation} from 'react-i18next';
+import { useTranslation } from 'react-i18next';
+import AuthService from '@services/authService';
+import i18n from '@localization/i18n';
+import { navigationRef } from '../../../index';
+import { CustomModal } from '@shared/components/CustomModal';
+import CommonLoader from '@shared/components/commonLoader/CommonLoader';
 
 interface ItemType {
   id: number | string;
@@ -49,11 +54,11 @@ const PinGerneration = () => {
   const dispatch = useDispatch();
   const userDetails = useSelector((state: RootState) => state.auth.userDetails);
   const [retypePinValue, setRetypePinValue] = useState('');
-  const maxPinLength = 6; // Maximum length of the PIN
+  const maxPinLength = 4; // Maximum length of the PIN
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const [isPinSetupDone, setIsPinSetupDone] = useState(false);
   const isFocused = useIsFocused();
-  const {t} = useTranslation('auth');
+  const { t } = useTranslation('auth');
 
   useEffect(() => {
     AsyncStorage.getItem('securityPin').then(value => {
@@ -79,6 +84,45 @@ const PinGerneration = () => {
     return true;
   };
 
+  const getUserDetails = async () => {
+    try {
+      const res: any = await AuthService.userDetails();
+      const value = await AsyncStorage.getItem('securityMethod')
+      const securityValue = value && JSON.parse(value)
+
+      if (res?.success) {
+        dispatch(
+          updateCurrentUser({
+            email: res?.user?.email,
+            id: res?.user?.id,
+            name: res?.user?.name,
+            picture: res?.user?.picture,
+            isSetupDone: res?.user?.isSetupDone,
+            currencySymbol: res?.user?.currency,
+            phoneNumber: res?.user?.phoneNumber,
+            securityMethod: securityValue?.method,
+            currentLanguage: i18n.language,
+            activeContactRequestCount: res?.user?.activeContactRequestCount,
+            isAdmin: res?.user?.isAdmin,
+          }),
+        );
+        dispatch(updateIsLoggedin(true));
+        setLoading(false);
+
+      } else {
+        throw new Error('User details fetch failed');
+      }
+    } catch (err: any) {
+      setLoading(false);
+      try {
+        if (navigationRef.current?.isReady()) {
+          navigationRef.current.navigate('SignIn');
+        }
+      } catch (e) { }
+      Toast({ message: err?.response?.data?.message, type: 'error' });
+    }
+  };
+
   const userAddPinHandler = async () => {
     setLoading(true);
 
@@ -97,17 +141,16 @@ const PinGerneration = () => {
         })
         .catch(() => {
           setLoading(false);
-          Toast({message: t('SOMETHING_WENT_WRONG'), type: 'error'});
+          Toast({ message: t('SOMETHING_WENT_WRONG'), type: 'error' });
         });
     } else {
       if (pinValue.length === maxPinLength) {
         await AsyncStorage.getItem('securityPin')
-          .then(value => {
+          .then(async (value) => {
             const savedPin = value ? JSON.parse(value) : null;
-
             if (savedPin === pinValue) {
-              setLoading(false);
-              dispatch(updateIsLoggedin(true));
+              // setLoading(false);
+              await getUserDetails()
             } else {
               triggerShakeAnimation();
               setPinValue('');
@@ -119,11 +162,11 @@ const PinGerneration = () => {
           })
           .catch(() => {
             setLoading(false);
-            Toast({message: t('SOMETHING_WENT_WRONG'), type: 'error'});
+            Toast({ message: t('SOMETHING_WENT_WRONG'), type: 'error' });
           });
       } else {
         triggerShakeAnimation();
-        Toast({message: t('PIN_REQUIRED'), type: 'error'});
+        Toast({ message: t('PIN_REQUIRED'), type: 'error' });
       }
     }
   };
@@ -170,7 +213,7 @@ const PinGerneration = () => {
       value: (
         <View
           style={{
-            transform: [{rotate: I18nManager.isRTL ? '180deg' : '0deg'}],
+            transform: [{ rotate: I18nManager.isRTL ? '180deg' : '0deg' }],
           }}>
           <DeleteTextIcon width={40} height={40} stroke={appColors.light} />
         </View>
@@ -181,17 +224,45 @@ const PinGerneration = () => {
       value: <CommonText size={30} content={'0'} color={appColors.light} />,
     },
     {
-      id: 'submit',
-      value: (
-        <View
-          style={{
-            transform: [{rotate: I18nManager.isRTL ? '180deg' : '0deg'}],
-          }}>
-          <ArrowIcon width={40} height={40} stroke={appColors.light} />
-        </View>
-      ),
+      id: 'empty',
+      value: <View />,
     },
+    // {
+    //   id: 'submit',
+    //   value: (
+    //     <View
+    //       style={{
+    //         transform: [{ rotate: I18nManager.isRTL ? '180deg' : '0deg' }],
+    //       }}>
+    //       <ArrowIcon width={40} height={40} stroke={appColors.light} />
+    //     </View>
+    //   ),
+    // },
   ];
+
+  useEffect(() => {
+    if ((!isRetype && pinValue.length === maxPinLength) || (isRetype && retypePinValue?.length === maxPinLength)) {
+      if (isPinSetupDone) {
+        userAddPinHandler();
+      } else if (!isRetype) {
+        if (pinValue?.length === maxPinLength) {
+          setIsRetype(true);
+        } else {
+          Toast({ message: t('PIN_REQUIRED'), type: 'error' });
+        }
+      } else if (retypePinValue?.length === maxPinLength) {
+        if (retypePinValue === pinValue) {
+          userAddPinHandler();
+        } else {
+          triggerShakeAnimation();
+          setRetypePinValue('');
+          Toast({ message: t('PIN_DOESNT_MATCH'), type: 'error' });
+        }
+      } else {
+        Toast({ message: t('PIN_REQUIRED'), type: 'error' });
+      }
+    }
+  }, [pinValue, retypePinValue])
 
   const handlePress = async (item: ItemType) => {
     Vibration.vibrate(50);
@@ -201,25 +272,25 @@ const PinGerneration = () => {
         ? setRetypePinValue(prev => prev.slice(0, -1))
         : setPinValue(prev => prev.slice(0, -1));
     } else if (item?.id == 'submit') {
-      if (isPinSetupDone) {
-        userAddPinHandler();
-      } else if (!isRetype) {
-        if (pinValue?.length === maxPinLength) {
-          setIsRetype(true);
-        } else {
-          Toast({message: t('PIN_REQUIRED'), type: 'error'});
-        }
-      } else if (retypePinValue?.length === maxPinLength) {
-        if (retypePinValue === pinValue) {
-          userAddPinHandler();
-        } else {
-          triggerShakeAnimation();
-          setRetypePinValue('');
-          Toast({message: t('PIN_DOESNT_MATCH'), type: 'error'});
-        }
-      } else {
-        Toast({message: t('PIN_REQUIRED'), type: 'error'});
-      }
+      // if (isPinSetupDone) {
+      //   userAddPinHandler();
+      // } else if (!isRetype) {
+      //   if (pinValue?.length === maxPinLength) {
+      //     setIsRetype(true);
+      //   } else {
+      //     Toast({ message: t('PIN_REQUIRED'), type: 'error' });
+      //   }
+      // } else if (retypePinValue?.length === maxPinLength) {
+      //   if (retypePinValue === pinValue) {
+      //     userAddPinHandler();
+      //   } else {
+      //     triggerShakeAnimation();
+      //     setRetypePinValue('');
+      //     Toast({ message: t('PIN_DOESNT_MATCH'), type: 'error' });
+      //   }
+      // } else {
+      //   Toast({ message: t('PIN_REQUIRED'), type: 'error' });
+      // }
     } else {
       isRetype
         ? setRetypePinValue(prev => (prev + item?.id).slice(0, maxPinLength))
@@ -227,10 +298,22 @@ const PinGerneration = () => {
     }
   };
 
-  const renderItem = ({item, index}: {item: ItemType; index: number}) => {
+  const renderItem = ({ item }: { item: ItemType }) => {
+    if (item.id === 'empty') {
+      return (
+        <View
+          style={{
+            marginHorizontal: 30,
+            marginBottom: 20,
+            flex: 1 / 3,
+          }}
+        />
+      );
+    }
+
     return (
       <TouchableOpacity
-        hitSlop={{bottom: 25, left: 25, right: 25, top: 25}}
+        hitSlop={{ bottom: 25, left: 25, right: 25, top: 25 }}
         onPress={() => handlePress(item)}
         activeOpacity={0.5}
         style={{
@@ -248,30 +331,29 @@ const PinGerneration = () => {
   // Animation style for container
   const animatedStyle = useAnimatedStyle(() => {
     return {
-      transform: [{translateX: shakeValue.value}],
+      transform: [{ translateX: shakeValue.value }],
     };
   });
   const triggerShakeAnimation = () => {
     shakeValue.value = withSequence(
-      withTiming(-20, {duration: 100}),
+      withTiming(-20, { duration: 100 }),
       withSpring(0, {
         damping: 8,
         mass: 0.5,
         stiffness: 1000,
-        restDisplacementThreshold: 0.1,
       }),
     );
   };
 
   return (
     <ScrollView
-      contentContainerStyle={{flexGrow: 1, backgroundColor: appColors.primary}}>
+      contentContainerStyle={{ flexGrow: 1, backgroundColor: appColors.primary }}>
       <CommonHeader
         title=""
         leftIcon={isRetype}
         theme='dark'
         leftIconPressBack={() => {
-          if(isRetype) {
+          if (isRetype) {
             setIsRetype(false)
             setPinValue("")
             setRetypePinValue("")
@@ -308,7 +390,7 @@ const PinGerneration = () => {
             },
             animatedStyle,
           ]}>
-          {Array.from({length: maxPinLength}).map((pin, index) => {
+          {Array.from({ length: maxPinLength }).map((pin, index) => {
             return (
               <View
                 key={index}
@@ -316,7 +398,7 @@ const PinGerneration = () => {
                   marginVertical: 10,
                   backgroundColor:
                     index <
-                    (isRetype ? retypePinValue?.length : pinValue?.length)
+                      (isRetype ? retypePinValue?.length : pinValue?.length)
                       ? appColors.light
                       : 'transparent',
                   width: 20,
@@ -342,6 +424,9 @@ const PinGerneration = () => {
         renderItem={renderItem}
         keyExtractor={(item, index) => index.toString()}
       />
+      <CustomModal visible={Loading} animationType="fade" transparent={true}>
+        <CommonLoader />
+      </CustomModal>
     </ScrollView>
   );
 };
