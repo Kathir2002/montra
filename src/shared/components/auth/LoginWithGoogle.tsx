@@ -103,7 +103,7 @@ const LoginWithGoogle = (props: LoginWithGoogleProps) => {
               await CommonDataService.setToken(res?.token);
               const securityValue = await getSecurityMethodFromAsyncStorage()
               if (securityValue === null) {
-                await AsyncStorage.setItem("securityMethod", JSON.stringify({ method: "PIN", useName: res?.user?.name }))
+                await AsyncStorage.setItem("securityMethod", JSON.stringify({ method: "PIN", userName: res?.user?.name }))
               }
               const updatedSecurityValue = await getSecurityMethodFromAsyncStorage()
               dispatch(
