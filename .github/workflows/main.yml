@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Create .env file
-        uses: SpicyPizza/create-envfile@v3.0.0
+        uses: SpicyPizza/create-envfile@3.0.0
         with:
           envkey_DEV_WEB_CLIENTID: ${{ secrets.DEV_WEB_CLIENTID }}
           envkey_DEV_ANDROID_CLIENTID: ${{ secrets.DEV_ANDROID_CLIENTID }}
