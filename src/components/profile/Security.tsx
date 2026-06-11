@@ -144,10 +144,7 @@ const Security = () => {
 
   const updateUserSecurityMethod = async () => {
     setLoading(true);
-    const data = {
-      securityMethod: securityType,
-    };
-    await AsyncStorage.setItem('securityMethod', JSON.stringify({ method: securityType, useName: userDetails?.name }))
+    await AsyncStorage.setItem('securityMethod', JSON.stringify({ method: securityType, userName: userDetails?.name }))
       .then(async () => {
         setLoading(false);
         rbSheetRef.current?.close();
