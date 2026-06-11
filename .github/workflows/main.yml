@@ -16,15 +16,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Create .env file
-        uses: SpicyPizza/create-envfile@3.0.0
-        with:
-          envkey_DEV_WEB_CLIENTID: ${{ secrets.DEV_WEB_CLIENTID }}
-          envkey_DEV_ANDROID_CLIENTID: ${{ secrets.DEV_ANDROID_CLIENTID }}
-          envkey_DEV_IOS_CLIENTID: ${{ secrets.DEV_IOS_CLIENTID }}
-          envkey_PROD_WEB_CLIENTID: ${{ secrets.PROD_WEB_CLIENTID }}
-          envkey_PROD_ANDROID_CLIENTID: ${{ secrets.PROD_ANDROID_CLIENTID }}
-          envkey_PROD_IOS_CLIENTID: ${{ secrets.PROD_IOS_CLIENTID }}
-          file_name: .env
+        run: |
+          echo "DEV_WEB_CLIENTID=${{ secrets.DEV_WEB_CLIENTID }}" >> .env
+          echo "DEV_ANDROID_CLIENTID=${{ secrets.DEV_ANDROID_CLIENTID }}" >> .env
+          echo "DEV_IOS_CLIENTID=${{ secrets.DEV_IOS_CLIENTID }}" >> .env
+          echo "PROD_WEB_CLIENTID=${{ secrets.PROD_WEB_CLIENTID }}" >> .env
+          echo "PROD_ANDROID_CLIENTID=${{ secrets.PROD_ANDROID_CLIENTID }}" >> .env
+          echo "PROD_IOS_CLIENTID=${{ secrets.PROD_IOS_CLIENTID }}" >> .env
 
       - name: Setup Node.js environment
         uses: actions/setup-node@v4
