@@ -18,12 +18,12 @@ jobs:
       - name: Create .env file
         uses: SpicyPizza/create-envfile@v3.0.0
         with:
-          envkey_API_URL: ${{ secrets.DEV_WEB_CLIENTID }}
-          envkey_ANALYTICS_KEY: ${{ secrets.DEV_ANDROID_CLIENTID }}
-          envkey_ANALYTICS_KEY: ${{ secrets.DEV_IOS_CLIENTID }}
-          envkey_ANALYTICS_KEY: ${{ secrets.PROD_WEB_CLIENTID }}
-          envkey_ANALYTICS_KEY: ${{ secrets.PROD_ANDROID_CLIENTID }}
-          envkey_ANALYTICS_KEY: ${{ secrets.PROD_IOS_CLIENTID }}
+          envkey_DEV_WEB_CLIENTID: ${{ secrets.DEV_WEB_CLIENTID }}
+          envkey_DEV_ANDROID_CLIENTID: ${{ secrets.DEV_ANDROID_CLIENTID }}
+          envkey_DEV_IOS_CLIENTID: ${{ secrets.DEV_IOS_CLIENTID }}
+          envkey_PROD_WEB_CLIENTID: ${{ secrets.PROD_WEB_CLIENTID }}
+          envkey_PROD_ANDROID_CLIENTID: ${{ secrets.PROD_ANDROID_CLIENTID }}
+          envkey_PROD_IOS_CLIENTID: ${{ secrets.PROD_IOS_CLIENTID }}
           file_name: .env
 
       - name: Setup Node.js environment
