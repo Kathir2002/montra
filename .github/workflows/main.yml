@@ -15,6 +15,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Create .env file
+        uses: SpicyPizza/create-envfile@v3.0.0
+        with:
+          envkey_API_URL: ${{ secrets.DEV_WEB_CLIENTID }}
+          envkey_ANALYTICS_KEY: ${{ secrets.DEV_ANDROID_CLIENTID }}
+          envkey_ANALYTICS_KEY: ${{ secrets.DEV_IOS_CLIENTID }}
+          envkey_ANALYTICS_KEY: ${{ secrets.PROD_WEB_CLIENTID }}
+          envkey_ANALYTICS_KEY: ${{ secrets.PROD_ANDROID_CLIENTID }}
+          envkey_ANALYTICS_KEY: ${{ secrets.PROD_IOS_CLIENTID }}
+          file_name: .env
+
       - name: Setup Node.js environment
         uses: actions/setup-node@v4
         with:
