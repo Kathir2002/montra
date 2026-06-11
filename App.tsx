@@ -109,12 +109,11 @@ const App = () => {
     if (userToken) {
       // await getUserDetails();
       await AsyncStorage.getItem('securityMethod').then(async (value) => {
-        const securityValue = JSON.parse(value)?.method
+        const securityValue = JSON.parse(value)
         const hasNotification = pendingNotificationData !== null;
-
         // NOTE: do NOT perform deep-link navigation from inside biometric/pin handlers.
         // Instead: set flags/route and let the centralized navigation handler perform the navigation
-        if (securityValue === 'PIN') {
+        if (securityValue?.method === 'PIN') {
           // set up to show PIN screen (we will attempt navigation safely via pendingAuthRoute)
           setPendingAuthRoute({
             screen: 'PinGerneration',
@@ -123,7 +122,7 @@ const App = () => {
           setTimeout(() => {
             setIsLoading(false)
           }, 100)
-        } else if (securityValue === 'FINGERPRINT') {
+        } else if (securityValue?.method === 'FINGERPRINT') {
           // attempt biometric then set login state; do not navigate from biometric handler
           setIsNavigateToLogin(false);
           await handleBiometricAuth(hasNotification, securityValue?.userName);
