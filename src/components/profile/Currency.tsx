@@ -4,6 +4,7 @@ import {
   StatusBar,
   StyleSheet,
   TouchableOpacity,
+  useWindowDimensions,
   Vibration,
   View,
 } from 'react-native';
@@ -40,6 +41,7 @@ const Currency = () => {
   const [isLimit, setIsLimit] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
   const userDetails = useSelector((state: RootState) => state.auth.userDetails);
+  const { width, height } = useWindowDimensions()
 
   const [isSuccessPopoverVisible, setIsSuccessPopoverVisible] = useState(false);
   const [rbSheetOpen, setRbSheetOpen] = useState(false);
@@ -219,6 +221,8 @@ const Currency = () => {
           alignItems: 'center',
           justifyContent: 'center',
           borderRadius: 8,
+          width: width > height ? width * 0.7 : width * 0.9,
+
         }}>
         <LottieView
           source={require('@assets/lottie/sucess-lottie.json')}

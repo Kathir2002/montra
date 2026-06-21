@@ -103,5 +103,11 @@
   "RECONNECTING": "ફરી કનેક્ટ થાય છે",
   "YOU": "તમે",
   "YESTERDAY": "ગઇકાલે",
-  "TODAY": "આજ"
+  "TODAY": "આજ",
+  "LOGOUT_FROM": "ક્યાંથી લોગઆઉટ કરવું?",
+  "CURRENT_DEVICE": "વર્તમાન ઉપકરણ",
+  "ALL_DEVICE": "બધા ઉપકરણો",
+  "CANCEL": "રદ કરો",
+  "LOGOUT_CONFIRMATION_CURRENT_DEVICE": "શું તમે ખરેખર વર્તમાન ઉપકરણમાંથી લોગઆઉટ કરવા માંગો છો?",
+  "LOGOUT_CONFIRMATION_ALL_DEVICES": "શું તમે ખરેખર બધા ઉપકરણોમાંથી લોગઆઉટ કરવા માંગો છો?"
 }

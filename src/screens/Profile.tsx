@@ -29,7 +29,7 @@ import LogoutIcon from '@assets/svg/logout.svg';
 import DeactivateIcon from '@assets/svg/deactivate.svg';
 import ExportDataIcon from '@assets/svg/export.svg';
 import { getMessaging, getToken } from '@react-native-firebase/messaging';
-import { RBSheetRef } from '@shared/components/commonRBSheet/CommonRBSheet';
+import CommonRBSheet, { RBSheetRef } from '@shared/components/commonRBSheet/CommonRBSheet';
 import {
   DEV_ANDROID_CLIENTID,
   DEV_IOS_CLIENTID,
@@ -46,10 +46,12 @@ import { useTranslation } from 'react-i18next';
 import CommonConfirmation from '@shared/components/CommonConfirmation';
 import { removeAllShortcuts } from '@src/lib/shortcutHandler';
 import { CustomModal } from '@shared/components/CustomModal';
+import CommonButton from '@shared/components/commonButton/CommonButton';
 
 const Profile = () => {
   const { t } = useTranslation('profile');
   const [isLoading, setIsLoading] = useState(false);
+  const [isLogoutAllDevice, setIsLogoutAllDevice] = useState<boolean>(false)
   const isToggleOpen = useSelector(
     (state: RootState) => state.auth.isFabToggleOpen,
   );
@@ -71,7 +73,8 @@ const Profile = () => {
   GoogleSignin.configure(__DEV__ ? devData : prodData);
 
   const dispatch = useDispatch();
-  const rbSheetRef = useRef<RBSheetRef>(null);
+  const logoutConfirmationRbSheetRef = useRef<RBSheetRef>(null);
+  const logoutRbSheetRef = useRef<RBSheetRef>(null)
   const deactivateRBSheetRef = useRef<RBSheetRef>(null);
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const [isFinanceStoryVisible, setIsFinanceStoryVisible] = useState(false);
@@ -98,28 +101,44 @@ const Profile = () => {
         await AsyncStorage.removeItem(res);
       }
     });
+    logoutConfirmationRbSheetRef.current?.close();
+    logoutRbSheetRef.current?.close();
+    deactivateRBSheetRef.current?.close();
     dispatch(updateIsLoggedin(false));
     dispatch(updateCurrentUser({ activeContactRequestCount: 0, isAdmin: false }));
     setIsLoading(false);
   };
 
-  const logoutHandler = async (isFromDeactivateAccount: boolean = false) => {
+  const logoutDeviceHandler = async (isFromDeactivateAccount: boolean = false) => {
     setIsLoading(true);
     try {
       const fcmToken = await getToken(messagingInstance);
 
       const data = { fcmToken };
       if (!isFromDeactivateAccount) {
-        await AccountService.logoutUser(data)
-          .then(async (res: any) => {
-            if (res?.success) {
-              await logoutUser();
-            }
-          })
-          .catch(err => {
-            setIsLoading(false);
-            Toast({ type: 'error', message: err?.response?.data?.message });
-          });
+        if (isLogoutAllDevice) {
+          await AccountService.logoutAllDevices()
+            .then(async (res: any) => {
+              if (res?.success) {
+                await logoutUser();
+              }
+            })
+            .catch(err => {
+              setIsLoading(false);
+              Toast({ type: 'error', message: err?.response?.data?.message });
+            });
+        } else {
+          await AccountService.logoutUser(data)
+            .then(async (res: any) => {
+              if (res?.success) {
+                await logoutUser();
+              }
+            })
+            .catch(err => {
+              setIsLoading(false);
+              Toast({ type: 'error', message: err?.response?.data?.message });
+            });
+        }
       } else {
         await logoutUser();
       }
@@ -130,13 +149,18 @@ const Profile = () => {
     }
   };
 
+  const handleLogoutConfirmation = (isLogoutAllDevice = false) => {
+    setIsLogoutAllDevice(isLogoutAllDevice)
+    logoutConfirmationRbSheetRef.current.open()
+  }
+
   const deactivateAccountHandler = async () => {
     setIsLoading(true);
     await AccountService.deactivateAccount()
       .then((res: any) => {
         if (res?.success) {
           Toast({ message: res?.message, type: 'success' });
-          logoutHandler(true);
+          logoutDeviceHandler(true);
         }
       })
       .catch(err => {
@@ -173,7 +197,7 @@ const Profile = () => {
       title: t('LOGOUT'),
       icon: <LogoutIcon width={25} height={25} />,
       onPress: () => {
-        rbSheetRef.current?.open();
+        logoutRbSheetRef.current.open()
         setRbSheetOpen(true);
       },
     },
@@ -303,18 +327,63 @@ const Profile = () => {
           return <RenderItem index={index} item={item} key={index} />;
         })}
       </View>
+      <CommonRBSheet
+        onClose={() => setRbSheetOpen(false)}
+        ref={logoutRbSheetRef}
+        height={170}
+        closeOnPressBack={true}
+        closeOnPressMask={true}
+        draggable={true}
+        customStyles={{
+          container: { borderTopLeftRadius: 20, borderTopRightRadius: 20 },
+        }}>
+
+        <View style={{ padding: 15, paddingTop: 0, gap: 10 }}>
+
+          <CommonText
+            content={t('LOGOUT_FROM')}
+            bold
+            size={'large'}
+            style={{ textAlign: 'center' }}
+          />
+          <TouchableOpacity activeOpacity={0.5} onPress={() => { handleLogoutConfirmation(false) }}>
+            <CommonText
+              content={t('CURRENT_DEVICE')}
+              color={appColors.placeholderColor}
+              size={'label'}
+              style={{ textAlign: 'center', paddingHorizontal: 15 }}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity activeOpacity={0.5} onPress={() => { handleLogoutConfirmation(true) }}>
+            <CommonText
+              content={t('ALL_DEVICE')}
+              color={appColors.placeholderColor}
+              size={'label'}
+              style={{ textAlign: 'center', paddingHorizontal: 15 }}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity activeOpacity={0.5} onPress={() => { logoutRbSheetRef.current.close(); setRbSheetOpen(false) }}>
+            <CommonText
+              content={t('CANCEL')}
+              color={appColors.placeholderColor}
+              size={'label'}
+              style={{ textAlign: 'center', paddingHorizontal: 15 }}
+            />
+          </TouchableOpacity>
+        </View>
+      </CommonRBSheet>
       <CommonConfirmation
         titleText={`${t('LOGOUT')}?`}
-        subText={t('LOGOUT_CONFIRMATION')}
+        subText={isLogoutAllDevice ? t('LOGOUT_CONFIRMATION_ALL_DEVICES') : t('LOGOUT_CONFIRMATION_CURRENT_DEVICE')}
         handleCancelBtn={() => {
-          rbSheetRef.current?.close();
+          logoutConfirmationRbSheetRef.current?.close();
           setRbSheetOpen(false);
         }}
-        handleOkBtn={() => logoutHandler()}
+        handleOkBtn={() => logoutDeviceHandler()}
         onClose={() => {
           setRbSheetOpen(false);
         }}
-        ref={rbSheetRef}
+        ref={logoutConfirmationRbSheetRef}
         height={200}
         onOpen={() => {
           StatusBar.setBarStyle('light-content');

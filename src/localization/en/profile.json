@@ -13,7 +13,8 @@
   "EXPORT_DATA": "Export Data",
   "DEACTIVATE_ACCOUNT": "Deactivate Account",
   "LOGOUT": "Logout",
-  "LOGOUT_CONFIRMATION": "Are you sure do you wanna logout?",
+  "LOGOUT_CONFIRMATION_CURRENT_DEVICE": "Are you sure do you wanna logout from current device?",
+  "LOGOUT_CONFIRMATION_ALL_DEVICES": "Are you sure do you wanna logout from all devices?",
   "NO": "No",
   "YES": "Yes",
   "ACCOUNT_DEACTIVATION_CONFIRMATION": "Are you sure you want to deactivate your account? It will be permanently deleted in 14 days?",
@@ -103,5 +104,9 @@
   "RECONNECTING": "Reconnecting",
   "YOU": "You",
   "YESTERDAY": "Yesterday",
-  "TODAY": "Today"
+  "TODAY": "Today",
+  "LOGOUT_FROM": "Logout from?",
+  "CURRENT_DEVICE": "Current Device",
+  "ALL_DEVICE": "All Device",
+  "CANCEL": "Cancel"
 }

@@ -5,6 +5,7 @@ import {
   ScrollView,
   StatusBar,
   TouchableOpacity,
+  useWindowDimensions,
   Vibration,
   View,
 } from 'react-native';
@@ -76,6 +77,7 @@ const AddNewAccount = () => {
   const [paymentDataList, setPaymentDataList] = useState({ ...paymentData });
   const [open, setOpen] = useState(false);
   const [isSuccessPopoverVisible, setIsSuccessPopoverVisible] = useState(false);
+  const { width, height } = useWindowDimensions()
 
   const dirtyRBSheetRef = useRef<RBSheetRef>(null);
   const deleteRBSheetRef = useRef<RBSheetRef>(null);
@@ -815,6 +817,8 @@ const AddNewAccount = () => {
           alignItems: 'center',
           justifyContent: 'center',
           borderRadius: 8,
+          width: width > height ? width * 0.7 : width * 0.9,
+
         }}>
         <LottieView
           source={require('@assets/lottie/sucess-lottie.json')}

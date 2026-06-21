@@ -103,5 +103,11 @@
   "RECONNECTING": "إعادة الاتصال",
   "YOU": "أنت",
   "YESTERDAY": "أمس",
-  "TODAY": "اليوم"
+  "TODAY": "اليوم",
+  "LOGOUT_FROM": "تسجيل الخروج من؟",
+  "CURRENT_DEVICE": "الجهاز الحالي",
+  "ALL_DEVICE": "جميع الأجهزة",
+  "CANCEL": "إلغاء",
+  "LOGOUT_CONFIRMATION_CURRENT_DEVICE": "هل أنت متأكد من رغبتك في تسجيل الخروج من الجهاز الحالي؟",
+  "LOGOUT_CONFIRMATION_ALL_DEVICES": "هل أنت متأكد من رغبتك في تسجيل الخروج من جميع الأجهزة؟"
 }

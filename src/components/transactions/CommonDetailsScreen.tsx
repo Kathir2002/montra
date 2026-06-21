@@ -4,6 +4,7 @@ import {
   Modal,
   StatusBar,
   TouchableOpacity,
+  useWindowDimensions,
   Vibration,
   View,
 } from 'react-native';
@@ -32,7 +33,7 @@ import {
   getCurrencySymbol,
   openFileFromUrl,
 } from '@src/lib/functions';
-import CommonRBSheet, {
+import {
   RBSheetRef,
 } from '../../shared/components/commonRBSheet/CommonRBSheet';
 import TransactionService from '@services/transactionService';
@@ -62,6 +63,7 @@ const CommonDetailsScreen = ({
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const [transactionDetails, setTransactionDetails] =
     useState<TransactionListInterface | null>(null);
+  const { width, height } = useWindowDimensions()
 
   const [rbSheetOpen, setRbSheetOpen] = useState(false);
   const [isSuccessPopoverVisible, setIsSuccessPopoverVisible] = useState(false);
@@ -411,6 +413,8 @@ const CommonDetailsScreen = ({
           alignItems: 'center',
           justifyContent: 'center',
           borderRadius: 8,
+          width: width > height ? width * 0.7 : width * 0.9,
+
         }}>
         <LottieView
           source={require('@assets/lottie/sucess-lottie.json')}

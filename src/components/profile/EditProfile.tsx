@@ -271,6 +271,7 @@ const EditProfile = () => {
               }}
               disabled={true}
               editable={false}
+              keyboardType='email-address'
               labelVisible={false}
               value={formik?.values?.email!}
               onChangeText={text => formik.setFieldValue('email', text)}

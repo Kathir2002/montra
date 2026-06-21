@@ -264,6 +264,7 @@ const Signin = () => {
             }}
             placeholder={t('EMAIL')}
             autoCapitalize="none"
+            keyboardType='email-address'
             onFocus={() => {
               if (passwordVisible) {
                 riveRef.current?.setInputState(

@@ -103,5 +103,11 @@
   "RECONNECTING": "재연결 중",
   "YOU": "당신",
   "YESTERDAY": "어제",
-  "TODAY": "오늘"
+  "TODAY": "오늘",
+  "LOGOUT_FROM": "로그아웃 위치?",
+  "CURRENT_DEVICE": "현재 기기",
+  "ALL_DEVICE": "모든 기기",
+  "CANCEL": "취소",
+  "LOGOUT_CONFIRMATION_CURRENT_DEVICE": "현재 기기에서 로그아웃하시겠습니까?",
+  "LOGOUT_CONFIRMATION_ALL_DEVICES": "모든 기기에서 로그아웃하시겠습니까?"
 }

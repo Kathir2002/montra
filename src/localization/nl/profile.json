@@ -103,5 +103,11 @@
   "RECONNECTING": "Opnieuw verbinden",
   "YOU": "U",
   "YESTERDAY": "Gisteren",
-  "TODAY": "Vandaag"
+  "TODAY": "Vandaag",
+  "LOGOUT_FROM": "Afmelden bij?",
+  "CURRENT_DEVICE": "Huidig apparaat",
+  "ALL_DEVICE": "Alle apparaten",
+  "CANCEL": "Annuleren",
+  "LOGOUT_CONFIRMATION_CURRENT_DEVICE": "Weet u zeker dat u wilt afmelden bij het huidige apparaat?",
+  "LOGOUT_CONFIRMATION_ALL_DEVICES": "Weet u zeker dat u wilt afmelden bij alle apparaten?"
 }

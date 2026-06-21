@@ -8,6 +8,7 @@ import {
   Vibration,
   Image,
   Modal,
+  useWindowDimensions,
 } from 'react-native';
 import React, { useRef, useState } from 'react';
 import * as yup from 'yup';
@@ -56,6 +57,8 @@ const Help = () => {
   const { t } = useTranslation('profile');
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const [rbSheetOpen, setRbSheetOpen] = useState(false);
+  const { width, height } = useWindowDimensions()
+
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccessPopoverVisible, setIsSuccessPopoverVisible] = useState(false);
   const [requestId, setRequestId] = useState();
@@ -484,6 +487,8 @@ const Help = () => {
         popoverStyle={{
           padding: 15,
           borderRadius: 8,
+          width: width > height ? width * 0.7 : width * 0.9,
+
         }}>
         <View
           style={{

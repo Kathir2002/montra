@@ -103,5 +103,11 @@
   "RECONNECTING": "Wiederverbinden",
   "YOU": "Du",
   "YESTERDAY": "Gestern",
-  "TODAY": "Heute"
+  "TODAY": "Heute",
+  "LOGOUT_FROM": "Abmelden von?",
+  "CURRENT_DEVICE": "Aktuelles Gerät",
+  "ALL_DEVICE": "Alle Geräte",
+  "CANCEL": "Abbrechen",
+  "LOGOUT_CONFIRMATION_CURRENT_DEVICE": "Möchten Sie sich wirklich vom aktuellen Gerät abmelden?",
+  "LOGOUT_CONFIRMATION_ALL_DEVICES": "Möchten Sie sich wirklich von allen Geräten abmelden?"
 }

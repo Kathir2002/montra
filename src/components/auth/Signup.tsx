@@ -151,6 +151,7 @@ const SignUp = () => {
               color: appColors.placeholderColor,
               size: 20,
             }}
+            keyboardType='email-address'
             autoCapitalize="none"
             placeholder={t('EMAIL')}
             value={formik.values.email}

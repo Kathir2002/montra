@@ -7,6 +7,7 @@ import {
   Platform,
   StatusBar,
   TouchableOpacity,
+  useWindowDimensions,
   Vibration,
   View,
 } from 'react-native';
@@ -24,7 +25,6 @@ import { RBSheetRef } from '@shared/components/commonRBSheet/CommonRBSheet';
 import LottieView from 'lottie-react-native';
 import { Toast } from '@shared/ToastConfig';
 import Popover from 'react-native-popover-view/dist/Popover';
-import CommonLoader from '@shared/components/commonLoader/CommonLoader';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateCurrentUser } from '@store/slice/appSlice';
 import { RootState } from '@store/store';
@@ -35,7 +35,6 @@ import CommonConfirmation from '@shared/components/CommonConfirmation';
 import { appFonts } from '@shared/appFonts';
 
 import RNRestart from "../../../specs/NativeRestart"
-import { CustomModal } from '@shared/components/CustomModal';
 
 interface CurrencyData {
   label: string;
@@ -48,9 +47,8 @@ const Language = () => {
   const { t, i18n } = useTranslation('profile');
   const rbSheetRef = useRef<RBSheetRef>(null);
   const userDetails = useSelector((state: RootState) => state.auth.userDetails);
-  const [loading, setLoading] = useState(false);
   const [isSuccessPopoverVisible, setIsSuccessPopoverVisible] = useState(false);
-
+  const { width, height } = useWindowDimensions()
   const [rbSheetOpen, setRbSheetOpen] = useState(false);
 
   const [currentLanguage, setCurrentLanguage] = useState<string>('');
@@ -166,12 +164,12 @@ const Language = () => {
       />
       <StatusBar
         backgroundColor={
-          isSuccessPopoverVisible || loading || rbSheetOpen
+          isSuccessPopoverVisible || rbSheetOpen
             ? appColors?.transparentBackground
             : appColors.light
         }
         barStyle={
-          isSuccessPopoverVisible || loading || rbSheetOpen
+          isSuccessPopoverVisible || rbSheetOpen
             ? 'light-content'
             : 'dark-content'
         }
@@ -222,6 +220,7 @@ const Language = () => {
           alignItems: 'center',
           justifyContent: 'center',
           borderRadius: 8,
+          width: width > height ? width * 0.7 : width * 0.9,
         }}>
         <LottieView
           source={require('@assets/lottie/sucess-lottie.json')}
@@ -235,9 +234,6 @@ const Language = () => {
           style={{ textAlign: 'center', paddingHorizontal: 20 }}
         />
       </Popover>
-      <CustomModal visible={loading} transparent={true} animationType="fade">
-        <CommonLoader />
-      </CustomModal>
     </KeyboardAvoidingView>
   );
 };

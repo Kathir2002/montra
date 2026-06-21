@@ -103,5 +103,11 @@
   "RECONNECTING": "Riconnessione in corso",
   "YOU": "Tu",
   "YESTERDAY": "Ieri",
-  "TODAY": "Oggi"
+  "TODAY": "Oggi",
+  "LOGOUT_FROM": "Disconnettersi da?",
+  "CURRENT_DEVICE": "Dispositivo corrente",
+  "ALL_DEVICE": "Tutti i dispositivi",
+  "CANCEL": "Annulla",
+  "LOGOUT_CONFIRMATION_CURRENT_DEVICE": "Sei sicuro di voler disconnetterti dal dispositivo corrente?",
+  "LOGOUT_CONFIRMATION_ALL_DEVICES": "Sei sicuro di voler disconnetterti da tutti i dispositivi?"
 }

@@ -7,6 +7,7 @@ import {
   StatusBar,
   StyleSheet,
   TouchableOpacity,
+  useWindowDimensions,
   Vibration,
   View,
 } from 'react-native';
@@ -20,11 +21,10 @@ import {
 import TickIcon from '@assets/svg/tick.svg';
 import CommonText from '@shared/components/commonText/CommonText';
 import CommonButton from '@shared/components/commonButton/CommonButton';
-import CommonRBSheet, {
+import {
   RBSheetRef,
 } from '@shared/components/commonRBSheet/CommonRBSheet';
 import LottieView from 'lottie-react-native';
-import AccountService from '@services/setup/accountService';
 import { Toast } from '@shared/ToastConfig';
 import Popover from 'react-native-popover-view/dist/Popover';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
@@ -48,6 +48,7 @@ const Security = () => {
   const { t } = useTranslation('profile');
   const rbSheetRef = useRef<RBSheetRef>(null);
   const [pin, setPin] = useState(new Array(6).fill(null));
+  const { width, height } = useWindowDimensions()
 
   const userDetails = useSelector((state: RootState) => state.auth.userDetails);
   const [securityType, setSecurityType] = useState<SecurityType>(
@@ -279,6 +280,8 @@ const Security = () => {
           alignItems: 'center',
           justifyContent: 'center',
           borderRadius: 8,
+          width: width > height ? width * 0.7 : width * 0.9,
+
         }}>
         <LottieView
           source={require('@assets/lottie/sucess-lottie.json')}

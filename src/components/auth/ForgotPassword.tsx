@@ -107,6 +107,7 @@ const ForgotPassword = () => {
               color: appColors.placeholderColor,
               size: 20,
             }}
+            keyboardType='email-address'
             placeholder={t('EMAIL')}
             value={formik.values.email}
             onChangeText={(text: string) => {

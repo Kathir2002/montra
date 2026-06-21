@@ -103,5 +103,11 @@
   "RECONNECTING": "Reconnexion",
   "YOU": "Vous",
   "YESTERDAY": "Hier",
-  "TODAY": "Aujourd'hui"
+  "TODAY": "Aujourd'hui",
+  "LOGOUT_FROM": "Se déconnecter de ?",
+  "CURRENT_DEVICE": "Appareil actuel",
+  "ALL_DEVICE": "Tous les appareils",
+  "CANCEL": "Annuler",
+  "LOGOUT_CONFIRMATION_CURRENT_DEVICE": "Êtes-vous sûr de vouloir vous déconnecter de l'appareil actuel ?",
+  "LOGOUT_CONFIRMATION_ALL_DEVICES": "Êtes-vous sûr de vouloir vous déconnecter de tous les appareils ?"
 }

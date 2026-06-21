@@ -103,5 +103,11 @@
   "RECONNECTING": "ಪುನಃ ಸಂಪರ್ಕಿಸುತ್ತಿದೆ",
   "YOU": "ನೀವು",
   "YESTERDAY": "ನಿನ್ನೆ",
-  "TODAY": "ಇಂದು"
+  "TODAY": "ಇಂದು",
+  "LOGOUT_FROM": "ಇಲ್ಲಿಂದ ಲಾಗ್ ಔಟ್ ಮಾಡಬೇಕೆ?",
+  "CURRENT_DEVICE": "ಪ್ರಸ್ತುತ ಸಾಧನ",
+  "ALL_DEVICE": "ಎಲ್ಲಾ ಸಾಧನಗಳು",
+  "CANCEL": "ರದ್ದುಮಾಡು",
+  "LOGOUT_CONFIRMATION_CURRENT_DEVICE": "ಪ್ರಸ್ತುತ ಸಾಧನದಿಂದ ಲಾಗ್ ಔಟ್ ಮಾಡಲು ನಿಮಗೆ ಖಚಿತವೇ?",
+  "LOGOUT_CONFIRMATION_ALL_DEVICES": "ಎಲ್ಲಾ ಸಾಧನಗಳಿಂದ ಲಾಗ್ ಔಟ್ ಮಾಡಲು ನಿಮಗೆ ಖಚಿತವೇ?"
 }

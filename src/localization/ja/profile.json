@@ -103,5 +103,11 @@
   "RECONNECTING": "再接続中",
   "YOU": "あなた",
   "YESTERDAY": "昨日",
-  "TODAY": "今日"
+  "TODAY": "今日",
+  "LOGOUT_FROM": "ログアウト元？",
+  "CURRENT_DEVICE": "現在のデバイス",
+  "ALL_DEVICE": "すべてのデバイス",
+  "CANCEL": "キャンセル",
+  "LOGOUT_CONFIRMATION_CURRENT_DEVICE": "現在のデバイスからログアウトしてもよろしいですか？",
+  "LOGOUT_CONFIRMATION_ALL_DEVICES": "すべてのデバイスからログアウトしてもよろしいですか？"
 }

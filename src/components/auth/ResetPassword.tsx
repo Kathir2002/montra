@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   View,
   KeyboardAvoidingView,
-  Modal,
   BackHandler,
 } from 'react-native';
 import React, { useEffect, useState } from 'react';
@@ -23,7 +22,6 @@ import {
   useRoute,
 } from '@react-navigation/native';
 import CommonButton from '@shared/components/commonButton/CommonButton';
-import { encryptDetails } from '@src/lib/functions';
 import AuthService from '@services/authService';
 import { Toast } from '@shared/ToastConfig';
 import CommonLoader from '@shared/components/commonLoader/CommonLoader';
@@ -92,9 +90,10 @@ const ResetPassword = () => {
     validateOnBlur: true,
     onSubmit: async () => {
       setIsLoading(true);
+      console.log(route?.resetToken, "route?.resetToken");
+
       await AuthService.resetPassword({
-        data: { newPassword: formik.values.rePassword },
-        token: encryptDetails(route?.userToken)!,
+        data: { newPassword: formik.values.rePassword, token: route?.resetToken }
       })
         .then((res: any) => {
           setIsLoading(false);

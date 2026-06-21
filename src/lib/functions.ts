@@ -2,26 +2,9 @@ import {
   StackCardInterpolatedStyle,
   StackCardInterpolationProps,
 } from '@react-navigation/stack';
-import {store} from '@store/store';
-import * as CryptoJS from 'react-native-crypto-js';
+import { store } from '@store/store';
 import RNFetchBlob from 'react-native-blob-util';
-import {Alert, Linking, Platform} from 'react-native';
-
-/**
- * async function for encrypting the tokens and id details
- */
-
-export const encryptDetails = (data: string) => {
-  if (data) {
-    const text = CryptoJS.AES.encrypt(
-      data.toString(),
-      'mycryptoSecretKeyy',
-    ).toString();
-    return text.replace(/\\/g, '|');
-  } else {
-    return null;
-  }
-};
+import { Alert, Linking, Platform } from 'react-native';
 
 export const formatBytes = (bytes: number) => {
   const bytesInKilobyte = 1024;
@@ -122,7 +105,7 @@ export const forSlideFromLeftAnimation = ({
   });
   return {
     cardStyle: {
-      transform: [{translateX}],
+      transform: [{ translateX }],
     },
   };
 };
@@ -137,7 +120,7 @@ export const openFileFromUrl = async (
     const fileName = fileUrl.split('/').pop();
     if (!isLocalFile) {
       // Define the path to save the file
-      const {dirs} = RNFetchBlob.fs;
+      const { dirs } = RNFetchBlob.fs;
       const filePath =
         Platform.OS === 'ios'
           ? `${dirs.DocumentDir}/${fileName}`
@@ -245,7 +228,7 @@ export const getDateLabel = (date: Date) => {
   }
 
   if (diffDays <= 7) {
-    return messageDate.toLocaleDateString('en-US', {weekday: 'long'});
+    return messageDate.toLocaleDateString('en-US', { weekday: 'long' });
   }
 
   return messageDate.toLocaleDateString('en-US', {

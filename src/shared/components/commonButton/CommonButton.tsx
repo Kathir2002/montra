@@ -5,10 +5,10 @@ import {
   TextStyle,
   ViewStyle,
 } from 'react-native';
-import React, {FC} from 'react';
-import {Button, IconNode} from '@rneui/base';
-import {appColors} from '@shared/appColors';
-import {appFonts} from '@shared/appFonts';
+import React, { FC } from 'react';
+import { Button, IconNode } from '@rneui/base';
+import { appColors } from '@shared/appColors';
+import { appFonts } from '@shared/appFonts';
 
 interface CommonButtonInterface {
   title: string;
@@ -45,7 +45,7 @@ const CommonButton: FC<CommonButtonInterface> = ({
       ]}
       disabled={disabled}
       titleStyle={[
-        {fontSize: 16},
+        { fontSize: 16 },
         buttonType == 'clear'
           ? commonButtonStyle.clearTitleStyle
           : commonButtonStyle.titleStyle,
@@ -69,7 +69,7 @@ const commonButtonStyle = StyleSheet.create({
   titleStyle: {
     color: appColors.light,
     textAlign: 'center',
-    paddingVertical: 5,
+    // paddingVertical: 5,
     fontFamily: appFonts.medium,
   },
   clearButtonStyle: {
@@ -79,7 +79,7 @@ const commonButtonStyle = StyleSheet.create({
   clearTitleStyle: {
     color: appColors.primary,
     textAlign: 'center',
-    paddingVertical: 5,
+    // paddingVertical: 5,
     fontFamily: appFonts.medium,
   },
 });

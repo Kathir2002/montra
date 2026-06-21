@@ -1,4 +1,4 @@
-import {config} from '../../environment';
+import { config } from '../../environment';
 import axios from 'axios';
 import HttpRoutingService from './httpRoutingService';
 
@@ -28,28 +28,28 @@ const authServiceApi = async (data: any, url: string, token: string = '') => {
 };
 
 class authService {
-  async signin({data}: dataType) {
+  async signin({ data }: dataType) {
     return authServiceApi(data, 'api/auth/signin');
   }
-  async signup({data}: dataType) {
+  async signup({ data }: dataType) {
     return authServiceApi(data, 'api/auth/signup');
   }
-  async verifyOtp({data}: dataType) {
+  async verifyOtp({ data }: dataType) {
     return authServiceApi(data, 'api/auth/verify-otp');
   }
-  async resendOtp({data}: dataType) {
+  async resendOtp({ data }: dataType) {
     return authServiceApi(data, 'api/auth/resend-otp');
   }
-  async signinWithGoogle({data, token}: dataType) {
+  async signinWithGoogle({ data, token }: dataType) {
     return authServiceApi(data, 'api/auth/signin/google', token);
   }
   async userDetails() {
     return HttpRoutingService.getMethod('api/auth/user-details', {});
   }
-  async resetPassword({data, token}: dataType) {
-    return authServiceApi(data, 'api/auth/reset-password', token);
+  async resetPassword({ data }: dataType) {
+    return authServiceApi(data, 'api/auth/reset-password');
   }
-  async forgotPassword({data}: dataType) {
+  async forgotPassword({ data }: dataType) {
     return authServiceApi(data, 'api/auth/forgot-password');
   }
 }

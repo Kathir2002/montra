@@ -103,5 +103,11 @@
   "RECONNECTING": "重新连接中",
   "YOU": "您",
   "YESTERDAY": "昨天",
-  "TODAY": "今天"
+  "TODAY": "今天",
+  "LOGOUT_FROM": "从此设备退出？",
+  "CURRENT_DEVICE": "当前设备",
+  "ALL_DEVICE": "所有设备",
+  "CANCEL": "取消",
+  "LOGOUT_CONFIRMATION_CURRENT_DEVICE": "您确定要从当前设备注销吗？",
+  "LOGOUT_CONFIRMATION_ALL_DEVICES": "您确定要从所有设备注销吗？"
 }

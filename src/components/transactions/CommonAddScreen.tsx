@@ -10,6 +10,7 @@ import {
   StatusBar,
   TextInput,
   TouchableOpacity,
+  useWindowDimensions,
   Vibration,
   View,
 } from 'react-native';
@@ -126,6 +127,8 @@ const CommonAddScreen: FC<{
   }> = useRoute();
   const deleteRBSheetRef = useRef<RBSheetRef>(null);
   const { t } = useTranslation('transaction');
+  const { width, height } = useWindowDimensions()
+
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [walletOpen, setWalletOpen] = useState(false);
@@ -2049,6 +2052,8 @@ const CommonAddScreen: FC<{
           alignItems: 'center',
           justifyContent: 'center',
           borderRadius: 8,
+          width: width > height ? width * 0.7 : width * 0.9,
+
         }}>
         <LottieView
           source={require('@assets/lottie/sucess-lottie.json')}

@@ -128,16 +128,11 @@ const Dashboard = () => {
   const monthFirstdate = moment(filterData.filterMonth).startOf('month');
   const monthLastdate = moment(filterData.filterMonth).endOf('month');
 
-  const monthRange = splitMonthIntoWeeks(monthFirstdate, monthLastdate);
+  const monthRange = React.useMemo(() => {
+    return splitMonthIntoWeeks(monthFirstdate, monthLastdate);
+  }, [filterData.filterMonth, t]);
 
-  const [chartDropdownData, setChartDropdownData] =
-    useState<{ label: string; value: string }[]>(monthRange);
-
-  useEffect(() => {
-    if (isFocused) {
-      setChartDropdownData(monthRange);
-    }
-  }, [filterData.filterMonth]);
+  const chartDropdownData = monthRange;
 
   const getChartDropdownValue = (): string => {
     const currentMoment = moment();

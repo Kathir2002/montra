@@ -103,5 +103,11 @@
   "RECONNECTING": "Menyambungkan ulang",
   "YOU": "Anda",
   "YESTERDAY": "Kemarin",
-  "TODAY": "Hari ini"
+  "TODAY": "Hari ini",
+  "LOGOUT_FROM": "Keluar dari?",
+  "CURRENT_DEVICE": "Perangkat saat ini",
+  "ALL_DEVICE": "Semua perangkat",
+  "CANCEL": "Batal",
+  "LOGOUT_CONFIRMATION_CURRENT_DEVICE": "Apakah Anda yakin ingin keluar dari perangkat saat ini?",
+  "LOGOUT_CONFIRMATION_ALL_DEVICES": "Apakah Anda yakin ingin keluar dari semua perangkat?"
 }

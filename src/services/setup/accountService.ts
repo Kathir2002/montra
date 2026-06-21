@@ -1,7 +1,7 @@
 import HttpRoutingService from '@services/httpRoutingService';
 import CommonDataService from '@shared/commonDataServices';
 import axios from 'axios';
-import {config} from '../../../environment';
+import { config } from '../../../environment';
 
 class accountService {
   addAccount(data: any) {
@@ -54,6 +54,9 @@ class accountService {
   }
   logoutUser(data: any) {
     return HttpRoutingService.postMethod('api/account/logout-user', data);
+  }
+  logoutAllDevices() {
+    return HttpRoutingService.postMethod("api/account/logout-all", {})
   }
   changePassword(data: any) {
     return HttpRoutingService.postMethod('api/auth/change-password', data);

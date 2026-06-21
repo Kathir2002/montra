@@ -103,5 +103,11 @@
   "RECONNECTING": "Переподключение",
   "YOU": "Вы",
   "YESTERDAY": "Вчера",
-  "TODAY": "Сегодня"
+  "TODAY": "Сегодня",
+  "LOGOUT_FROM": "Выйти из?",
+  "CURRENT_DEVICE": "Текущее устройство",
+  "ALL_DEVICE": "Все устройства",
+  "CANCEL": "Отмена",
+  "LOGOUT_CONFIRMATION_CURRENT_DEVICE": "Вы действительно хотите выйти из учетной записи на текущем устройстве?",
+  "LOGOUT_CONFIRMATION_ALL_DEVICES": "Вы действительно хотите выйти из учетной записи на всех устройствах?"
 }

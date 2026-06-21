@@ -46,6 +46,10 @@ import { Image } from '@rneui/base';
 import NativeHardExit from './specs/NativeHardExit';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NetworkBannerListener } from '@services/NetworkBannerManager';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { DEV_WEB_CLIENTID, PROD_WEB_CLIENTID } from '@env';
+import { removeAllShortcuts } from '@src/lib/shortcutHandler';
+import { networkEventEmitter } from '@services/interceptor';
 
 const messagingInstance = getMessaging();
 
@@ -424,6 +428,61 @@ const App = () => {
 
     attemptAuthNav();
   }, [pendingAuthRoute]);
+
+  // ---------------------- Unauthorized listener ----------------------
+  useEffect(() => {
+    const handleUnauthorized = async (message?: string) => {
+      if (!isloggedin) return;
+
+      try {
+        const devData = {
+          webClientId: DEV_WEB_CLIENTID,
+          scopes: ['profile', 'email'],
+        };
+        const prodData = {
+          webClientId: PROD_WEB_CLIENTID,
+          scopes: ['profile', 'email'],
+        };
+        GoogleSignin.configure(__DEV__ ? devData : prodData);
+        await GoogleSignin.signOut();
+      } catch (error) {
+        console.error('Google Sign-Out Error during unauthorized handler:', error);
+      }
+
+      if (Platform.OS === 'android') {
+        try {
+          removeAllShortcuts();
+        } catch (error) {
+          console.error('Failed to remove shortcuts during unauthorized handler:', error);
+        }
+      }
+
+      try {
+        const ASYNC_KEYS = await AsyncStorage.getAllKeys();
+        await EncryptedStorage.clear();
+        await Promise.all(
+          ASYNC_KEYS?.map(async (res: string) => {
+            if (res !== 'getStartedVisible') {
+              await AsyncStorage.removeItem(res);
+            }
+          }) || []
+        );
+      } catch (error) {
+        console.error('Failed to clear storage during unauthorized handler:', error);
+      }
+
+      dispatch(updateIsLoggedin(false));
+      dispatch(updateCurrentUser({ activeContactRequestCount: 0, isAdmin: false }));
+
+      Toast({ message: message || 'You have been logged out.', type: 'error' });
+    };
+
+    networkEventEmitter.on('unauthorized', handleUnauthorized);
+
+    return () => {
+      networkEventEmitter.off('unauthorized', handleUnauthorized);
+    };
+  }, [dispatch, isloggedin]);
 
   // ---------------------- Splash hide on load end ----------------------
   // useEffect(() => {

@@ -4,6 +4,7 @@ import {
   StatusBar,
   StyleSheet,
   TouchableOpacity,
+  useWindowDimensions,
   Vibration,
   View,
 } from 'react-native';
@@ -28,7 +29,7 @@ import Popover from 'react-native-popover-view';
 import LottieView from 'lottie-react-native';
 import CommonText from '@shared/components/commonText/CommonText';
 import CommonButton from '@shared/components/commonButton/CommonButton';
-import CommonRBSheet, {
+import {
   RBSheetRef,
 } from '@shared/components/commonRBSheet/CommonRBSheet';
 import BudgetService from '@services/setup/budgetSerice';
@@ -41,6 +42,8 @@ import { CustomModal } from '@shared/components/CustomModal';
 
 const BudgetDetails = () => {
   const { t } = useTranslation('transaction');
+  const { width, height } = useWindowDimensions()
+
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const route: RouteProp<{
     params: {
@@ -274,6 +277,8 @@ const BudgetDetails = () => {
           alignItems: 'center',
           justifyContent: 'center',
           borderRadius: 8,
+          width: width > height ? width * 0.7 : width * 0.9,
+
         }}>
         <LottieView
           source={require('@assets/lottie/sucess-lottie.json')}
@@ -282,7 +287,7 @@ const BudgetDetails = () => {
           style={{ height: 80, width: 80 }}
         />
         <CommonText
-          content="Transaction has been successfully removed"
+          content={t("TRANSACTION_REMOVED_SUCCESS")}
           size={'label'}
           style={{ textAlign: 'center', paddingHorizontal: 20 }}
         />

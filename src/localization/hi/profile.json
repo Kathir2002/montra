@@ -103,5 +103,11 @@
   "RECONNECTING": "पुनः कनेक्ट हो रहा है",
   "YOU": "आप",
   "YESTERDAY": "कल",
-  "TODAY": "आज"
+  "TODAY": "आज",
+  "LOGOUT_FROM": "कहाँ से लॉगआउट करें?",
+  "CURRENT_DEVICE": "वर्तमान डिवाइस",
+  "ALL_DEVICE": "सभी डिवाइस",
+  "CANCEL": "रद्द करें",
+  "LOGOUT_CONFIRMATION_CURRENT_DEVICE": "क्या आप वाकई वर्तमान डिवाइस से लॉगआउट करना चाहते हैं?",
+  "LOGOUT_CONFIRMATION_ALL_DEVICES": "क्या आप वाकई सभी डिवाइसों से लॉगआउट करना चाहते हैं?"
 }

@@ -56,9 +56,9 @@ const AppWrapper = () => {
                 },
               },
               ResetPassword: {
-                path: 'reset-password/:userToken',
+                path: 'reset-password/:resetToken',
                 parse: {
-                  userToken: (userToken) => `${userToken}`,
+                  resetToken: (resetToken) => `${resetToken}`,
                 },
               },
               HelpRequest_Details: {
