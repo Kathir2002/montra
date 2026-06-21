@@ -9,7 +9,8 @@
     "start": "react-native start",
     "test": "jest",
     "apk": "cd android && gradlew clean && gradlew assembleRelease",
-    "clean": "cd android && gradlew clean && gradlew generateCodegenArtifactsFromSchema && cd .. && npm run android"
+    "clean": "cd android && gradlew clean && gradlew generateCodegenArtifactsFromSchema && cd .. && npm run android",
+    "publish:android": "npx stallion publish-bundle --upload-path=montra/montra/montra --platform=android --release-note"
   },
   "dependencies": {
     "@notifee/react-native": "^9.1.8",
